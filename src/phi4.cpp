@@ -18,12 +18,13 @@ const double EPSILON =  1.0;
 const int  meas   =     25;
 const int write_out   = 1;
 const int D=2;
-#define N_X 256
-#define N_Y 256
+#define N_X 128
+#define N_Y 128
 
-  double m;
-  double m_2;
-  double g;
+double m;
+double m_2;
+double g;
+double i_Lambda=1.0;;
 
   
 	  double a;	  
@@ -34,6 +35,7 @@ const int D=2;
 
   int x_up[N_X],x_dn[N_X];
   int y_up[N_Y],y_dn[N_Y];
+
 
 long int accepted=0;
 
@@ -59,9 +61,10 @@ main(int argc,char *argv[]) {
   m_2=m;
   //  m=((m>0)?1:-1)*m*m/2.0;
   g=atof(argv[2])/24.0;
-  n_term=atoi(argv[3]);
-  n_prod=atoi(argv[4]);
-  seed=atoi(argv[5]);
+  i_Lambda=atoi(argv[3]);
+  n_term=atoi(argv[4]);
+  n_prod=atoi(argv[5]);
+  seed=atoi(argv[6]);
 
   fprintf(stderr,"%f %f\n",m,g);
   fprintf(stderr,"%d %d %d\n",n_term,n_prod,seed);
@@ -132,7 +135,7 @@ main(int argc,char *argv[]) {
       double loc_mag=0.0;
       for(ix=0;ix<N_X;ix++) {
 	for(iy=0;iy<N_Y;iy++) {
-#if 1
+#if 0
 
 	  double b;
 
@@ -209,24 +212,45 @@ make_sweep() {
       corona=phi[x_up[ix]][iy]+phi[x_dn[ix]][iy]+
 	phi[ix][y_up[iy]]+phi[ix][y_dn[iy]];
 
+      double big_corona= -i_Lambda*(
+				    (
+				     phi[x_up[x_up[ ix]] ][iy]+
+				     phi[x_dn[x_dn[ ix]] ][iy]+
+				     phi[ix] [y_up[ y_up[iy] ] ]+
+				     phi[ix] [y_dn[ y_dn[iy] ] ]
+				     )
+				    -8.0*(
+					  phi[x_up[ix] ][iy]+
+					  phi[x_dn[ix] ][iy]+
+					  phi[ix][y_up[iy] ]+
+					  phi[ix][y_dn[iy] ]
+					  )+
+				    2.0*(
+					 phi[x_up[ix] ][y_up[iy] ]+
+					 phi[x_dn[ix] ][y_up[iy] ]+
+					 phi[x_up[ix] ][y_dn[iy] ]+
+					 phi[x_dn[ix] ][y_dn[iy] ]
+					 )
+				    );
+	    
 
       phi_tmp=phi[ix][iy];
 	      
-      old_action=corona*phi_tmp;
+      old_action=(corona+big_corona)*phi_tmp;
 
       phi2_tmp=phi_tmp*phi_tmp;
 
-      old_action -= (D+m_2)*phi2_tmp;
+      old_action -= (D+m_2+10.0*i_Lambda)*phi2_tmp;
       old_action -= g*phi2_tmp*phi2_tmp;
       
 	      
       phi_tmp=phi[ix][iy]+EPSILON*(drand48() + drand48() -1.0);
 
-      new_action=corona*phi_tmp;
+      new_action=(corona+big_corona)*phi_tmp;
 
       phi2_tmp=phi_tmp*phi_tmp;
 
-      new_action -= (D+m_2)*phi2_tmp;
+      new_action -= (D+m_2+10.0*i_Lambda)*phi2_tmp;
       new_action -= g*phi2_tmp*phi2_tmp;
 
 
