@@ -7,6 +7,8 @@
  *
  */
 
+
+
 #include<iostream>
 using namespace std;
 
@@ -18,8 +20,13 @@ const double EPSILON =  1.0;
 const int  meas   =     25;
 const int write_out   = 1;
 const int D=2;
-#define N_X 128
-#define N_Y 128
+
+const int N_HIT=1;
+
+#define N_X 256
+#define N_Y 256
+
+
 
 double m;
 double m_2;
@@ -27,14 +34,13 @@ double g;
 double i_Lambda=1.0;;
 
   
-	  double a;	  
+double a;	  
 
 
+double  phi[N_X][N_Y]={{0.0}};
 
-  double  phi[N_X][N_Y]={{0.0}};
-
-  int x_up[N_X],x_dn[N_X];
-  int y_up[N_Y],y_dn[N_Y];
+int x_up[N_X],x_dn[N_X];
+int y_up[N_Y],y_dn[N_Y];
 
 
 long int accepted=0;
@@ -84,17 +90,13 @@ main(int argc,char *argv[]) {
   for(ix=0;ix<N_X;ix++)    {
     x_up[ix]=(ix+1)%N_X;
     x_dn[ix]=(ix+N_X-1)%N_X;
-#if 0
-    fprintf(stderr,"%3d %3d %3d\n",x_dn[ix],ix,x_up[ix]);
-#endif
+
   }
 
   for(iy=0;iy<N_Y;iy++)    {
     y_up[iy]=(iy+1)%N_Y;
     y_dn[iy]=(iy+N_Y-1)%N_Y;
-#if 0
-    fprintf(stderr,"%3d %3d %3d\n",y_dn[iy],iy,y_up[iy]);
-#endif
+
   }
 
   for(ix=0;ix<N_X;ix++)
@@ -106,13 +108,13 @@ main(int argc,char *argv[]) {
       exit(1);
 
 
-#if 1
+
   for(ix=0;ix<N_X;ix++) {
     for(iy=0;iy<N_Y;iy++) {
       phi[ix][iy]=2*drand48()-1.0;
     }
   }
-#endif
+
 
 
   for(sweep=0;sweep<n_term;sweep++)    {
@@ -135,21 +137,6 @@ main(int argc,char *argv[]) {
       double loc_mag=0.0;
       for(ix=0;ix<N_X;ix++) {
 	for(iy=0;iy<N_Y;iy++) {
-#if 0
-
-	  double b;
-
-	  double xx;
-	  
-	  xx=phi[x_up[ix]][iy]+
-	    phi[x_dn[ix]][iy]+
-	    phi[ix][y_up[iy]]+
-	    phi[ix][y_dn[iy]];
-		
-
-	  //	  better_phi2 +=(a + 2*b*(2 + b*xx*xx))/(2*(a + 4*b)*(a+4*b));
-	  better_phi2 += (a +xx*xx)/(a*a);
-#endif	
 
 	    
 	  loc_mag+=phi[ix][iy];
@@ -203,13 +190,12 @@ make_sweep() {
       double  delta_action;
       double  phi_tmp;
       double  phi2_tmp;
-      double  corona;
 
       ix=lrand48()%N_X;
       iy=lrand48()%N_Y;
 
 
-      corona=phi[x_up[ix]][iy]+phi[x_dn[ix]][iy]+
+      double corona=phi[x_up[ix]][iy]+phi[x_dn[ix]][iy]+
 	phi[ix][y_up[iy]]+phi[ix][y_dn[iy]];
 
       double big_corona= -i_Lambda*(
@@ -233,38 +219,39 @@ make_sweep() {
 					 )
 				    );
 	    
-
-      phi_tmp=phi[ix][iy];
+      for(int h=0;h<N_HIT;h++) {
+	phi_tmp=phi[ix][iy];
 	      
-      old_action=(corona+big_corona)*phi_tmp;
+	old_action=(corona+big_corona)*phi_tmp;
 
-      phi2_tmp=phi_tmp*phi_tmp;
+	phi2_tmp=phi_tmp*phi_tmp;
 
-      old_action -= (D+m_2+10.0*i_Lambda)*phi2_tmp;
-      old_action -= g*phi2_tmp*phi2_tmp;
+	old_action -= (D+m_2+10.0*i_Lambda)*phi2_tmp;
+	old_action -= g*phi2_tmp*phi2_tmp;
       
 	      
-      phi_tmp=phi[ix][iy]+EPSILON*(drand48() + drand48() -1.0);
+	phi_tmp=phi[ix][iy]+EPSILON*(drand48() + drand48() -1.0);
 
-      new_action=(corona+big_corona)*phi_tmp;
+	new_action=(corona+big_corona)*phi_tmp;
 
-      phi2_tmp=phi_tmp*phi_tmp;
+	phi2_tmp=phi_tmp*phi_tmp;
 
-      new_action -= (D+m_2+10.0*i_Lambda)*phi2_tmp;
-      new_action -= g*phi2_tmp*phi2_tmp;
+	new_action -= (D+m_2+10.0*i_Lambda)*phi2_tmp;
+	new_action -= g*phi2_tmp*phi2_tmp;
 
 
-      delta_action=new_action-old_action;
+	delta_action=new_action-old_action;
 	      
-      if(delta_action< 0.0)
-	if(exp(delta_action) < drand48())
-	  goto next;
+	if(delta_action< 0.0)
+	  if(exp(delta_action) < drand48())
+	    goto next;
       
       
-      phi[ix][iy]=phi_tmp;
-      accepted++;
+	phi[ix][iy]=phi_tmp;
+	accepted++;
 
-    next:;
+      next:;
+      }
     }
 
 
