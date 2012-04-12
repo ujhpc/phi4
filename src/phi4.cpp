@@ -16,6 +16,11 @@ using namespace std;
 #include<stdio.h>
 #include<cmath>
 
+
+#include"indexer.h"
+#include"field.h"
+
+
 const double EPSILON =  1.0;
 const int  meas   =     25;
 const int write_out   = 1;
@@ -23,8 +28,8 @@ const int D=2;
 
 const int N_HIT=1;
 
-#define N_X 256
-#define N_Y 256
+#define N_X 128
+#define N_Y 128
 
 
 
@@ -47,8 +52,21 @@ long int accepted=0;
 
 void make_sweep();
 
+typedef double *field_t;
+typedef Indexer<2> Ind;
+
+
+std::vector<double> field_array(N_X*N_Y);
+
+typedef ScalarFieldAccessor<double,2> SFA;
+SFA sfa(field_array);
+Field<double &, Ind, SFA> phi_field(field_array);
+
 int
 main(int argc,char *argv[]) {
+
+  int dim[2]={N_X,N_Y};
+  Ind::init(dim);
 
   int n_term;
   int n_prod;
@@ -116,6 +134,11 @@ main(int argc,char *argv[]) {
   }
 
 
+  for(int i=0;i<N_X*N_Y;i++) {
+      phi_field[i]=2*drand48()-1.0;
+    }
+  
+    
 
   for(sweep=0;sweep<n_term;sweep++)    {
     make_sweep();
@@ -174,7 +197,7 @@ main(int argc,char *argv[]) {
   }
 
   fprintf(stderr,"acceptance %f\n",((double) accepted)/(N_X*N_Y*n_prod));
-
+ Ind::clean();
 }
 
 
@@ -255,5 +278,6 @@ make_sweep() {
     }
 
 
+   
   }
 
