@@ -169,7 +169,7 @@ main(int argc,char *argv[]) {
       }
       
       amag += fabs(loc_mag);
-      mag  +=loc_mag;
+      mag  += loc_mag;
       xi   += loc_mag*loc_mag;
       ++n_meas;
     
@@ -271,6 +271,83 @@ make_sweep() {
       
       
 	phi[ix][iy]=phi_tmp;
+	accepted++;
+
+      next:;
+      }
+    }
+
+
+   
+  }
+
+  void
+make_sweep(Field<double &, Ind, SFA> &field) {
+
+    for(int i=0;i<N_X*N_Y;i++) {
+    
+
+      double  old_action=0.0;
+      double  new_action=0.0;
+      double  delta_action;
+      double  phi_tmp;
+      double  phi2_tmp;
+
+
+
+      double corona;
+      for(int mu=0;mu<Ind::D;mu++) {
+	corona+=field[Ind::up(i,mu)]+field[Ind::dn(i,mu)];
+      }
+
+      double big_corona;
+     
+	    
+      for(int mu=0;mu<Ind::D;mu++) {
+	big_corona+=field[Ind::up(Ind::up(i,mu),mu)];
+	big_corona+=field[Ind::dn(Ind::dn(i,mu),mu)];
+	
+	big_corona-=8.0*field[Ind::up(i,mu)];
+	big_corona-=8.0*field[Ind::dn(i,mu)];
+	
+      }
+
+      big_corona+=2.0*field[Ind::up(Ind::up(i,0),1)];
+      big_corona+=2.0*field[Ind::dn(Ind::dn(i,0),1)];
+      big_corona+=2.0*field[Ind::dn(Ind::up(i,0),1)];
+      big_corona+=2.0*field[Ind::up(Ind::dn(i,0),1)];
+      
+      big_corona*=-i_Lambda;
+
+      for(int h=0;h<N_HIT;h++) {
+	phi_tmp=field[i];
+	      
+	old_action=(corona+big_corona)*phi_tmp;
+
+	phi2_tmp=phi_tmp*phi_tmp;
+
+	old_action -= (D+m_2+10.0*i_Lambda)*phi2_tmp;
+	old_action -= g*phi2_tmp*phi2_tmp;
+      
+	      
+	phi_tmp=phi_tmp+EPSILON*(drand48() + drand48() -1.0);
+
+	new_action=(corona+big_corona)*phi_tmp;
+
+	phi2_tmp=phi_tmp*phi_tmp;
+
+	new_action -= (D+m_2+10.0*i_Lambda)*phi2_tmp;
+	new_action -= g*phi2_tmp*phi2_tmp;
+
+
+	delta_action=new_action-old_action;
+	      
+	if(delta_action< 0.0)
+	  if(exp(delta_action) < drand48())
+	    goto next;
+      
+      
+	field[i]=phi_tmp;
 	accepted++;
 
       next:;
