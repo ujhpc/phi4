@@ -24,7 +24,7 @@ using namespace std;
 const double EPSILON =  1.0;
 const int  meas   =     25;
 const int write_out   = 1;
-const int D=2;
+
 
 const int N_HIT=1;
 
@@ -41,16 +41,9 @@ double i_Lambda=1.0;;
   
 double a;	  
 
-
-double  phi[N_X][N_Y]={{0.0}};
-
-int x_up[N_X],x_dn[N_X];
-int y_up[N_Y],y_dn[N_Y];
-
-
 long int accepted=0;
 
-void make_sweep();
+
 
 typedef double *field_t;
 typedef Indexer<2> Ind;
@@ -61,6 +54,10 @@ std::vector<double> field_array(N_X*N_Y);
 typedef ScalarFieldAccessor<double,2> SFA;
 SFA sfa(field_array);
 Field<double &, Ind, SFA> phi_field(field_array);
+
+
+void make_sweep(Field<double &, Ind, SFA> &field);
+
 
 int
 main(int argc,char *argv[]) {
@@ -105,33 +102,6 @@ main(int argc,char *argv[]) {
    *
    */
 
-  for(ix=0;ix<N_X;ix++)    {
-    x_up[ix]=(ix+1)%N_X;
-    x_dn[ix]=(ix+N_X-1)%N_X;
-
-  }
-
-  for(iy=0;iy<N_Y;iy++)    {
-    y_up[iy]=(iy+1)%N_Y;
-    y_dn[iy]=(iy+N_Y-1)%N_Y;
-
-  }
-
-  for(ix=0;ix<N_X;ix++)
-    if(ix!=x_up[x_dn[ix]])
-      exit(1);
-
-  for(iy=0;iy<N_Y;iy++)
-    if(iy!=y_up[y_dn[iy]])
-      exit(1);
-
-
-
-  for(ix=0;ix<N_X;ix++) {
-    for(iy=0;iy<N_Y;iy++) {
-      phi[ix][iy]=2*drand48()-1.0;
-    }
-  }
 
 
   for(int i=0;i<N_X*N_Y;i++) {
@@ -141,8 +111,7 @@ main(int argc,char *argv[]) {
     
 
   for(sweep=0;sweep<n_term;sweep++)    {
-    make_sweep();
-      
+    make_sweep(phi_field);      
   }
 
 
@@ -152,20 +121,15 @@ main(int argc,char *argv[]) {
 
   for(sweep=0;sweep<n_prod;sweep++)    {
       
-    make_sweep();
+    make_sweep(phi_field);
     
     int n_meas=0;
     if( (sweep+1)%meas==0 ) {
 
       double loc_mag=0.0;
-      for(ix=0;ix<N_X;ix++) {
-	for(iy=0;iy<N_Y;iy++) {
-
-	    
-	  loc_mag+=phi[ix][iy];
-	  phi2+=phi[ix][iy]*phi[ix][iy];
-	}
-
+      for(int site=0;site<Ind::n_sites();++site) { 
+	loc_mag+=phi_field[site];
+	phi2+= phi_field[site]*phi_field[site];
       }
       
       amag += fabs(loc_mag);
@@ -200,161 +164,93 @@ main(int argc,char *argv[]) {
  Ind::clean();
 }
 
-
-  void
-make_sweep() {
-
-    int i;
-    for(i=0;i<N_X*N_Y;i++) {
-      int ix,iy;
-
-      double  old_action=0.0;
-      double  new_action=0.0;
-      double  delta_action;
-      double  phi_tmp;
-      double  phi2_tmp;
-
-      ix=lrand48()%N_X;
-      iy=lrand48()%N_Y;
-
-
-      double corona=phi[x_up[ix]][iy]+phi[x_dn[ix]][iy]+
-	phi[ix][y_up[iy]]+phi[ix][y_dn[iy]];
-
-      double big_corona= -i_Lambda*(
-				    (
-				     phi[x_up[x_up[ ix]] ][iy]+
-				     phi[x_dn[x_dn[ ix]] ][iy]+
-				     phi[ix] [y_up[ y_up[iy] ] ]+
-				     phi[ix] [y_dn[ y_dn[iy] ] ]
-				     )
-				    -8.0*(
-					  phi[x_up[ix] ][iy]+
-					  phi[x_dn[ix] ][iy]+
-					  phi[ix][y_up[iy] ]+
-					  phi[ix][y_dn[iy] ]
-					  )+
-				    2.0*(
-					 phi[x_up[ix] ][y_up[iy] ]+
-					 phi[x_dn[ix] ][y_up[iy] ]+
-					 phi[x_up[ix] ][y_dn[iy] ]+
-					 phi[x_dn[ix] ][y_dn[iy] ]
-					 )
-				    );
-	    
-      for(int h=0;h<N_HIT;h++) {
-	phi_tmp=phi[ix][iy];
-	      
-	old_action=(corona+big_corona)*phi_tmp;
-
-	phi2_tmp=phi_tmp*phi_tmp;
-
-	old_action -= (D+m_2+10.0*i_Lambda)*phi2_tmp;
-	old_action -= g*phi2_tmp*phi2_tmp;
-      
-	      
-	phi_tmp=phi[ix][iy]+EPSILON*(drand48() + drand48() -1.0);
-
-	new_action=(corona+big_corona)*phi_tmp;
-
-	phi2_tmp=phi_tmp*phi_tmp;
-
-	new_action -= (D+m_2+10.0*i_Lambda)*phi2_tmp;
-	new_action -= g*phi2_tmp*phi2_tmp;
-
-
-	delta_action=new_action-old_action;
-	      
-	if(delta_action< 0.0)
-	  if(exp(delta_action) < drand48())
-	    goto next;
-      
-      
-	phi[ix][iy]=phi_tmp;
-	accepted++;
-
-      next:;
-      }
-    }
-
-
-   
-  }
-
-  void
+void
 make_sweep(Field<double &, Ind, SFA> &field) {
 
-    for(int i=0;i<N_X*N_Y;i++) {
+  for(int i=0;i<Ind::n_sites();i++) {
     
 
-      double  old_action=0.0;
-      double  new_action=0.0;
-      double  delta_action;
-      double  phi_tmp;
-      double  phi2_tmp;
+    double  old_action=0.0;
+    double  new_action=0.0;
+    double  delta_action;
+    double  phi_tmp;
+    double  phi2_tmp;
 
 
-
-      double corona;
-      for(int mu=0;mu<Ind::D;mu++) {
-	corona+=field[Ind::up(i,mu)]+field[Ind::dn(i,mu)];
-      }
-
-      double big_corona;
-     
-	    
-      for(int mu=0;mu<Ind::D;mu++) {
-	big_corona+=field[Ind::up(Ind::up(i,mu),mu)];
-	big_corona+=field[Ind::dn(Ind::dn(i,mu),mu)];
-	
-	big_corona-=8.0*field[Ind::up(i,mu)];
-	big_corona-=8.0*field[Ind::dn(i,mu)];
-	
-      }
-
-      big_corona+=2.0*field[Ind::up(Ind::up(i,0),1)];
-      big_corona+=2.0*field[Ind::dn(Ind::dn(i,0),1)];
-      big_corona+=2.0*field[Ind::dn(Ind::up(i,0),1)];
-      big_corona+=2.0*field[Ind::up(Ind::dn(i,0),1)];
+    double small_corona=0.0;
       
-      big_corona*=-i_Lambda;
-
-      for(int h=0;h<N_HIT;h++) {
-	phi_tmp=field[i];
-	      
-	old_action=(corona+big_corona)*phi_tmp;
-
-	phi2_tmp=phi_tmp*phi_tmp;
-
-	old_action -= (D+m_2+10.0*i_Lambda)*phi2_tmp;
-	old_action -= g*phi2_tmp*phi2_tmp;
-      
-	      
-	phi_tmp=phi_tmp+EPSILON*(drand48() + drand48() -1.0);
-
-	new_action=(corona+big_corona)*phi_tmp;
-
-	phi2_tmp=phi_tmp*phi_tmp;
-
-	new_action -= (D+m_2+10.0*i_Lambda)*phi2_tmp;
-	new_action -= g*phi2_tmp*phi2_tmp;
-
-
-	delta_action=new_action-old_action;
-	      
-	if(delta_action< 0.0)
-	  if(exp(delta_action) < drand48())
-	    goto next;
-      
-      
-	field[i]=phi_tmp;
-	accepted++;
-
-      next:;
-      }
+    for(int mu=0;mu<Ind::D;mu++) {
+      small_corona+=field[Ind::up(i,mu)]+field[Ind::dn(i,mu)];
     }
+
+      
+
+    double big_corona_01=0.0;
+    double big_corona_02=0.0;
+    double big_corona_11=0.0;
+
+	    
+    for(int mu=0;mu<Ind::D;mu++) {
+      big_corona_02 +=field[Ind::up(Ind::up(i,mu),mu)];
+      big_corona_02 +=field[Ind::dn(Ind::dn(i,mu),mu)];
+      
+      big_corona_01 += field[Ind::up(i,mu)];
+      big_corona_01 += field[Ind::dn(i,mu)];
+      
+      for(int nu=0;nu<mu;nu++) {
+	big_corona_11 += field[Ind::up(Ind::up(i,mu),nu)];
+	big_corona_11 += field[Ind::dn(Ind::dn(i,mu),nu)];
+	big_corona_11 += field[Ind::dn(Ind::up(i,mu),nu)];
+	big_corona_11 += field[Ind::up(Ind::dn(i,mu),nu)];
+      
+      }
+
+    }
+
+      
+    double big_corona=-i_Lambda*(big_corona_02-2*Ind::D*big_corona_01+2.0*big_corona_11);
+
+    double corona=small_corona+big_corona;
+
+    for(int h=0;h<N_HIT;h++) {
+      phi_tmp=field[i];
+	      
+      old_action=corona*phi_tmp;
+
+
+      phi2_tmp=phi_tmp*phi_tmp;
+
+      old_action -= (Ind::D+m_2+10.0*i_Lambda)*phi2_tmp;
+      old_action -= g*phi2_tmp*phi2_tmp;
+      
+	      
+      phi_tmp=field[i]+EPSILON*(drand48() + drand48() -1.0);
+
+      new_action=corona*phi_tmp;
+
+      phi2_tmp=phi_tmp*phi_tmp;
+
+      const double M=Ind::D*(1.0+2.0*Ind::D)*i_Lambda;
+      new_action -= (Ind::D+m_2+M)*phi2_tmp;
+      new_action -= g*phi2_tmp*phi2_tmp;
+
+
+
+      delta_action=new_action-old_action;
+	      
+      if(delta_action< 0.0)
+	if(exp(delta_action) < drand48())
+	  goto next;
+      
+      
+      field[i]=phi_tmp;
+      accepted++;
+
+    next:;
+    }
+  }
 
 
    
-  }
+}
 

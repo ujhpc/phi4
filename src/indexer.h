@@ -15,7 +15,12 @@ public:
   enum {D=Dim};
 
   static coordinate_t site(const coordinate_t *coord) {
-    
+    int s=0;
+
+    for(int i=0;i<Dim;i++)
+      s += vol(i)*coord[i];
+
+    return s;
   }
 
   static coordinate_t index(coordinate_t site, coordinate_t dir) {
@@ -66,19 +71,23 @@ public:
      dn_  = new coordinate_t[n_links_];
      
       
-#if 0
+
 
       for(iterator it=begin();it!=end();++it) {
 
 	for(int mu=0;mu<Dim;++mu) {
 
 	  int coord[Dim];
-	  for(int i=0;i<Dim;++i) 
+	  for(int i=0;i<Dim;++i) {
+
 	    coord[i]=(*it)[i];
-	  
+	  }
+
+
 	  coord[mu]=(*it)[mu]+1;
-	  if(coord[mu]>=dims_[mu])
-	    coord[mu]-=dims_[mu];
+	  if(coord[mu]>= dim(mu))
+	    coord[mu] -= dim(mu);
+
 
 	  up_[index( *it,mu)] = site(coord); 
 	  
@@ -87,11 +96,11 @@ public:
 	  if(coord[mu]<0)
 	    coord[mu]+=dims_[mu];
 
-	  dn_[index( *it,mu)] =site(coord); 
+	  dn_[index( *it,mu)] = site(coord); 
 	  
 	}
       }
-#endif
+
   }
 
 
