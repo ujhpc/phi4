@@ -3,7 +3,7 @@
  *
  * Quick and dirty phi^4 simulation (2D)
  *
- *   exp (\sum_x (\sum_i (phi(x)-phi(x+i) )^2  -m phi(x)^2 -phi(x)^4 )
+ *   exp (\sum_x (\sum_i 1/2(phi(x)-phi(x+i) )^2  -m 1/2phi(x)^2 -lambda/4! phi(x)^4 )
  *
  */
 
@@ -26,7 +26,7 @@ const int  meas   =     25;
 const int write_out   = 1;
 
 
-const int N_HIT=1;
+const int N_HIT=5;
 
 #define N_X 128
 #define N_Y 128
@@ -36,22 +36,21 @@ const int N_HIT=1;
 double m;
 double m_2;
 double g;
-double i_Lambda=1.0;;
+double i_Lambda=1.0;
 
   
-double a;	  
+//double a;	  
 
 long int accepted=0;
 
 
-
-typedef double *field_t;
+//typedef double *field_t;
 typedef Indexer<2> Ind;
 
 
-std::vector<double> field_array(N_X*N_Y);
-
 typedef ScalarFieldAccessor<double,2> SFA;
+
+std::vector<double> field_array(N_X*N_Y);
 SFA sfa(field_array);
 Field<double &, Ind, SFA> phi_field(field_array);
 
@@ -62,6 +61,9 @@ void make_sweep(Field<double &, Ind, SFA> &field);
 int
 main(int argc,char *argv[]) {
 
+
+
+
   int dim[2]={N_X,N_Y};
   Ind::init(dim);
 
@@ -71,7 +73,6 @@ main(int argc,char *argv[]) {
 
 
   double phi2=0.0;
-  double better_phi2=0.0;
       
   int sweep;
 
@@ -90,11 +91,16 @@ main(int argc,char *argv[]) {
   fprintf(stderr,"%f %f\n",m,g);
   fprintf(stderr,"%d %d %d\n",n_term,n_prod,seed);
 
-  a=4.0+m_2;  
+  // a=4.0+m_2;  
   m_2/=2.0;
  
   
   srand48(seed);
+
+  
+  for(int i=0;i<N_X*N_Y;i++) {
+      phi_field[i]=2*drand48()-1.0;
+    }
 
   /*
    *
@@ -103,21 +109,14 @@ main(int argc,char *argv[]) {
    */
 
 
-
-  for(int i=0;i<N_X*N_Y;i++) {
-      phi_field[i]=2*drand48()-1.0;
-    }
-  
-    
-
   for(sweep=0;sweep<n_term;sweep++)    {
     make_sweep(phi_field);      
   }
 
 
-  double amag=0.0;
-  double mag=0.0;
-  double xi=0.0;
+  double amag= 0.0;
+  double mag = 0.0;
+  double xi  = 0.0;
 
   for(sweep=0;sweep<n_prod;sweep++)    {
       
@@ -141,11 +140,10 @@ main(int argc,char *argv[]) {
     
       if((n_meas)%write_out == 0)  {
 	   
-	fprintf(stdout,"%.12g %.12g %.16g %.16g %.16g\n",phi2/(N_X*N_Y*n_meas),better_phi2/(N_X*N_Y*n_meas),
+	fprintf(stdout,"%.12g  %.16g %.16g %.16g\n",phi2/(N_X*N_Y*n_meas),
 		mag/(n_meas),xi/(n_meas),
 		amag/n_meas);
 	phi2=0.0;
-	better_phi2=0.0;
 	mag=0.0;
 	amag=0.0;
 	xi=0.0;
@@ -160,7 +158,7 @@ main(int argc,char *argv[]) {
     }
   }
 
-  fprintf(stderr,"acceptance %f\n",((double) accepted)/(N_X*N_Y*n_prod));
+  fprintf(stderr,"acceptance %f\n",((double) accepted)/(Ind::n_sites()*n_prod));
  Ind::clean();
 }
 
@@ -178,6 +176,7 @@ make_sweep(Field<double &, Ind, SFA> &field) {
 
 
     double small_corona=0.0;
+    const double M=Ind::D*(1.0+2.0*Ind::D)*i_Lambda;
       
     for(int mu=0;mu<Ind::D;mu++) {
       small_corona+=field[Ind::up(i,mu)]+field[Ind::dn(i,mu)];
@@ -202,13 +201,13 @@ make_sweep(Field<double &, Ind, SFA> &field) {
 	big_corona_11 += field[Ind::dn(Ind::dn(i,mu),nu)];
 	big_corona_11 += field[Ind::dn(Ind::up(i,mu),nu)];
 	big_corona_11 += field[Ind::up(Ind::dn(i,mu),nu)];
-      
       }
-
     }
 
       
-    double big_corona=-i_Lambda*(big_corona_02-2*Ind::D*big_corona_01+2.0*big_corona_11);
+    double big_corona=-i_Lambda*(big_corona_02
+				 -4.0*Ind::D*big_corona_01
+				 +2.0*big_corona_11);
 
     double corona=small_corona+big_corona;
 
@@ -220,7 +219,8 @@ make_sweep(Field<double &, Ind, SFA> &field) {
 
       phi2_tmp=phi_tmp*phi_tmp;
 
-      old_action -= (Ind::D+m_2+10.0*i_Lambda)*phi2_tmp;
+
+      old_action -= (Ind::D+m_2+M)*phi2_tmp;
       old_action -= g*phi2_tmp*phi2_tmp;
       
 	      
@@ -230,7 +230,7 @@ make_sweep(Field<double &, Ind, SFA> &field) {
 
       phi2_tmp=phi_tmp*phi_tmp;
 
-      const double M=Ind::D*(1.0+2.0*Ind::D)*i_Lambda;
+     
       new_action -= (Ind::D+m_2+M)*phi2_tmp;
       new_action -= g*phi2_tmp*phi2_tmp;
 
