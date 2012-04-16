@@ -176,8 +176,10 @@ make_sweep(Field<double &, Ind, SFA> &field) {
 
 
     double small_corona=0.0;
-    const double M=Ind::D*(1.0+2.0*Ind::D)*i_Lambda;
-      
+    const double quadratic_coef_1=Ind::D+m_2;
+    const double quadratic_coef_2=Ind::D*(1.0+2.0*Ind::D)*i_Lambda;  
+    const double quadratic_coef=  quadratic_coef_1+quadratic_coef_2;
+
     for(int mu=0;mu<Ind::D;mu++) {
       small_corona+=field[Ind::up(i,mu)]+field[Ind::dn(i,mu)];
     }
@@ -220,26 +222,27 @@ make_sweep(Field<double &, Ind, SFA> &field) {
       phi2_tmp=phi_tmp*phi_tmp;
 
 
-      old_action -= (Ind::D+m_2+M)*phi2_tmp;
-      old_action -= g*phi2_tmp*phi2_tmp;
+      old_action -= (quadratic_coef+g*phi2_tmp)*phi2_tmp;
+      //      old_action -= g*phi2_tmp*phi2_tmp;
       
 	      
-      phi_tmp=field[i]+EPSILON*(drand48() + drand48() -1.0);
+      phi_tmp += EPSILON*(drand48()  -0.5);
 
       new_action=corona*phi_tmp;
 
       phi2_tmp=phi_tmp*phi_tmp;
 
      
-      new_action -= (Ind::D+m_2+M)*phi2_tmp;
-      new_action -= g*phi2_tmp*phi2_tmp;
+      new_action -= phi2_tmp*(quadratic_coef+g*phi2_tmp);
+      //new_action -= phi2_tmp;
 
 
 
       delta_action=new_action-old_action;
 	      
       if(delta_action< 0.0)
-	if(exp(delta_action) < drand48())
+       if(exp(delta_action) < drand48() )
+	//if(0.5 < drand48() )
 	  goto next;
       
       
