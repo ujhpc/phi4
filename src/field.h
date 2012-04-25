@@ -37,6 +37,9 @@ class Field {
 
 
 public:
+
+  typedef indexer_t indexer_t;
+
   Field(accessor_t accessor):field_(accessor) {};
   
   T operator[](unsigned int i) {return field_[i];};
