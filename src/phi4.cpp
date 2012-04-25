@@ -223,7 +223,6 @@ make_sweep(Field<double &, Ind, SFA> &field) {
 
 
       old_action -= (quadratic_coef+g*phi2_tmp)*phi2_tmp;
-      //      old_action -= g*phi2_tmp*phi2_tmp;
       
 	      
       phi_tmp += EPSILON*(drand48()  -0.5);
@@ -234,7 +233,7 @@ make_sweep(Field<double &, Ind, SFA> &field) {
 
      
       new_action -= phi2_tmp*(quadratic_coef+g*phi2_tmp);
-      //new_action -= phi2_tmp;
+
 
 
 
@@ -242,7 +241,6 @@ make_sweep(Field<double &, Ind, SFA> &field) {
 	      
       if(delta_action< 0.0)
        if(exp(delta_action) < drand48() )
-	//if(0.5 < drand48() )
 	  goto next;
       
       
