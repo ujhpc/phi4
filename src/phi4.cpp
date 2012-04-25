@@ -1,14 +1,4 @@
 
-/*
- *
- * Quick and dirty phi^4 simulation (2D)
- *
- *   exp (\sum_x (\sum_i 1/2(phi(x)-phi(x+i) )^2  -m 1/2phi(x)^2 -lambda/4! phi(x)^4 )
- *
- */
-
-
-
 #include<iostream>
 using namespace std;
 
@@ -165,6 +155,12 @@ main(int argc,char *argv[]) {
 void
 make_sweep(Field<double &, Ind, SFA> &field) {
 
+  const double quadratic_coef_1=Ind::D+m_2;
+  const double quadratic_coef_2=Ind::D*(1.0+2.0*Ind::D)*i_Lambda;  
+  const double quadratic_coef=  quadratic_coef_1+quadratic_coef_2;
+  
+  double register gr=g;
+
   for(int i=0;i<Ind::n_sites();i++) {
     
 
@@ -176,9 +172,6 @@ make_sweep(Field<double &, Ind, SFA> &field) {
 
 
     double small_corona=0.0;
-    const double quadratic_coef_1=Ind::D+m_2;
-    const double quadratic_coef_2=Ind::D*(1.0+2.0*Ind::D)*i_Lambda;  
-    const double quadratic_coef=  quadratic_coef_1+quadratic_coef_2;
 
     for(int mu=0;mu<Ind::D;mu++) {
       small_corona+=field[Ind::up(i,mu)]+field[Ind::dn(i,mu)];
@@ -213,6 +206,7 @@ make_sweep(Field<double &, Ind, SFA> &field) {
 
     double corona=small_corona+big_corona;
 
+#pragma unroll
     for(int h=0;h<N_HIT;h++) {
       phi_tmp=field[i];
 	      
@@ -222,7 +216,7 @@ make_sweep(Field<double &, Ind, SFA> &field) {
       phi2_tmp=phi_tmp*phi_tmp;
 
 
-      old_action -= (quadratic_coef+g*phi2_tmp)*phi2_tmp;
+      old_action -= (quadratic_coef+gr*phi2_tmp)*phi2_tmp;
       
 	      
       phi_tmp += EPSILON*(drand48()  -0.5);
@@ -230,12 +224,8 @@ make_sweep(Field<double &, Ind, SFA> &field) {
       new_action=corona*phi_tmp;
 
       phi2_tmp=phi_tmp*phi_tmp;
-
      
-      new_action -= phi2_tmp*(quadratic_coef+g*phi2_tmp);
-
-
-
+      new_action -= phi2_tmp*(quadratic_coef+gr*phi2_tmp);
 
       delta_action=new_action-old_action;
 	      
