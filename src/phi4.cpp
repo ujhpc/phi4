@@ -32,13 +32,9 @@ typedef ScalarFieldAccessor<double,2> SFA;
 int
 main(int argc,char *argv[]) {
 
-   std::vector<double> field_array(N_X*N_Y);
-   SFA sfa(field_array);
-   Field<double &, Ind, SFA> phi_field(field_array);
-
-
-  long int accepted=0;
-
+  std::vector<double> field_array(N_X*N_Y);
+  SFA sfa(field_array);
+  Field<double &, Ind, SFA> phi_field(field_array);
 
 
   int dim[2]={N_X,N_Y};
@@ -69,8 +65,6 @@ main(int argc,char *argv[]) {
 
   fprintf(stderr,"%f %f %f\n",pars.m_2,pars.g,pars.i_Lambda);
   fprintf(stderr,"%d %d %d\n",n_term,n_prod,seed);
-
-
  
   
   srand48(seed);
@@ -86,6 +80,7 @@ main(int argc,char *argv[]) {
    *
    */
 
+  long int accepted=0;
 
   for(sweep=0;sweep<n_term;sweep++)    {
     accepted+=make_sweep(phi_field,pars);      
