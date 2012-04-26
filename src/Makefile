@@ -5,6 +5,10 @@ DP=icpc -MM
 SED=sed
 MV=mv
 
+
+VPATH=$(HOME)/downloads/gtest-1.6.0/src
+
+
 PREP_C =  perl -pe 's!(${notdir $*})\.o[ :]*!${dir $*}$$1.o $@ : !g' > $@
 
 #  $(SED) 's,\($$(notdir $2)\) *:,$$(dir $2) $3: ,' > $3.tmp
