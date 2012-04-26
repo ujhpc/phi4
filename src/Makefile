@@ -1,5 +1,5 @@
-CC=icc
-CXX=icpc 
+CC=icc -DGTEST_HAS_TR1_TUPLE=0
+CXX=icpc -DGTEST_HAS_TR1_TUPLE=0
 LD=icpc
 DP=icpc -MM
 SED=sed
@@ -24,12 +24,16 @@ endef
 CXXFLAGS+=-fast 
 
 
+MAIN=phi4.o
+OBJECTS= sweep.o random.o
+TESTS_OBJECTS=$(subst .cpp,.o,$(wildcard *_test.cpp)) gtest-all.o
 
-OBJECTS=phi4.o sweep.o random.o
-
-DEPEND=$(subst .o,.d,$(OBJECTS))
+DEPEND=$(subst .o,.d,$(MAIN)) $(subst .o,.d,$(OBJECTS)) $(subst .o,.d,$(TESTS_OBJECTS))
 
 -include $(DEPEND)
 
-build: $(OBJECTS)
+build: $(MAIN) $(OBJECTS)
 	$(LD) -o phi4 $^	
+
+test: $(OBJECTS) $(TESTS_OBJECTS) 
+	$(LD) -o test  $^  -lpthread

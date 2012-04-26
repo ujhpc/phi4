@@ -1,4 +1,9 @@
 *~
 a.out
 *.o
+*.d
+gtest-all.cc
+gest.h
+
+
 
