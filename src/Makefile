@@ -25,7 +25,8 @@ CXXFLAGS+=-fast
 
 
 
-OBJECTS=phi4.o sweep.o
+OBJECTS=phi4.o sweep.o random.o
+
 DEPEND=$(subst .o,.d,$(OBJECTS))
 
 -include $(DEPEND)
