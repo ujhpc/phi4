@@ -5,9 +5,13 @@ DP=icpc -MM
 SED=sed
 MV=mv
 
+PREP_C =  perl -pe 's!(${notdir $*})\.o[ :]*!${dir $*}$$1.o $@ : !g' > $@
+
+#  $(SED) 's,\($$(notdir $2)\) *:,$$(dir $2) $3: ,' > $3.tmp
+
 define make-depend
   $(DP) $(CFLAGS) $(CXXFLAGS) $1 | \
-  $(SED) 's,\($$(notdir $2)\) *:,$$(dir $2) $3: ,' > $3.tmp
+  perl -pe 's!(${notdir $2})[ :]*!${dir $2}$$1 $3 : !g' > $3.tmp
   $(MV) $3.tmp $3
 endef
 
