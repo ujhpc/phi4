@@ -17,11 +17,7 @@ class rand48_array {
   void set_seeds(const unsigned  short *seed);
   void get_seeds(unsigned  short *seed) const;
 
-  void next(int i) {
-    value_=erand48(seeds_+3*i);
-  };
 
-  //  double value(int i) const {return value_;};
 
   double rand(int i) {
     return erand48(seeds_+3*i);
@@ -30,7 +26,6 @@ class rand48_array {
  private:
   int n_generators_;
 
-  double value_;
 
   unsigned short *seeds_;
 
