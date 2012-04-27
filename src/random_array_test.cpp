@@ -1,6 +1,6 @@
 #include<cmath>
+#include<gtest/gtest.h>
 
-#include"gtest.h"
 
 #include"random.h"
 
