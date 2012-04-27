@@ -21,11 +21,10 @@ class rand48_array {
     value_=erand48(seeds_+3*i);
   };
 
-  double value(int i) const {return value_;};
+  //  double value(int i) const {return value_;};
 
   double rand(int i) {
-    value_=erand48(seeds_+3*i);
-    return value_;
+    return erand48(seeds_+3*i);
   };
 
  private:
