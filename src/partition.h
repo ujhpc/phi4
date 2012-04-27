@@ -68,11 +68,8 @@ public:
 	    coords[i]+= Cell::start_points[sp][i]+Cell::cell_points[cp][i];
 	  }
 	  int site=indexer_t::site_safe(coords);
-	  //std::cerr<<"coord "<<coords[0]<<" "<<coords[1]<<" "<<site<<std::endl;
 	  partitions_[sp*partition_size_ + index]=site;
-	  index++;
-
-	  
+	  ++index;
 	  ++grid;
 	}
       }
