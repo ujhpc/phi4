@@ -14,6 +14,8 @@ public:
   typedef LatticeIterator<Dim> iterator;
   enum {D=Dim};
 
+  
+
   static coordinate_t site(const coordinate_t *coord) {
     int s=0;
 
@@ -21,6 +23,18 @@ public:
       s += vol(i)*coord[i];
 
     return s;
+  }
+
+  static coordinate_t site_safe(const coordinate_t *coord) {
+    int c[D];
+    for(int i=0;i<D;++i) {
+      c[i]=coord[i];
+      if(c[i]>=dim(i))
+	c[i]-=dim(i);
+      if(c[i]<0)
+	c[i]+=dim(i);
+    }
+    return site(c);
   }
 
   static coordinate_t index(coordinate_t site, coordinate_t dir) {
