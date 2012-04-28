@@ -27,6 +27,10 @@ endef
 
 CXXFLAGS+=-fast 
 
+ifdef OPENMP
+CXXFLAGS+=-openmp
+LDFLAGS +=-openmp
+endif
 
 MAIN=phi4.o
 OBJECTS= sweep.o random.o
@@ -37,7 +41,10 @@ DEPEND=$(subst .o,.d,$(MAIN)) $(subst .o,.d,$(OBJECTS)) $(subst .o,.d,$(TESTS_OB
 -include $(DEPEND)
 
 build: $(MAIN) $(OBJECTS)
-	$(LD) -o phi4 $^	
+	$(LD) $(LDFLAGS) -o phi4 $^	
 
 test: $(OBJECTS) $(TESTS_OBJECTS) 
-	$(LD) -o test  $^  -lpthread
+	$(LD) $(LDFLAGS) -o test  $^  -lpthread
+
+clean:
+	rm -f *.o *.d

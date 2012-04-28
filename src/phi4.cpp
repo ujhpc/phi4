@@ -1,9 +1,14 @@
 #include<iostream>
 using namespace std;
 
+
 #include<stdlib.h>
 #include<stdio.h>
 #include<cmath>
+
+#ifdef _OPENMP
+#include<omp.h>
+#endif
 
 #include"indexer.h"
 #include"field.h"
@@ -60,7 +65,14 @@ main(int argc,char *argv[]) {
  
   
   srand48(seed);
-  rand48_array::init(2,seed);
+
+#ifdef _OPENMP
+  int n_threads=omp_get_max_threads();
+#else
+  int n_threads=1;
+#endif
+  std::cerr<<"n threads = "<<n_threads<<std::endl;
+  rand48_array::init(n_threads,seed);
   
   for(int i=0;i<N_X*N_Y;i++) {
       phi_field[i]=2*drand48()-1.0;

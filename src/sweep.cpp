@@ -1,5 +1,9 @@
 #include<cstdlib>
 #include<cmath>
+#ifdef _OPENMP
+#include<omp.h>
+#endif
+
 
 #include"sweep.h"
 
@@ -27,9 +31,17 @@ make_sweep(F &field, const parameters<double> &pars, const P &partition ) {
 
   for(int p=0;p<partition.n_partitions();++p) {
 
-
+    /* this loop can parallelised */
+    
+    #pragma omp parallel for
     for(int s=0;s<partition.partition_size();++s) {
       int i=partition.partition(p,s);
+
+      #ifdef _OPENMP
+      const int tid=omp_get_thread_num();
+      #else
+      const int tid=0;
+      #endif
 
       double  old_action=0.0;
       double  new_action=0.0;
@@ -86,7 +98,7 @@ make_sweep(F &field, const parameters<double> &pars, const P &partition ) {
 	old_action -= (quadratic_coef+gr*phi2_tmp)*phi2_tmp;
       
 	      
-	phi_tmp += EPSILON*(RAND(0)  -0.5);
+	phi_tmp += EPSILON*(RAND(tid)  -0.5);
 
 	new_action=corona*phi_tmp;
 
@@ -97,7 +109,7 @@ make_sweep(F &field, const parameters<double> &pars, const P &partition ) {
 	delta_action=new_action-old_action;
 	      
 	if(delta_action< 0.0)
-	  if(exp(delta_action) < RAND(0) )
+	  if(exp(delta_action) < RAND(tid) )
 	    goto next;
       
       
