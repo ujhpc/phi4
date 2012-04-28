@@ -10,6 +10,8 @@ using namespace std;
 #include"sweep.h"
 #include"measurments.h"
 
+#include"typedefs.h"
+
 const int  meas   =     25;
 const int write_out   = 1;
 
@@ -17,9 +19,7 @@ const int write_out   = 1;
 #define N_X 128
 #define N_Y 128
  
-typedef Indexer<2> Ind;
 
-typedef ScalarFieldAccessor<double,2> SFA;
 
 int
 main(int argc,char *argv[]) {
@@ -72,7 +72,7 @@ main(int argc,char *argv[]) {
 
   long int accepted=0;
 
-  single_partition<Ind> partition;
+  Partition partition;
 
   for(sweep=0;sweep<n_term;sweep++)    {
     accepted+=make_sweep(phi_field,pars,partition);      

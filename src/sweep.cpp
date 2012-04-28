@@ -6,6 +6,8 @@
 #include"indexer.h"
 #include"field.h"
 
+#include"typedefs.h"
+
 
 const double l2_e=1.442695040888963;
 
@@ -107,12 +109,7 @@ make_sweep(F &field, const parameters<double> &pars, const P &partition ) {
   return accepted;
 }
 
-typedef Indexer<2> Ind;
-
-typedef ScalarFieldAccessor<double,2> SFA;
-typedef  Field<double &, Ind, SFA> F;
-
 template
-long int make_sweep< Field<double &, Ind, SFA>, single_partition<typename F::indexer_t> >( Field<double &, Ind, SFA>&,const parameters<double> &, 
-const  single_partition<typename F::indexer_t>  &partition 
+long int make_sweep< Field<double &, Ind, SFA>, Partition >( Field<double &, Ind, SFA>&,const parameters<double> &, 
+const  Partition  &partition 
 );
