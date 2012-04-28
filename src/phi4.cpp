@@ -67,7 +67,7 @@ main(int argc,char *argv[]) {
     }
 
   /*
-   * termalisation loop
+   * termalisation loop 
    */
 
   long int accepted=0;

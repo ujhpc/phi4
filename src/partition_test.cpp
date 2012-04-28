@@ -18,7 +18,7 @@ protected:
     int dims[2]={4,4};
     Indexer<2>::init(dims);
     partition=new partition_t;
-    partition->gen_partitions();
+    //    partition->gen_partitions();
   }
   
   void TearDown() {};

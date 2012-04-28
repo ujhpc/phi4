@@ -18,7 +18,7 @@ protected:
     int dims[2]={8,8};
     Indexer<2>::init(dims);
     partition=new partition_t;
-    partition->gen_partitions();
+    //    partition->gen_partitions();
   }
   
   void TearDown() {};
@@ -61,4 +61,25 @@ TEST_F(partition8x8Test,two_dim_8x8_test) {
   EXPECT_EQ(55,partition->partition(1,7));
 
    
+}
+
+
+TEST_F(partition8x8Test,two_dim_8x8_coverage_test) {
+  int n_sites=Indexer<2>::n_sites();
+  int *part=new int[n_sites];
+
+  for(int i=0;i<n_sites;++i) 
+    part[i]=0;
+  
+  for(int p=0;p<partition->n_partitions();++p) {
+    for(int i=0;i<partition->partition_size();++i) {
+      part[partition->partition(p,i)]++;
+    }
+  }
+  
+    for(int i=0;i<n_sites;++i) 
+      ASSERT_EQ(1,part[i]);
+    
+
+  
 }

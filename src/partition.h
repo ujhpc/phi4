@@ -46,9 +46,22 @@ public:
     for(int i=0;i<D;++i)
       grid_dims_[i]=indexer_t::dim(i)/Cell::cell_dims[i];
 
-    partition_size_=indexer_t::n_sites()/Cell::n_start_points;
-
+    n_partitions_=Cell::n_start_points;
+    partition_size_=indexer_t::n_sites()/n_partitions_;
+    
+    gen_partitions();
+    
   }
+
+
+  int n_partitions() const {return n_partitions_;}
+  int partition_size() const {return partition_size_;}
+  
+  int partition(int i, int j) {
+    return partitions_[i*partition_size_ +j];
+  }
+
+private:
 
   void   gen_partitions() {
     
@@ -76,11 +89,8 @@ public:
     }
   }
 
-  int partition(int i, int j) {
-    return partitions_[i*partition_size_ +j];
-  }
 
-private:
+  int n_partitions_;
   int partition_size_;
   int grid_dims_[D];
   int *partitions_;
