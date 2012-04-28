@@ -136,20 +136,13 @@ long int
 make_sweep(F &field, const parameters<double> &pars, const P &partition ) {
 
   long int accepted=0;
-#if 0  
-  typedef typename F::indexer_t indexer_t;
-  const double quadratic_coef_1 = indexer_t::D+pars.m_2/2.0;
-  const double quadratic_coef_2 = indexer_t::D*(1.0+2.0*indexer_t::D)*pars.i_Lambda;  
-  const double quadratic_coef   = quadratic_coef_1+quadratic_coef_2;
-  
-  double register gr=pars.g/24.0;
-#endif
 
   Updater<F,Partition> update(field,partition,pars);
+#pragma omp parallel default(none) shared(partition,update) private(accepted)
   for(int p=0;p<partition.n_partitions();++p) {
 
     /* this loop can parallelised */
-#pragma omp parallel for default(none) shared(p,partition,update) private(accepted)
+#pragma omp for
     for(int s=0;s<partition.partition_size();++s) {
       int i=partition.partition(p,s);
 
