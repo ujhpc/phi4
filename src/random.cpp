@@ -22,3 +22,5 @@ void rand48_array::get_seeds(unsigned  short *seed) const {
   }
 
 }
+
+rand48_array *rand48_array::generator_;

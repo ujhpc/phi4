@@ -9,7 +9,7 @@ using namespace std;
 #include"field.h"
 #include"sweep.h"
 #include"measurments.h"
-
+#include"random.h"
 #include"typedefs.h"
 
 const int  meas   =     25;
@@ -60,7 +60,7 @@ main(int argc,char *argv[]) {
  
   
   srand48(seed);
-
+  rand48_array::init(2,seed);
   
   for(int i=0;i<N_X*N_Y;i++) {
       phi_field[i]=2*drand48()-1.0;
@@ -82,7 +82,7 @@ main(int argc,char *argv[]) {
   
 
   MagnetisationMeasurer magnetisation;
-
+  accepted=0;
   for(sweep=0;sweep<n_prod;sweep++)    {
       
     accepted+=make_sweep(phi_field,pars,partition);

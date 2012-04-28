@@ -23,12 +23,18 @@ class rand48_array {
     return erand48(seeds_+3*i);
   };
 
+  static rand48_array *generator()  {return generator_;}
+  static void init(int n, long int seed) {
+    generator_= new rand48_array(n);
+    generator_->gen_seeds(seed);
+  }
  private:
   int n_generators_;
 
 
   unsigned short *seeds_;
 
+  static rand48_array *generator_;
 
 };
 

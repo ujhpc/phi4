@@ -7,6 +7,7 @@
 #include"field.h"
 
 #include"typedefs.h"
+#include"random.h"
 
 
 const double l2_e=1.442695040888963;
@@ -25,6 +26,8 @@ make_sweep(F &field, const parameters<double> &pars, const P &partition ) {
   double register gr=pars.g/24.0;
 
   for(int p=0;p<partition.n_partitions();++p) {
+
+
     for(int s=0;s<partition.partition_size();++s) {
       int i=partition.partition(p,s);
 
@@ -83,7 +86,7 @@ make_sweep(F &field, const parameters<double> &pars, const P &partition ) {
 	old_action -= (quadratic_coef+gr*phi2_tmp)*phi2_tmp;
       
 	      
-	phi_tmp += EPSILON*(drand48()  -0.5);
+	phi_tmp += EPSILON*(RAND(0)  -0.5);
 
 	new_action=corona*phi_tmp;
 
@@ -94,7 +97,7 @@ make_sweep(F &field, const parameters<double> &pars, const P &partition ) {
 	delta_action=new_action-old_action;
 	      
 	if(delta_action< 0.0)
-	  if(exp(delta_action) < drand48() )
+	  if(exp(delta_action) < RAND(0) )
 	    goto next;
       
       
