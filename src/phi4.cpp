@@ -78,10 +78,6 @@ main(int argc,char *argv[]) {
   fprintf(stderr,"acceptance %f\n",((double) accepted)/(N_HIT*Ind::n_sites()*n_term));
   
 
-  double amag= 0.0;
-  double mag = 0.0;
-  double xi  = 0.0;
-
 
   MagnetisationMeasurer magnetisation;
 
@@ -89,60 +85,31 @@ main(int argc,char *argv[]) {
       
     accepted+=make_sweep(phi_field,pars);
     
-
-
     int n_meas=0;
     if( (sweep+1)%meas==0 ) {
-#if 1
+
       magnetisation.measure(phi_field);
       
       if((magnetisation.n_meas())%write_out == 0)  {
 	   
 	fprintf(stdout,"%.12g  %.16g %.16g %.16g\n",
-		magnetisation.phi2()/(N_X*N_Y),
+		magnetisation.phi2()/Ind::n_sites(),
 		magnetisation.mag(),
 		magnetisation.xi(),
 	        magnetisation.amag()
 		);
-	
 		magnetisation.reset();
       }
-#else
-
-      double loc_mag=0.0;
-      for(int site=0;site<Ind::n_sites();++site) { 
-	loc_mag+=phi_field[site];
-	phi2+= phi_field[site]*phi_field[site];
-      }
-      
-      amag += fabs(loc_mag);
-      mag  += loc_mag;
-      xi   += loc_mag*loc_mag;
-      ++n_meas;
-    
-          
-      if((n_meas)%write_out == 0)  {
-	   
-	fprintf(stdout,"%.12g  %.16g %.16g %.16g\n",phi2/(N_X*N_Y*n_meas),
-		mag/(n_meas),xi/(n_meas),
-		amag/n_meas);
-	phi2=0.0;
-	mag=0.0;
-	amag=0.0;
-	xi=0.0;
-	n_meas=0;
-      }
-#endif
     
     if((sweep+1)%(100*meas) == 0)
       fflush(stdout);
-
 
     }
   }
 
   if(n_prod>0)
-    fprintf(stderr,"acceptance %f\n",((double) accepted)/(N_HIT*Ind::n_sites()*n_prod));
+    fprintf(stderr,"acceptance %f\n",
+	    ((double) accepted)/(N_HIT*Ind::n_sites()*n_prod));
   
   Ind::clean();
 }

@@ -33,11 +33,11 @@ public:
 
   }
 
-  int n_meas() const {return n_meas_;}
+  int    n_meas() const {return n_meas_;}
   double mag() const { return mag_/n_meas_;}
   double amag() const { return amag_/n_meas_;}
   double xi() const { return xi_/n_meas_;}
-  double phi2() const { return phi2_/n_meas_;}
+  double phi2() const { return phi2_/(n_meas_);}
 
 private:
   int n_meas_;
