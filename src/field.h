@@ -42,7 +42,7 @@ public:
 
   Field(accessor_t accessor):field_(accessor) {};
   
-  T operator[](unsigned int i) {return field_[i];};
+  T operator[](int i) {return field_[i];};
   
   T operator[](const unsigned int  *coord)  {
     return field_[indexer_t::site(coord)];

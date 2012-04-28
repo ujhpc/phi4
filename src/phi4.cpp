@@ -5,15 +5,10 @@ using namespace std;
 #include<stdio.h>
 #include<cmath>
 
-
 #include"indexer.h"
 #include"field.h"
-
-
-
 #include"sweep.h"
-
-
+#include"measurments.h"
 
 const int  meas   =     25;
 const int write_out   = 1;
@@ -21,15 +16,10 @@ const int write_out   = 1;
 
 #define N_X 128
 #define N_Y 128
-
-
  
 typedef Indexer<2> Ind;
 
 typedef ScalarFieldAccessor<double,2> SFA;
-
-
-
 
 int
 main(int argc,char *argv[]) {
@@ -77,9 +67,7 @@ main(int argc,char *argv[]) {
     }
 
   /*
-   *
    * termalisation loop
-   *
    */
 
   long int accepted=0;
@@ -94,13 +82,32 @@ main(int argc,char *argv[]) {
   double mag = 0.0;
   double xi  = 0.0;
 
-  accepted=0;
+
+  MagnetisationMeasurer magnetisation;
+
   for(sweep=0;sweep<n_prod;sweep++)    {
       
     accepted+=make_sweep(phi_field,pars);
     
+
+
     int n_meas=0;
     if( (sweep+1)%meas==0 ) {
+#if 1
+      magnetisation.measure(phi_field);
+      
+      if((magnetisation.n_meas())%write_out == 0)  {
+	   
+	fprintf(stdout,"%.12g  %.16g %.16g %.16g\n",
+		magnetisation.phi2()/(N_X*N_Y),
+		magnetisation.mag(),
+		magnetisation.xi(),
+	        magnetisation.amag()
+		);
+	
+		magnetisation.reset();
+      }
+#else
 
       double loc_mag=0.0;
       for(int site=0;site<Ind::n_sites();++site) { 
@@ -113,8 +120,7 @@ main(int argc,char *argv[]) {
       xi   += loc_mag*loc_mag;
       ++n_meas;
     
-      
-    
+          
       if((n_meas)%write_out == 0)  {
 	   
 	fprintf(stdout,"%.12g  %.16g %.16g %.16g\n",phi2/(N_X*N_Y*n_meas),
@@ -126,7 +132,7 @@ main(int argc,char *argv[]) {
 	xi=0.0;
 	n_meas=0;
       }
-
+#endif
     
     if((sweep+1)%(100*meas) == 0)
       fflush(stdout);
@@ -134,6 +140,7 @@ main(int argc,char *argv[]) {
 
     }
   }
+
   if(n_prod>0)
     fprintf(stderr,"acceptance %f\n",((double) accepted)/(N_HIT*Ind::n_sites()*n_prod));
   
