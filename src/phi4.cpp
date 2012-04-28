@@ -72,18 +72,20 @@ main(int argc,char *argv[]) {
 
   long int accepted=0;
 
+  single_partition<Ind> partition;
+
   for(sweep=0;sweep<n_term;sweep++)    {
-    accepted+=make_sweep(phi_field,pars);      
+    accepted+=make_sweep(phi_field,pars,partition);      
   }
   fprintf(stderr,"acceptance %f\n",((double) accepted)/(N_HIT*Ind::n_sites()*n_term));
   
-
+  
 
   MagnetisationMeasurer magnetisation;
 
   for(sweep=0;sweep<n_prod;sweep++)    {
       
-    accepted+=make_sweep(phi_field,pars);
+    accepted+=make_sweep(phi_field,pars,partition);
     
     int n_meas=0;
     if( (sweep+1)%meas==0 ) {

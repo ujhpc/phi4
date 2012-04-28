@@ -3,6 +3,18 @@
 
 #include"iterator.h"
 
+
+template<typename indexer_t> class single_partition {
+ public:
+  int n_partitions() const {return 1;}
+  int partition_size() const {return indexer_t::n_sites();}
+  
+  int partition(int i, int j) const {
+    return j;
+  }
+};
+
+
 template<int D> class octal_cell;
 
 template<> class octal_cell<2> {
@@ -57,7 +69,7 @@ public:
   int n_partitions() const {return n_partitions_;}
   int partition_size() const {return partition_size_;}
   
-  int partition(int i, int j) {
+  int partition(int i, int j) const {
     return partitions_[i*partition_size_ +j];
   }
 
