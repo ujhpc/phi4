@@ -31,14 +31,14 @@ private:
 };
 
 
-template<typename T, typename indexer_t, typename accessor_t>
+template<typename T, typename I, typename accessor_t>
 class Field {
 
 
 
 public:
 
-  typedef indexer_t indexer_t;
+  typedef I indexer_t;
 
   Field(accessor_t accessor):field_(accessor) {};
   

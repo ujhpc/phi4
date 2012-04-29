@@ -1,9 +1,32 @@
+
+ifeq "$(strip $(COMPILER))" "gcc"
+CC=g++
+CXX=g++
+CXXFLAGS+=-O3
+else
 CC=icc -DGTEST_HAS_TR1_TUPLE=0
 CXX=icpc -DGTEST_HAS_TR1_TUPLE=0
-LD=icpc
-DP=icpc -MM
+CXXFLAGS+=-fast 
+endif
+
+
+LD=$(CXX)
+DP=$(CXX) -MM
+
 SED=sed
 MV=mv
+
+ifdef OPENMP
+ifeq "$(strip $(COMPILER))" "gcc"
+CXXFLAGS+=-fopenmp
+LDFLAGS +=-fopenmp
+else
+CXXFLAGS+=-openmp
+LDFLAGS +=-openmp
+endif
+endif
+
+
 
 
 VPATH=$(HOME)/downloads/gtest-1.6.0/src
@@ -11,7 +34,6 @@ VPATH=$(HOME)/downloads/gtest-1.6.0/src
 
 PREP_C =  perl -pe 's!(${notdir $*})\.o[ :]*!${dir $*}$$1.o $@ : !g' > $@
 
-#  $(SED) 's,\($$(notdir $2)\) *:,$$(dir $2) $3: ,' > $3.tmp
 
 define make-depend
   $(DP) $(CFLAGS) $(CXXFLAGS) $1 | \
@@ -25,12 +47,8 @@ endef
 
 
 
-CXXFLAGS+=-fast 
 
-ifdef OPENMP
-CXXFLAGS+=-openmp
-LDFLAGS +=-openmp
-endif
+
 
 MAIN=phi4.o
 OBJECTS= sweep.o random.o
