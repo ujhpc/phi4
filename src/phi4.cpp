@@ -6,6 +6,12 @@ using namespace std;
 #include<stdio.h>
 #include<cmath>
 
+
+#include<boost/program_options/options_description.hpp>
+#include<boost/program_options/variables_map.hpp>
+#include<boost/program_options/parsers.hpp>
+namespace po = boost::program_options;
+
 #ifdef _OPENMP
 #include<omp.h>
 #endif
@@ -21,44 +27,50 @@ const int  meas   =     25;
 const int write_out   = 1;
 
 
-#define N_X 128
-#define N_Y 128
- 
-
-
 int
 main(int argc,char *argv[]) {
 
-  std::vector<double> field_array(N_X*N_Y);
-  SFA sfa(field_array);
-  Field<double &, Ind, SFA> phi_field(field_array);
-
-
-  int dim[2]={N_X,N_Y};
-  Ind::init(dim);
+  int dim[2];
 
   int n_term;
   int n_prod;
   int seed;
-
-
-  double phi2=0.0;
       
   int sweep;
 
   int ix,iy;
-
+  int n_x;
+  int n_y;
   
   struct parameters<double> pars;
+  po::options_description desc("Allowed options");
+  desc.add_options()
+    ("n-x", po::value<int>(&n_x)->default_value(128), "set x size")
+    ("n-y", po::value<int>(&n_y)->default_value(128), "set y size")
+    ("term,t", po::value<int>(&n_term)->default_value(0), "n-term")
+    ("sweep,n", po::value<int>(&n_prod)->default_value(0), "n-sweep")
+    ("seed,s", po::value<int>(&seed)->default_value(7675643), "seed")
+    ("m", po::value<FLOAT>(&pars.m_2)->default_value(0.25), "set m^2 size")
+    ("g", po::value<FLOAT>(&pars.g)->default_value(0.0), "set g size")
+    ("i-Lambda,L", po::value<FLOAT>(&pars.i_Lambda)->default_value(2.0), "set inverse Lambda size")
+    ;
 
-  pars.m_2=atof(argv[1]);
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::notify(vm);    
 
-  pars.g=atof(argv[2]);
-  pars.i_Lambda=atoi(argv[3]);
 
-  n_term=atoi(argv[4]);
-  n_prod=atoi(argv[5]);
-  seed=atoi(argv[6]);
+
+
+  dim[0]=n_x;
+  dim[1]=n_y;
+
+  Ind::init(dim);
+
+  std::vector<double> field_array(Ind::n_sites());
+  SFA sfa(field_array);
+  Field<double &, Ind, SFA> phi_field(field_array);
+  
 
   fprintf(stderr,"%f %f %f\n",pars.m_2,pars.g,pars.i_Lambda);
   fprintf(stderr,"%d %d %d\n",n_term,n_prod,seed);
@@ -74,7 +86,7 @@ main(int argc,char *argv[]) {
   std::cerr<<"n threads = "<<n_threads<<std::endl;
   rand48_array::init(n_threads,seed);
   
-  for(int i=0;i<N_X*N_Y;i++) {
+  for(int i=0;i<Ind::n_sites();i++) {
       phi_field[i]=2*drand48()-1.0;
     }
 

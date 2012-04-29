@@ -27,7 +27,7 @@ endif
 endif
 
 
-
+LDFLAGS+=-lboost_program_options
 
 VPATH=$(HOME)/downloads/gtest-1.6.0/src
 
