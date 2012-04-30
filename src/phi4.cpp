@@ -45,6 +45,7 @@ main(int argc,char *argv[]) {
   struct parameters<double> pars;
   po::options_description desc("Allowed options");
   desc.add_options()
+    ("threads", po::value<int>(), "set number of threads")
     ("n-x", po::value<int>(&n_x)->default_value(128), "set x size")
     ("n-y", po::value<int>(&n_y)->default_value(128), "set y size")
     ("term,t", po::value<int>(&n_term)->default_value(0), "n-term")
@@ -79,6 +80,9 @@ main(int argc,char *argv[]) {
   srand48(seed);
 
 #ifdef _OPENMP
+  if(vm.count("threads")) {
+    omp_set_num_threads(vm["threads"].as<int>());
+  }
   int n_threads=omp_get_max_threads();
 #else
   int n_threads=1;
