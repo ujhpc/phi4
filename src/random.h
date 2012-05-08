@@ -4,12 +4,12 @@
 #include<cstdlib>
 
 class rand48_array {
-  
+ static const int pitch = 32;
   
  public:
   
  rand48_array(int n):n_generators_(n), 
-    seeds_(new unsigned short[3*n_generators_]) {
+    seeds_(new unsigned short[pitch*n_generators_]) {
 
   };
   
@@ -20,7 +20,7 @@ class rand48_array {
 
 
   double rand(int i) {
-    return erand48(seeds_+3*i);
+    return erand48(seeds_+pitch*i);
   };
 
   static rand48_array *generator()  {return generator_;}

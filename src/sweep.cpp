@@ -142,7 +142,7 @@ make_sweep(F &field, const parameters<double> &pars, const P &partition ) {
   for(int p=0;p<partition.n_partitions();++p) {
 
     /* this loop can parallelised */
-#pragma omp for
+#pragma omp for nowait
     for(int s=0;s<partition.partition_size();++s) {
       int i=partition.partition(p,s);
 
