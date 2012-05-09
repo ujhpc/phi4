@@ -16,7 +16,9 @@ DP=$(CXX) -MM
 SED=sed
 MV=mv
 
+EXEC=phi4-no-omp
 ifdef OPENMP
+EXEC=phi4-omp
 ifeq "$(strip $(COMPILER))" "gcc"
 CXXFLAGS+=-fopenmp
 LDFLAGS +=-fopenmp
@@ -59,7 +61,7 @@ DEPEND=$(subst .o,.d,$(MAIN)) $(subst .o,.d,$(OBJECTS)) $(subst .o,.d,$(TESTS_OB
 -include $(DEPEND)
 
 build: $(MAIN) $(OBJECTS)
-	$(LD) $(LDFLAGS) -o phi4 $^	
+	$(LD) $(LDFLAGS) -o $(EXEC) $^	
 
 test: $(OBJECTS) $(TESTS_OBJECTS) 
 	$(LD) $(LDFLAGS) -o test  $^  -lpthread
