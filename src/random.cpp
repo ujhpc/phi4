@@ -24,3 +24,26 @@ void rand48_array::get_seeds(unsigned  short *seed) const {
 }
 
 rand48_array *rand48_array::generator_;
+
+void taus_array::gen_seeds(long seed) {
+  srand48(seed);
+  for(int i=0;i<4*n_generators_;++i) {   
+    unsigned r;
+    while( (r=lrand48()) < 128) {};
+    seeds_[i]=r;
+  }
+}
+
+void taus_array::set_seeds(const unsigned   *seed) {
+  for(int i=0;i<4*n_generators_;++i) {
+    seeds_[i]=seed[i];
+  }
+}
+
+void taus_array::get_seeds(unsigned   *seed) const {
+  for(int i=0;i<4*n_generators_;++i) {
+    seed[i]=seeds_[i];
+  }
+}
+
+taus_array *taus_array::generator_;

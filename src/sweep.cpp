@@ -138,11 +138,11 @@ make_sweep(F &field, const parameters<double> &pars, const P &partition ) {
   long int accepted=0;
 
   Updater<F,Partition> update(field,partition,pars);
-#pragma omp parallel default(none) shared(partition,update) private(accepted)
+#pragma omp parallel default(none) shared(partition,update,accepted)
   for(int p=0;p<partition.n_partitions();++p) {
 
     /* this loop can parallelised */
-#pragma omp for nowait
+#pragma omp for reduction(+:accepted)
     for(int s=0;s<partition.partition_size();++s) {
       int i=partition.partition(p,s);
 

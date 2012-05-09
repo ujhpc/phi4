@@ -2,7 +2,7 @@
 #define _tausworthe_
 
 
-
+#if 0
 inline __TARGET__  unsigned taus_step(unsigned &z, int S1,int S2,int S3,unsigned M) {
     unsigned b=(((z<<S1)^z)>>S2);
     return z=(((z &M)<<S3)^b);
@@ -21,6 +21,8 @@ inline __TARGET__  FLOAT rnd(unsigned *z) {
 				  taus_step(z[2], 3,11,17,4294967280u)^
 				  LCG_step(z[3],1664525,1013904223u) );
     }
+
+#endif
 
 inline __TARGET__  FLOAT rnd_nbc(unsigned *z1,
 				 unsigned *z2,

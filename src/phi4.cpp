@@ -88,7 +88,7 @@ main(int argc,char *argv[]) {
   int n_threads=1;
 #endif
   std::cerr<<"n threads = "<<n_threads<<std::endl;
-  rand48_array::init(n_threads,seed);
+  rand_array_t::init(n_threads,seed);
   
   for(int i=0;i<Ind::n_sites();i++) {
       phi_field[i]=2*drand48()-1.0;
