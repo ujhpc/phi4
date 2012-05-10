@@ -95,6 +95,16 @@ inline  double rnd2(unsigned *z) {
 }
 
 
+long unsigned int mask=0x0000ffffffffffff;
+long unsigned int a = 0x5DEECE66D;
+long unsigned int c = 0xB;
+double inv=3.5527136788005009294e-15;
+
+double 
+rand48(long unsigned &seed) {
+  seed= mask & (a*seed+c);
+  return inv*seed;
+}
 
 main() {
 
@@ -105,11 +115,14 @@ main() {
 
   taus_array taus(2);
   taus.gen_seeds(19798987);
+  long unsigned seed=1976555;
 
-  for(int i=0;i<50000000;i++) {
+  for(int i=0;i<100000000;i++) {
     //    sum+=drand48();
-    sum1+=taus.rnd(0);
-    sum2+=taus.rnd(1);
+    //sum1+=taus.rnd(0);
+    //sum2+=taus.rnd(1);
+    sum1+=rand48(seed);
+    sum2+=rand48(seed);
     
   }
 
