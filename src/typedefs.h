@@ -19,6 +19,6 @@ typedef  cell_partition<Dim,octal_cell<2>,Ind> Partition;
 inline double RAND(int i) {return taus_array::generator()->rand(i);}
 typedef  taus_array rand_array_t;
 
-//inline double RAND(int i) {return drand48();}
-
+//inline double RAND(int i) {return drand48();} 
 #endif
+ 

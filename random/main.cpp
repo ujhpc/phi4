@@ -111,6 +111,7 @@ main() {
     sum1+=taus.rnd(0);
     sum2+=taus.rnd(1);
     
+    
   }
 
   fprintf(stdout,"%12.8f\n",sum1+sum2);
