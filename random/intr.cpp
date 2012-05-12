@@ -19,11 +19,21 @@ void taus_step_SSE2(__m128i &z, int S1,int S2,int S3,unsigned M) {
 }
 
 
+static inline __m128i muly(const __m128i &a, const __m128i &b)
+{
+#ifdef __SSE4_1__  // modern CPU - use SSE 4.1
+    return _mm_mullo_epi32(a, b);
+#else               // old CPU - use SSE 2
+    __m128i tmp1 = _mm_mul_epu32(a,b); /* mul 2,0*/
+    __m128i tmp2 = _mm_mul_epu32( _mm_srli_si128(a,4), _mm_srli_si128(b,4)); /* mul 3,1 */
+    return _mm_unpacklo_epi32(_mm_shuffle_epi32(tmp1, _MM_SHUFFLE (0,0,2,0)), _mm_shuffle_epi32(tmp2, _MM_SHUFFLE (0,0,2,0))); /* shuffle results to [63..0] and pack */
+#endif
+}
 
 void LCG_step_SSE2 ( __m128i  &z, unsigned A,unsigned C) {
   const __m128i mm_A = _mm_set_epi32(A,A,A,A);
   const __m128i mm_C = _mm_set_epi32(C,C,C,C);
-  //z=_mm_mullo_epi32(z,mm_A); //SSE4
+  z=muly(z,mm_A);
   z=_mm_add_epi32(z,mm_C);
 }
 
@@ -42,8 +52,8 @@ main() {
       taus_step(z,13,19,12,4294967294u);
       taus_step_SSE2(mm_z,13,19,12,4294967294u);
 #else
-      LCG_step(z,1664525u,1013904223u);
-       LCG_step_SSE2(mm_z,1664525u,1013904223u);
+      //LCG_step(z,1664525u,1013904223u);
+      LCG_step_SSE2(mm_z,1664525u,1013904223u);
       
 #endif
     }
