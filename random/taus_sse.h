@@ -1,5 +1,6 @@
 #ifndef __TAUS_SSE_H__
 #define __TAUS_SSE_H__
+#include<iostream>
 
 #include"emmintrin.h"
 
@@ -22,6 +23,10 @@ static inline __m128i muly(const __m128i &a, const __m128i &b) {
 
 
 class taus_sse_array {
+
+  static const int pitch_s   =1;
+  static const int pitch_r   =4;
+  static const int n_seeds =4;
  public:
 
 
@@ -68,10 +73,40 @@ static inline  __m128  to_float(__m128i z)  {
 
 
  taus_sse_array(int n):n_generators_(n),
-  seeds_(new __m128i[n_generators_]) {};
+  seeds_((__m128i*) _mm_malloc (pitch_s*n_generators_,16)),  
+  random_((__m128*) _mm_malloc (pitch_r*n_generators_,16)),  
+  p_random_((float *)random_),
+  cursor_(3) {
+ };
+
+ void gen_seeds(long int seed ) {
+   srand48(seed);
+   unsigned *u_seeds=(unsigned *)seeds_;
+   for(int i=0;i<4*n_seeds*n_generators_;++i) {   
+     unsigned r;
+     while( (r=lrand48()) < 128) {};
+     u_seeds[i]=r;
+   }
+ }
+
+
+
+ void set_seeds(const unsigned  *seed) {
+   unsigned *u_seeds=(unsigned *)seeds_;
+   for(int i=0;i<4*n_seeds*n_generators_;++i) {
+     u_seeds[i]=seed[i];
+   }
+ }
+
+ void get_seeds(unsigned        *seed) const {
+   unsigned *u_seeds=(unsigned *)seeds_;
+   for(int i=0;i<4*n_seeds*n_generators_;++i) {
+     seed[i]=u_seeds[i];
+   }
+ }
 
 inline  __m128i  mm_irand(int i) const {
-  return  irnd_SSE2(seeds_ + 4*i);
+  return  irnd_SSE2(seeds_ + n_seeds*pitch_s*i);
 }
 
 inline  __m128  mm_rand_sym(int i) const {
@@ -92,14 +127,22 @@ inline  __m128  mm_rand(int i) const {
 }
 
  inline  float  rand(int i)  {
-  return 0.0f;
+   ++cursor_;
+   if(cursor_==4) {
+     cursor_=0;
+     random_[i*pitch_r]=mm_rand(i);
+   }
+   return p_random_[4*i*pitch_r+cursor_];
 }
 
 
  private:
  int n_generators_;
  __m128i *seeds_;
+ __m128  *random_;
+ float   *p_random_;
 
+ int cursor_;
 
 };
 

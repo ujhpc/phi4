@@ -31,7 +31,7 @@ main() {
   mm_seed[3] =_mm_set_epi32(z,z,9876,z);
   
   taus_sse_array rnd(2);
-  
+  rnd.gen_seeds(1377);
   
   double sum=0.0f;
   for(int i=0;i<1000000;++i) 
@@ -42,9 +42,11 @@ main() {
 #else
       //LCG_step(z,1664525u,1013904223u);
       //LCG_step_SSE2(mm_z,1664525u,1013904223u);
-      __m128 x = rnd.mm_rand_sym(1);
+      __m128 x = rnd.mm_rand(1);
       float  *t=(float *)&x;
       sum+=(t[0]+t[1]+t[2]+t[3]);
+      //float a=rnd.rand(0);
+      //sum+=a;
 
       
 
