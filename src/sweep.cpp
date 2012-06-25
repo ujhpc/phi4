@@ -32,14 +32,14 @@ public:
     const int tid=0;
 #endif
 
-    Float  old_action=0.0;
-    Float  new_action=0.0;
+    Float  old_action=(Float)0.0;
+    Float  new_action=(Float)0.0;
     Float  delta_action;
     Float  phi_tmp;
     Float  phi2_tmp;
 
 
-    Float small_corona=0.0;
+    Float small_corona=(Float)0.0;
 
     for(int mu=0;mu<indexer_t::D;mu++) {
       small_corona+=field[indexer_t::up(i,mu)]+field[indexer_t::dn(i,mu)];
@@ -47,9 +47,9 @@ public:
 
       
 
-    Float big_corona_01=0.0;
-    Float big_corona_02=0.0;
-    Float big_corona_11=0.0;
+    Float big_corona_01=(Float)0.0;
+    Float big_corona_02=(Float)0.0;
+    Float big_corona_11=(Float)0.0;
 
 	    
     for(int mu=0;mu<indexer_t::D;mu++) {
@@ -69,8 +69,8 @@ public:
 
       
     Float big_corona=-pars_.i_Lambda*(big_corona_02
-				      -4.0*indexer_t::D*big_corona_01
-				      +2.0*big_corona_11);
+				      -(Float)4.0*indexer_t::D*big_corona_01
+				      +(Float)2.0*big_corona_11);
 
     Float corona=small_corona+big_corona;
 
@@ -88,7 +88,7 @@ public:
       old_action -= (quadratic_coef+gr*phi2_tmp)*phi2_tmp;
       
 	      
-      phi_tmp += EPSILON*(RAND(tid)  -0.5);
+      phi_tmp += (Float)EPSILON*(RAND(tid)  -(Float)0.5);
 
       new_action=corona*phi_tmp;
 
@@ -98,8 +98,8 @@ public:
 
       delta_action=new_action-old_action;
 	      
-      if(delta_action< 0.0)
-	if(exp(delta_action) < RAND(tid) )
+      if(delta_action< (Float)0.0)
+	if(std::exp(delta_action) < RAND(tid) )
 	  goto next;
       
       
