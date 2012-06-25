@@ -1,7 +1,7 @@
 #ifndef _MEASURMENTS_H__
 #define _MEASURMENTS_H__
 
-
+#include "typedefs.h"
 
 class MagnetisationMeasurer {
 public:
@@ -12,7 +12,7 @@ public:
     local_mag_ = 0.0;
     local_phi2_= 0.0;
     for(int site=0;site<indexer_t::n_sites();++site) { 
-      double fi=field[site];
+      Float fi=field[site];
       local_mag_+=fi;
       local_phi2_+= fi*fi;
     }
@@ -34,21 +34,21 @@ public:
   }
 
   int    n_meas() const {return n_meas_;}
-  double mag() const { return mag_/n_meas_;}
-  double amag() const { return amag_/n_meas_;}
-  double xi() const { return xi_/n_meas_;}
-  double phi2() const { return phi2_/(n_meas_);}
+  Float mag() const { return mag_/n_meas_;}
+  Float amag() const { return amag_/n_meas_;}
+  Float xi() const { return xi_/n_meas_;}
+  Float phi2() const { return phi2_/(n_meas_);}
 
 private:
   int n_meas_;
 
-  double local_mag_;
-  double local_phi2_;
+  Float local_mag_;
+  Float local_phi2_;
 
-  double phi2_;
-  double amag_;
-  double mag_;
-  double xi_;
+  Float phi2_;
+  Float amag_;
+  Float mag_;
+  Float xi_;
 
 };
 

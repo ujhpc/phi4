@@ -1,9 +1,10 @@
 #ifndef __SWEEP_H__
 #define __SWEEP_H__
 
-#include"partition.h"
+#include "partition.h"
+#include "typedefs.h"
 
-const double EPSILON =  1.0;
+const Float EPSILON =  1.0;
 const int N_HIT=5;
 
 
@@ -16,7 +17,7 @@ template<typename F> struct parameters {
 
 template<typename F, typename P  > 
 long int 
-  make_sweep(F &field, const parameters<double> &pars, const P &part = 
+  make_sweep(F &field, const parameters<Float> &pars, const P &part = 
 	     single_partition<typename F::indexer_t>() ) ;
 
 

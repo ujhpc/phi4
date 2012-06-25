@@ -1,6 +1,6 @@
 #include<cstdlib>
 
-#include"random.h"
+#include "typedefs.h"
 
 const unsigned int two_16=1<<16;
 

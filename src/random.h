@@ -1,7 +1,8 @@
 #ifndef __RANDOM_H__
 #define __RANDOM_H__
 
-#include<cstdlib>
+#include <cstdlib>
+#include "typedefs.h"
 
 class rand48_array {
  static const int pitch = 32;
@@ -19,7 +20,7 @@ class rand48_array {
 
 
 
-  double rand(int i) {
+  Float rand(int i) {
     return erand48(seeds_+pitch*i);
   };
 
@@ -65,12 +66,12 @@ inline  unsigned irand(int i) {
 	  );
   }
 
-inline  double rand(int i) {
+inline  Float rand(int i) {
   taus_step(seeds_[i*pitch],13,19,12,4294967294u);
   taus_step(seeds_[i*pitch+1], 2,25, 4,4294967288u);
   taus_step(seeds_[i*pitch+2], 3,11,17,4294967280u);
   LCG_step(seeds_[i*pitch+3],1664525u,1013904223u);
-  return 2.328306436538696e-10*(double)(seeds_[i*pitch]^
+  return 2.328306436538696e-10*(Float)(seeds_[i*pitch]^
 					seeds_[i*pitch+1]^
 					seeds_[i*pitch+2]^
 					seeds_[i*pitch+3]

@@ -1,27 +1,20 @@
-#include<cstdlib>
-#include<cmath>
+#include <cstdlib>
+#include <cmath>
 #ifdef _OPENMP
-#include<omp.h>
+  #include <omp.h>
 #endif
 
+#include "typedefs.h"
+#include "sweep.h"
 
-#include"sweep.h"
-
-#include"indexer.h"
-#include"field.h"
-
-#include"typedefs.h"
-#include"random.h"
-
-
-const double l2_e=1.442695040888963;
+const Float l2_e=1.442695040888963;
 
 
 template<typename F,typename P>
 class Updater {
 public:  
   typedef typename F::indexer_t indexer_t;
-  Updater( F &f,const P& partition, const parameters<double> &pars):
+  Updater( F &f,const P& partition, const parameters<Float> &pars):
     field(f),
     partition_(partition),
     pars_(pars),
@@ -39,14 +32,14 @@ public:
     const int tid=0;
 #endif
 
-    double  old_action=0.0;
-    double  new_action=0.0;
-    double  delta_action;
-    double  phi_tmp;
-    double  phi2_tmp;
+    Float  old_action=(Float)0.0;
+    Float  new_action=(Float)0.0;
+    Float  delta_action;
+    Float  phi_tmp;
+    Float  phi2_tmp;
 
 
-    double small_corona=0.0;
+    Float small_corona=(Float)0.0;
 
     for(int mu=0;mu<indexer_t::D;mu++) {
       small_corona+=field[indexer_t::up(i,mu)]+field[indexer_t::dn(i,mu)];
@@ -54,9 +47,9 @@ public:
 
       
 
-    double big_corona_01=0.0;
-    double big_corona_02=0.0;
-    double big_corona_11=0.0;
+    Float big_corona_01=(Float)0.0;
+    Float big_corona_02=(Float)0.0;
+    Float big_corona_11=(Float)0.0;
 
 	    
     for(int mu=0;mu<indexer_t::D;mu++) {
@@ -75,11 +68,11 @@ public:
     }
 
       
-    double big_corona=-pars_.i_Lambda*(big_corona_02
-				      -4.0*indexer_t::D*big_corona_01
-				      +2.0*big_corona_11);
+    Float big_corona=-pars_.i_Lambda*(big_corona_02
+				      -(Float)4.0*indexer_t::D*big_corona_01
+				      +(Float)2.0*big_corona_11);
 
-    double corona=small_corona+big_corona;
+    Float corona=small_corona+big_corona;
 
     int accepted=0;
 #pragma unroll
@@ -95,7 +88,7 @@ public:
       old_action -= (quadratic_coef+gr*phi2_tmp)*phi2_tmp;
       
 	      
-      phi_tmp += EPSILON*(RAND(tid)  -0.5);
+      phi_tmp += (Float)EPSILON*(RAND(tid)  -(Float)0.5);
 
       new_action=corona*phi_tmp;
 
@@ -105,8 +98,8 @@ public:
 
       delta_action=new_action-old_action;
 	      
-      if(delta_action< 0.0)
-	if(exp(delta_action) < RAND(tid) )
+      if(delta_action< (Float)0.0)
+	if(std::exp(delta_action) < RAND(tid) )
 	  goto next;
       
       
@@ -121,19 +114,19 @@ public:
   
   F &field;
   const P &partition_;
-  const parameters<double> pars_;
+  const parameters<Float> pars_;
 
-  const double quadratic_coef_1;
-  const double quadratic_coef_2;
-  const double quadratic_coef;
+  const Float quadratic_coef_1;
+  const Float quadratic_coef_2;
+  const Float quadratic_coef;
   
-  double gr;
+  Float gr;
 
 };
 
 template<typename F, typename P  > 
 long int 
-make_sweep(F &field, const parameters<double> &pars, const P &partition ) {
+make_sweep(F &field, const parameters<Float> &pars, const P &partition ) {
 
   long int accepted=0;
 
@@ -155,6 +148,6 @@ make_sweep(F &field, const parameters<double> &pars, const P &partition ) {
 }
 
 template
-long int make_sweep< Field<double &, Ind, SFA>, Partition >( Field<double &, Ind, SFA>&,const parameters<double> &, 
+long int make_sweep< Field<Float &, Ind, SFA>, Partition >( Field<Float &, Ind, SFA>&,const parameters<Float> &, 
 const  Partition  &partition 
 );

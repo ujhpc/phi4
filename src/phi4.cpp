@@ -1,27 +1,22 @@
-#include<iostream>
+#include <iostream>
 using namespace std;
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <cmath>
 
-#include<stdlib.h>
-#include<stdio.h>
-#include<cmath>
-
-
-#include<boost/program_options/options_description.hpp>
-#include<boost/program_options/variables_map.hpp>
-#include<boost/program_options/parsers.hpp>
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/variables_map.hpp>
+#include <boost/program_options/parsers.hpp>
 namespace po = boost::program_options;
 
 #ifdef _OPENMP
-#include<omp.h>
+  #include <omp.h>
 #endif
 
-#include"indexer.h"
-#include"field.h"
-#include"sweep.h"
-#include"measurments.h"
-#include"random.h"
-#include"typedefs.h"
+#include "typedefs.h"
+#include "sweep.h"
+#include "measurments.h"
 
 const int  meas   =     25;
 const int write_out   = 1;
@@ -30,7 +25,7 @@ const int write_out   = 1;
 int
 main(int argc,char *argv[]) {
 
-  int dim[2];
+  int dim[DIM];
 
   int n_term;
   int n_prod;
@@ -41,13 +36,19 @@ main(int argc,char *argv[]) {
   int ix,iy;
   int n_x;
   int n_y;
+#if DIM >= 3
+  int n_z;
+#endif
   
-  struct parameters<double> pars;
+  struct parameters<Float> pars;
   po::options_description desc("Allowed options");
   desc.add_options()
     ("threads", po::value<int>(), "set number of threads")
     ("n-x", po::value<int>(&n_x)->default_value(128), "set x size")
     ("n-y", po::value<int>(&n_y)->default_value(128), "set y size")
+#if DIM >= 3
+    ("n-z", po::value<int>(&n_z)->default_value(128), "set y size")
+#endif
     ("term,t", po::value<int>(&n_term)->default_value(0), "n-term")
     ("sweep,n", po::value<int>(&n_prod)->default_value(0), "n-sweep")
     ("seed,s", po::value<int>(&seed)->default_value(7675643), "seed")
@@ -60,17 +61,17 @@ main(int argc,char *argv[]) {
   po::store(po::parse_command_line(argc, argv, desc), vm);
   po::notify(vm);    
 
-
-
-
   dim[0]=n_x;
   dim[1]=n_y;
+#if DIM >= 3
+  dim[2]=n_z;
+#endif
 
   Ind::init(dim);
-
-  std::vector<double> field_array(Ind::n_sites());
+  std::cerr<<"n_sites "<<Ind::n_sites()<<std::endl;
+  std::vector<Float> field_array(Ind::n_sites());
   SFA sfa(field_array);
-  Field<double &, Ind, SFA> phi_field(field_array);
+  Field<Float &, Ind, SFA> phi_field(field_array);
   
 
   fprintf(stderr,"%f %f %f\n",pars.m_2,pars.g,pars.i_Lambda);
@@ -105,7 +106,7 @@ main(int argc,char *argv[]) {
   for(sweep=0;sweep<n_term;sweep++)    {
     accepted+=make_sweep(phi_field,pars,partition);      
   }
-  fprintf(stderr,"acceptance %f\n",((double) accepted)/(N_HIT*Ind::n_sites()*n_term));
+  fprintf(stderr,"acceptance %f\n",((Float) accepted)/(N_HIT*Ind::n_sites()*n_term));
   
   
 
@@ -139,7 +140,7 @@ main(int argc,char *argv[]) {
 
   if(n_prod>0)
     fprintf(stderr,"acceptance %f\n",
-	    ((double) accepted)/(N_HIT*Ind::n_sites()*n_prod));
+	    ((Float) accepted)/(N_HIT*Ind::n_sites()*n_prod));
   
   Ind::clean();
 }
