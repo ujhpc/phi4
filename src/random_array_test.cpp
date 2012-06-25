@@ -24,12 +24,12 @@ protected:
 
 void 
 test_gen(rand48_array *gen,int k,int n) {
-  double tol=5.0*sqrt((1.0/12.0)/n);
+  Float tol=5.0*sqrt((1.0/12.0)/n);
 
-  double mean=0;
+  Float mean=0;
 
   for(int i=0;i<n;++i) {
-    double value=gen->rand(k);
+    Float value=gen->rand(k);
     ASSERT_LT(value,1.0);
     ASSERT_GE(value,0.0);
     mean+=value;
@@ -79,9 +79,9 @@ TEST_F(rand48_arrayTest,two_generators_eq) {
   for(int i=0;i<n;++i) {
 
 
-    double value1=r_array001->rand(0);
-    double value2=r_array002->rand(0);
-    double value3=r_array002->rand(1);
+    Float value1=r_array001->rand(0);
+    Float value2=r_array002->rand(0);
+    Float value3=r_array002->rand(1);
 
     ASSERT_DOUBLE_EQ(value1,value2)<<i;
     ASSERT_NE(value2,value3)<<i;
