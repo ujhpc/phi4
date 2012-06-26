@@ -4,11 +4,7 @@ using namespace std;
 #include <stdlib.h>
 #include <stdio.h>
 #include <cmath>
-
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/variables_map.hpp>
-#include <boost/program_options/parsers.hpp>
-namespace po = boost::program_options;
+#include <popt.h>
 
 #ifdef _OPENMP
   #include <omp.h>
@@ -23,43 +19,66 @@ const int write_out   = 1;
 
 
 int
-main(int argc,char *argv[]) {
+main(int argc,const char *argv[]) {
 
   int dim[DIM];
 
-  int n_term;
-  int n_prod;
-  int seed;
+  int n_term = 0;
+  int n_prod = 0;
+  int seed   = 7675643;
       
   int sweep;
 
   int ix,iy;
-  int n_x;
-  int n_y;
+  int n_x = 128;
+  int n_y = 128;
 #if DIM >= 3
-  int n_z;
+  int n_z = 128;
 #endif
   
-  struct parameters<Float> pars;
-  po::options_description desc("Allowed options");
-  desc.add_options()
-    ("threads", po::value<int>(), "set number of threads")
-    ("n-x", po::value<int>(&n_x)->default_value(128), "set x size")
-    ("n-y", po::value<int>(&n_y)->default_value(128), "set y size")
-#if DIM >= 3
-    ("n-z", po::value<int>(&n_z)->default_value(128), "set y size")
-#endif
-    ("term,t", po::value<int>(&n_term)->default_value(0), "n-term")
-    ("sweep,n", po::value<int>(&n_prod)->default_value(0), "n-sweep")
-    ("seed,s", po::value<int>(&seed)->default_value(7675643), "seed")
-    ("m", po::value<FLOAT>(&pars.m_2)->default_value(0.25), "set m^2 size")
-    ("g", po::value<FLOAT>(&pars.g)->default_value(0.0), "set g size")
-    ("i-Lambda,L", po::value<FLOAT>(&pars.i_Lambda)->default_value(2.0), "set inverse Lambda size")
-    ;
+  struct parameters<Float> pars = {
+    .g        = (Float)0.0,
+    .m_2      = (Float)0.25,
+    .i_Lambda = (Float)2.0
+  };
 
-  po::variables_map vm;
-  po::store(po::parse_command_line(argc, argv, desc), vm);
-  po::notify(vm);    
+  poptContext optCon;
+  int rc;
+  struct poptOption options[] = {
+    { "threads", 0, 0, 0, 0,
+      "set number of threads" },
+    { "n-x", 0, POPT_ARG_INT, &n_x, 0,
+      "set x size" },
+    { "n-y", 0, POPT_ARG_INT, &n_y, 0,
+      "set y size" },
+#if DIM >= 3
+    { "n-z", 0, POPT_ARG_INT, &n_z, 0,
+      "set z size" },
+#endif
+    { "term", 't', POPT_ARG_INT, &n_term, 0,
+      "n-term" },
+    { "sweep", 'n', POPT_ARG_INT, &n_prod, 0,
+      "n-sweep" },
+    { "seed", 's', POPT_ARG_INT, &seed, 0,
+      "seed" },
+    { NULL, 'm', POPT_ARG_FLOAT, &pars.m_2, 0,
+      "set m^2 size" },
+    { NULL, 'g', POPT_ARG_FLOAT, &pars.g, 0,
+      "set g size" },
+    { "i-Lambda", 'L', POPT_ARG_FLOAT, &pars.i_Lambda, 0,
+      "set inverse Lambda size" },
+    POPT_AUTOHELP
+    POPT_TABLEEND
+  };
+  optCon = poptGetContext(NULL, argc, argv, options, 0);
+
+  while((rc = poptGetNextOpt(optCon)) > 0);
+  if(rc < -1) {
+    fprintf(stderr, "%s: %s\n",
+      poptBadOption(optCon, POPT_BADOPTION_NOALIAS),
+      poptStrerror(rc));
+    exit(-1);
+  }
 
   dim[0]=n_x;
   dim[1]=n_y;

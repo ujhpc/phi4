@@ -26,7 +26,7 @@ LDFLAGS  += -openmp
 endif
 endif
 
-LDFLAGS      += -g -lboost_program_options
+LDFLAGS      += -g -lpopt
 CPPFLAGS     += -MMD -DDIM=$(DIM) -DFLOAT=$(FLOAT)
 VPATH         = $(HOME)/downloads/gtest-1.6.0/src
 
