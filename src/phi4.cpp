@@ -6,6 +6,10 @@ using namespace std;
 #include <cmath>
 #include <popt.h>
 
+template<typename T> int poptType();
+template<> int poptType<float>()  { return POPT_ARG_FLOAT; }
+template<> int poptType<double>() { return POPT_ARG_DOUBLE; }
+
 #ifdef _OPENMP
   #include <omp.h>
 #endif
@@ -61,11 +65,11 @@ main(int argc,const char *argv[]) {
       "n-sweep" },
     { "seed", 's', POPT_ARG_INT, &seed, 0,
       "seed" },
-    { NULL, 'm', POPT_ARG_FLOAT, &pars.m_2, 0,
+    { NULL, 'm', poptType<Float>(), &pars.m_2, 0,
       "set m^2 size" },
-    { NULL, 'g', POPT_ARG_FLOAT, &pars.g, 0,
+    { NULL, 'g', poptType<Float>(), &pars.g, 0,
       "set g size" },
-    { "i-Lambda", 'L', POPT_ARG_FLOAT, &pars.i_Lambda, 0,
+    { "i-Lambda", 'L', poptType<Float>(), &pars.i_Lambda, 0,
       "set inverse Lambda size" },
     POPT_AUTOHELP
     POPT_TABLEEND
