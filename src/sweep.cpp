@@ -134,7 +134,7 @@ make_sweep(F &field, const parameters<Float> &pars, const P &partition ) {
 #pragma omp parallel default(none) shared(partition,update,accepted)
   for(int p=0;p<partition.n_partitions();++p) {
 
-    /* this loop can parallelised */
+    /* this loop can be parallelised */
 #pragma omp for reduction(+:accepted)
     for(int s=0;s<partition.partition_size();++s) {
       int i=partition.partition(p,s);

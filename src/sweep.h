@@ -5,7 +5,7 @@
 #include "typedefs.h"
 
 const Float EPSILON =  1.0;
-const int N_HIT=5;
+const int N_HIT=4;
 
 
 template<typename F> struct parameters {
