@@ -39,6 +39,9 @@ main(int argc,const char *argv[]) {
 #if DIM >= 3
   int n_z = 128;
 #endif
+#ifdef _OPENMP
+  int threads = 0;
+#endif
   
   struct parameters<Float> pars = {
     .g        = (Float)0.0,
@@ -49,8 +52,10 @@ main(int argc,const char *argv[]) {
   poptContext optCon;
   int rc;
   struct poptOption options[] = {
-    { "threads", 0, 0, 0, 0,
-      "set number of threads" },
+#ifdef _OPENMP
+    { "threads", 0, POPT_ARG_INT, &threads, 0,
+      "set number of OpenMP threads" },
+#endif
     { "n-x", 0, POPT_ARG_INT, &n_x, 0,
       "set x size" },
     { "n-y", 0, POPT_ARG_INT, &n_y, 0,
@@ -104,8 +109,8 @@ main(int argc,const char *argv[]) {
   srand48(seed);
 
 #ifdef _OPENMP
-  if(vm.count("threads")) {
-    omp_set_num_threads(vm["threads"].as<int>());
+  if(threads > 0) {
+    omp_set_num_threads(threads);
   }
   int n_threads=omp_get_max_threads();
 #else
