@@ -21,7 +21,13 @@ public:
     quadratic_coef_1(indexer_t::D+pars.m_2/2.0),
     quadratic_coef_2(indexer_t::D*(1.0+2.0*indexer_t::D)*pars.i_Lambda),
     quadratic_coef(quadratic_coef_1+quadratic_coef_2), gr(pars.g/24.0) 
-  {};
+  {
+  
+
+    #ifdef _OPENMP
+    #endif
+    
+};
   
   
 
@@ -129,21 +135,49 @@ long int
 make_sweep(F &field, const parameters<Float> &pars, const P &partition ) {
 
   long int accepted=0;
-
+  
   Updater<F,Partition> update(field,partition,pars);
-#pragma omp parallel default(none) shared(partition,update,accepted)
-  for(int p=0;p<partition.n_partitions();++p) {
+#if   _OPENMP
+  const int num_threads=omp_get_max_threads();
+#else
+  const int num_threads=1;
+#endif
 
-    /* this loop can be parallelised */
-#pragma omp for reduction(+:accepted)
-    for(int s=0;s<partition.partition_size();++s) {
-      int i=partition.partition(p,s);
+  const int n_sites=  F::indexer_t::n_sites();
+  const int chunk =n_sites/(2*num_threads);
 
-      accepted+=update(i);
-
+#pragma omp parallel default(none) shared(update,accepted)  
+  {
+#pragma omp sections reduction(+:accepted) 
+  {
+  
+#pragma omp section  
+    for(int s=0;s<n_sites/4;++s) {
+      accepted+=update(s);
     }
 
+#pragma omp section  
+    for(int s=n_sites/2;s<3*n_sites/4;++s) {
+      accepted+=update(s);
+    }
   }
+
+
+#pragma omp sections reduction(+:accepted) 
+  {
+  
+#pragma omp section  
+    for(int s=n_sites/4;s<n_sites/2;++s) {
+      accepted+=update(s);
+    }
+
+#pragma omp section  
+    for(int s=3*n_sites/4;s<n_sites;++s) {
+      accepted+=update(s);
+    }
+  } 
+  }
+
   return accepted;
 }
 
