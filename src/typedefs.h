@@ -17,7 +17,7 @@ typedef FLOAT Float;
 
 typedef Indexer<DIM> Ind;
 typedef ScalarFieldAccessor<Float, DIM> SFA;
-typedef Field<Float &, Ind, SFA> ScalarField;
+//typedef Field<Float &, Ind, SFA> ScalarField;
 
 
 #if CELL_PARTITION

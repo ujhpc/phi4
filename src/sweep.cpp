@@ -42,7 +42,7 @@ public:
     Float small_corona=(Float)0.0;
 
     for(int mu=0;mu<indexer_t::D;mu++) {
-      small_corona+=field[indexer_t::up(i,mu)]+field[indexer_t::dn(i,mu)];
+      small_corona+=field.get(indexer_t::up(i,mu))+field.get(indexer_t::dn(i,mu));
     }
 
       
@@ -53,17 +53,17 @@ public:
 
 	    
     for(int mu=0;mu<indexer_t::D;mu++) {
-      big_corona_02 +=field[indexer_t::up(indexer_t::up(i,mu),mu)];
-      big_corona_02 +=field[indexer_t::dn(indexer_t::dn(i,mu),mu)];
+      big_corona_02 +=field.get(indexer_t::up(indexer_t::up(i,mu),mu));
+      big_corona_02 +=field.get(indexer_t::dn(indexer_t::dn(i,mu),mu));
       
-      big_corona_01 += field[indexer_t::up(i,mu)];
-      big_corona_01 += field[indexer_t::dn(i,mu)];
+      big_corona_01 += field.get(indexer_t::up(i,mu));
+      big_corona_01 += field.get(indexer_t::dn(i,mu));
       
       for(int nu=0;nu<mu;nu++) {
-	big_corona_11 += field[indexer_t::up(indexer_t::up(i,mu),nu)];
-	big_corona_11 += field[indexer_t::dn(indexer_t::dn(i,mu),nu)];
-	big_corona_11 += field[indexer_t::dn(indexer_t::up(i,mu),nu)];
-	big_corona_11 += field[indexer_t::up(indexer_t::dn(i,mu),nu)];
+	big_corona_11 += field.get(indexer_t::up(indexer_t::up(i,mu),nu));
+	big_corona_11 += field.get(indexer_t::dn(indexer_t::dn(i,mu),nu));
+	big_corona_11 += field.get(indexer_t::dn(indexer_t::up(i,mu),nu));
+	big_corona_11 += field.get(indexer_t::up(indexer_t::dn(i,mu),nu));
       }
     }
 
@@ -77,7 +77,7 @@ public:
     int accepted=0;
 #pragma unroll
     for(int h=0;h<N_HIT;h++) {
-      phi_tmp=field[i];
+      phi_tmp=field.get(i);
 	      
       old_action=corona*phi_tmp;
 
@@ -103,7 +103,7 @@ public:
 	  goto next;
       
       
-      field[i]=phi_tmp;
+      field.set(i,phi_tmp);
       accepted++;
 
     next:;
@@ -147,7 +147,14 @@ make_sweep(F &field, const parameters<Float> &pars, const P &partition ) {
   return accepted;
 }
 
+#if 0
 template
 long int make_sweep< Field<Float &, Ind, SFA>, Partition >( Field<Float &, Ind, SFA>&,const parameters<Float> &, 
 const  Partition  &partition 
 );
+#else
+template
+long int make_sweep< ScalarField<ScalarFieldArray<Float>, Ind>, Partition >( ScalarField<ScalarFieldArray<Float>, Ind>&, const parameters<Float> &, 
+const  Partition  &partition 
+);
+#endif

@@ -12,7 +12,7 @@ public:
     local_mag_ = 0.0;
     local_phi2_= 0.0;
     for(int site=0;site<indexer_t::n_sites();++site) { 
-      Float fi=field[site];
+      Float fi=field.get(site);
       local_mag_+=fi;
       local_phi2_+= fi*fi;
     }

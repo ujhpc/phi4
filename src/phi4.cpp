@@ -97,10 +97,17 @@ main(int argc,const char *argv[]) {
 
   Ind::init(dim);
   std::cerr<<"n_sites "<<Ind::n_sites()<<std::endl;
+
   std::vector<Float> field_array(Ind::n_sites());
-  SFA sfa(field_array);
-  Field<Float &, Ind, SFA> phi_field(field_array);
   
+  SFA sfa(field_array);
+
+  //  ScalarFieldArray<Float> sfarray(Ind::n_sites());
+
+  //  Field<Float &, Ind, SFA> phi_field(field_array);
+  ScalarField<ScalarFieldArray<Float> , Ind> phi_field(Ind::n_sites());
+
+
 
   fprintf(stderr,"%f %f %f\n",pars.m_2,pars.g,pars.i_Lambda);
   fprintf(stderr,"%d %d %d\n",n_term,n_prod,seed);
@@ -120,7 +127,7 @@ main(int argc,const char *argv[]) {
   rand_array_t::init(n_threads,seed);
   
   for(int i=0;i<Ind::n_sites();i++) {
-      phi_field[i]=2*drand48()-1.0;
+    phi_field.set(i,2*drand48()-1.0);
     }
 
   /*

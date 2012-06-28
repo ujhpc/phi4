@@ -31,6 +31,15 @@ private:
 };
 
 
+template<typename T> struct strip_ref {
+  typedef T bare_t;
+
+};
+
+template<typename T> struct strip_ref<T  &> {
+  typedef T bare_t;
+};
+
 template<typename T, typename I, typename accessor_t>
 class Field {
 
@@ -42,21 +51,21 @@ public:
 
   Field(accessor_t accessor):field_(accessor) {};
   
-  T operator[](int i) {return field_[i];};
-  
+#if 0  
+   T operator[](int i) {return field_[i];};
+
+
   T operator[](const unsigned int  *coord)  {
     return field_[indexer_t::site(coord)];
   };
-  
-  T get(int i) {return field_[i];};
-  void  set(const T t, int i) {field_[i]=t;};
+#endif
 
-  
-  
+  T get(int i) {return field_[i];};
+  void  set(int i, typename strip_ref<T>::bare_t t) {field_[i]=t;};
+
+    
  private:
   accessor_t field_;
-  
-
   
 };
 
@@ -66,30 +75,33 @@ class ScalarFieldArray {
 
 public:
   typedef std::vector<T> storage_t;
-
-  ScalarFieldArray(int n):field_(n) {};
-
-  class ScalarFieldAccesor {
+  typedef T scalar_t;
   
+  ScalarFieldArray(int n):field_(n) {};
+  
+  class ScalarFieldAccessor {
+  public:
     T get(int i) const {return (*pfield_)[i];}
     T get(int i,int) const {return get(i);}
     T operator()(int i) const  {return get(i);}
     T operator()(int i,int) const  {return get(i);}
     
-    void set(T t, int i) { (*pfield_)[i]=t;}
-    void set(T t, int i, int ) { set(t,i);}
+    void set(int i, T t) { (*pfield_)[i]=t;}
+    void set(int i,int,T t) { set(t,i);}
     
 
   private:
-    ScalarFieldAccesor(storage_t *p):pfield_(p);		       
+    ScalarFieldAccessor(storage_t *p):pfield_(p) {};		       
     storage_t *pfield_;
+    
+    friend  class ScalarFieldArray;
   };
 
 
-  typedef  ScalarFieldAccesor accessor_t;
+  typedef  ScalarFieldAccessor accessor_t;
 
-  accessor_t accessor() const {
-    return ScalarAccesor(field_);
+  accessor_t accessor()  {
+    return ScalarFieldAccessor(&field_);
   }
 
 
@@ -98,6 +110,29 @@ private:
   
 };
 
+
+template<typename A, typename Indexer>
+class ScalarField {
+ public:
+  typedef  typename A::scalar_t scalar_t;
+  typedef  Indexer indexer_t;
+
+ ScalarField(int n = indexer_t::n_sites()):field_(n), 
+    accessor_(field_.accessor()) {
+  };
+
+  scalar_t get(int i) const {return accessor_.get(i);}
+  scalar_t get(int i,int) const {return get(i);}
+  scalar_t operator()(int i) const  {return get(i);}
+  scalar_t operator()(int i,int) const  {return get(i);}
+    
+  void set(int i,     scalar_t t) { accessor_.set(i,t);}
+  void set(int i,int, scalar_t t) { set(t,i);}
+
+ private:
+  A field_;
+  typename A::accessor_t accessor_;
+};
 
 
 template<typename T > 
@@ -118,8 +153,8 @@ public:
     T operator()(int i,int) const  {return get(i);}
     
 
-    void set(T t, int i, int j) { (*pfield_)[i*N_+j]=t;}
-    void set(vector_t v, int i) { 
+    void set(int i, int j,T t) { (*pfield_)[i*N_+j]=t;}
+    void set(int i, vector_t v) { 
       int offset =i*N_;
       
       for(int j=0;j<N_;j++;offset++) {
