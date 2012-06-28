@@ -33,7 +33,7 @@ main() {
 
 #else
       for(int j=0;j<4;j++) {
-	sum+=log(drand48());
+	sum+=std::log(drand48());
     } 
 
 #endif

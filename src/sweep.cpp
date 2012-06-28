@@ -81,9 +81,8 @@ public:
     Float corona=small_corona+big_corona;
 
     int accepted=0;
-#pragma unroll
-    for(int h=0;h<N_HIT;h++) {
-      phi_tmp=field[i];
+
+    phi_tmp=field[i];
 	      
       old_action=corona*phi_tmp;
 
@@ -92,6 +91,12 @@ public:
 
 
       old_action -= (quadratic_coef+gr*phi2_tmp)*phi2_tmp;
+      
+
+#pragma unroll
+    for(int h=0;h<N_HIT;h++) {
+      phi_tmp=field[i];
+	      
       
 	      
       phi_tmp += (Float)EPSILON*(RAND(tid)  -(Float)0.5);
@@ -110,6 +115,7 @@ public:
       
       
       field[i]=phi_tmp;
+      old_action=new_action;
       accepted++;
 
     next:;
@@ -146,39 +152,23 @@ make_sweep(F &field, const parameters<Float> &pars, const P &partition ) {
   const int n_sites=  F::indexer_t::n_sites();
   const int chunk =n_sites/(2*num_threads);
 
-#pragma omp parallel default(none) shared(update,accepted)  
+#pragma omp parallel default(none) shared(update,accepted)   
   {
-#pragma omp sections reduction(+:accepted) 
-  {
-  
-#pragma omp section  
-    for(int s=0;s<n_sites/4;++s) {
-      accepted+=update(s);
+#pragma omp for  reduction(+:accepted) 
+    for(int i=0;i<num_threads;++i){ 
+      for(int s=2*i*chunk;s<(2*i+1)*chunk;++s) 
+	accepted+=update(s);
+    
     }
-
-#pragma omp section  
-    for(int s=n_sites/2;s<3*n_sites/4;++s) {
-      accepted+=update(s);
+#pragma omp for  reduction(+:accepted) 
+    for(int i=0;i<num_threads;++i){ 
+      for(int s=(2*i+1)*chunk;s<(2*i+2)*chunk;++s) 
+	accepted+=update(s);
+    
     }
   }
-
-
-#pragma omp sections reduction(+:accepted) 
-  {
-  
-#pragma omp section  
-    for(int s=n_sites/4;s<n_sites/2;++s) {
-      accepted+=update(s);
-    }
-
-#pragma omp section  
-    for(int s=3*n_sites/4;s<n_sites;++s) {
-      accepted+=update(s);
-    }
-  } 
-  }
-
   return accepted;
+ 
 }
 
 template
