@@ -134,8 +134,8 @@ main() {
     for(int j=0;j<10;j++) {
       float x=-1.0f*drand48();
       //sum+=std::exp(x);
-      sum+=Exp8(x);
-      //sum+=0.0001f;
+      //sum+=Exp8(x);
+      sum+=0.0001f;
     }
 
   }
