@@ -66,7 +66,7 @@ class ScalarField {
   void set(int i,int, scalar_t t) { set(t,i);}
   
   accessor_t accessor() {return accessor_;}
-  
+  static const int n_components = 1;
  private:
   A field_;
   accessor_t accessor_;

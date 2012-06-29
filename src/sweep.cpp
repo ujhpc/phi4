@@ -41,71 +41,77 @@ public:
     Float  old_action=(Float)0.0;
     Float  new_action=(Float)0.0;
     Float  delta_action;
-    Float  phi_tmp;
-    Float  phi2_tmp;
 
 
-    Float small_corona=(Float)0.0;
+    Float phi2_tmp=(Float)0.0;
+    Float corona[F::n_components];
 
-    for(int mu=0;mu<indexer_t::D;mu++) {
-      small_corona+=field.get(indexer_t::up(i,mu))+field.get(indexer_t::dn(i,mu));
-    }
+    for(int k=0;k<F::n_components;++k) {
 
+      Float small_corona=(Float)0.0;
+      Float big_corona=(Float)0.0;
+    
       
-
-    Float big_corona_01=(Float)0.0;
-    Float big_corona_02=(Float)0.0;
-    Float big_corona_11=(Float)0.0;
-
-	    
-    for(int mu=0;mu<indexer_t::D;mu++) {
-      big_corona_02 +=field.get(indexer_t::up(indexer_t::up(i,mu),mu));
-      big_corona_02 +=field.get(indexer_t::dn(indexer_t::dn(i,mu),mu));
-      
-      big_corona_01 += field.get(indexer_t::up(i,mu));
-      big_corona_01 += field.get(indexer_t::dn(i,mu));
-      
-      for(int nu=0;nu<mu;nu++) {
-	big_corona_11 += field.get(indexer_t::up(indexer_t::up(i,mu),nu));
-	big_corona_11 += field.get(indexer_t::dn(indexer_t::dn(i,mu),nu));
-	big_corona_11 += field.get(indexer_t::dn(indexer_t::up(i,mu),nu));
-	big_corona_11 += field.get(indexer_t::up(indexer_t::dn(i,mu),nu));
+      for(int mu=0;mu<indexer_t::D;mu++) {
+	small_corona+=field.get(indexer_t::up(i,mu),k)
+	  +field.get(indexer_t::dn(i,mu),k);
       }
+
+
+      Float big_corona_01=(Float)0.0;
+      Float big_corona_02=(Float)0.0;
+      Float big_corona_11=(Float)0.0;
+
+   	    
+      for(int mu=0;mu<indexer_t::D;mu++) {
+	big_corona_02 +=field.get(indexer_t::up(indexer_t::up(i,mu),mu),k);
+	big_corona_02 +=field.get(indexer_t::dn(indexer_t::dn(i,mu),mu),k);
+      
+	big_corona_01 += field.get(indexer_t::up(i,mu),k);
+	big_corona_01 += field.get(indexer_t::dn(i,mu),k);
+      
+	for(int nu=0;nu<mu;nu++) {
+	  big_corona_11 += field.get(indexer_t::up(indexer_t::up(i,mu),nu),k);
+	  big_corona_11 += field.get(indexer_t::dn(indexer_t::dn(i,mu),nu),k);
+	  big_corona_11 += field.get(indexer_t::dn(indexer_t::up(i,mu),nu),k);
+	  big_corona_11 += field.get(indexer_t::up(indexer_t::dn(i,mu),nu),k);
+	}
+      }
+
+      
+      big_corona= -pars_.i_Lambda*(big_corona_02
+		 		  -(Float)4.0*indexer_t::D*big_corona_01
+		 		  +(Float)2.0*big_corona_11);
+      corona[k]=small_corona+big_corona;
+
+      Float phi_tmp=field.get(i,k);
+      old_action+=corona[k]*phi_tmp;
+				      
+      phi2_tmp+= phi_tmp*phi_tmp;
     }
 
-      
-    Float big_corona=-pars_.i_Lambda*(big_corona_02
-				      -(Float)4.0*indexer_t::D*big_corona_01
-				      +(Float)2.0*big_corona_11);
-
-    Float corona=small_corona+big_corona;
-
-    int accepted=0;
-
-    phi_tmp=field.get(i);
-
-	      
-    old_action=corona*phi_tmp;
-
-
-    phi2_tmp=phi_tmp*phi_tmp;
-
-
+    
     old_action -= (quadratic_coef+gr*phi2_tmp)*phi2_tmp;
-      
+    
+    int accepted=0;
 
 #pragma unroll
     for(int h=0;h<N_HIT;h++) {
-      phi_tmp=field.get(i);
-	      
-      
-	      
-      phi_tmp += (Float)EPSILON*(RAND(tid)  -(Float)0.5);
+      new_action=(Float)0.0;
+      Float phi_tmp[F::n_components];
+      phi2_tmp=(Float)0.0;
 
-      new_action=corona*phi_tmp;
+      for(int k=0;k<F::n_components;++k) {
+	phi_tmp[k]=field.get(i,k);
+	
+	phi_tmp[k] += (Float)EPSILON*(RAND(tid)  -(Float)0.5);
 
-      phi2_tmp=phi_tmp*phi_tmp;
+	new_action+=corona[k]*phi_tmp[k];
+
+	phi2_tmp+=phi_tmp[k]*phi_tmp[k];
      
+
+      }
       new_action -= phi2_tmp*(quadratic_coef+gr*phi2_tmp);
 
       delta_action=new_action-old_action;
@@ -115,15 +121,17 @@ public:
 	  goto next;
       
       
-
-      field.set(i,phi_tmp);
-
+      for(int k=0;k<F::n_components;++k) {
+	field.set(i,phi_tmp[k]);
+      }
+       
       old_action=new_action;
-
       accepted++;
-
+          
     next:;
-    }
+    } //MULTI_HIT LOOP
+
+
     return accepted;
   }
 
