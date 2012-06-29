@@ -100,11 +100,7 @@ main(int argc,const char *argv[]) {
 
   std::vector<Float> field_array(Ind::n_sites());
   
-  SFA sfa(field_array);
-
-  //  ScalarFieldArray<Float> sfarray(Ind::n_sites());
-
-  //  Field<Float &, Ind, SFA> phi_field(field_array);
+  
   ScalarField<ScalarFieldArray<Float> , Ind> phi_field(Ind::n_sites());
 
 

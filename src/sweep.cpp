@@ -175,14 +175,9 @@ make_sweep(F &field, const parameters<Float> &pars, const P &partition ) {
  
 }
 
-#if 0
-template
-long int make_sweep< Field<Float &, Ind, SFA>, Partition >( Field<Float &, Ind, SFA>&,const parameters<Float> &, 
-const  Partition  &partition 
-);
-#else
+
 template
 long int make_sweep< ScalarField<ScalarFieldArray<Float>, Ind>, Partition >( ScalarField<ScalarFieldArray<Float>, Ind>&, const parameters<Float> &, 
 const  Partition  &partition 
 );
-#endif
+
