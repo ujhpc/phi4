@@ -46,7 +46,7 @@ private:
 };
 
 
-template<typename A, typename Indexer>
+template<typename A,  typename Indexer>
 class ScalarField {
  public:
   typedef  typename A::scalar_t scalar_t;
@@ -73,29 +73,29 @@ class ScalarField {
 };
 
 
-template<typename T > 
+template<typename T ,int N_COMP> 
 class VectorFieldArray {
 
 public:
   typedef std::vector<T> storage_t;
   typedef T* vector_t;
   
-  VectorFieldArray(int n, int N):n_fields_(n),N_(N),
-				 field_(n_fields_*N_) {};
+  VectorFieldArray(int n):n_fields_(n),
+				 field_(n_fields_*N_COMP) {};
 
   class VectorFieldAccesor {
   
-    vector_t get(int i) const {return &pfield_[i*N_];}
-    T get(int i,int j) const {return get(i*N_+j);}
+    vector_t get(int i) const {return &pfield_[i*N_COMP];}
+    T get(int i,int j) const {return get(i*N_COMP+j);}
     vector_t operator()(int i) const  {return get(i);}
     T operator()(int i,int) const  {return get(i);}
     
 
-    void set(int i, int j,T t) { (*pfield_)[i*N_+j]=t;}
+    void set(int i, int j,T t) { (*pfield_)[i*N_COMP+j]=t;}
     void set(int i, vector_t v) { 
-      int offset =i*N_;
+      int offset =i*N_COMP;
       
-      for(int j=0;j<N_;j++;offset++) {
+      for(int j=0;j<N_COMP;j++;offset++) {
 	(*pfield_)[offset]=v[j];
       }
     }
@@ -113,10 +113,10 @@ public:
     return VectorFieldAccesor(field_);
   }
 
+  static const int n_components = N_COMP;
 
 private:
   int n_fields_;
-  int N_;
   storage_t field_;
   
 };
