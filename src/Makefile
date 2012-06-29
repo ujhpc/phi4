@@ -52,3 +52,6 @@ test: $(OBJECTS) $(TESTS_OBJECTS)
 
 clean:
 	rm -f $(MAIN) $(OBJECTS) $(TESTS_OBJECTS) $(DEPEND)
+
+clean-all:
+	rm -rf *.trace *.odcpp *.dSYM *.o *.d *.s phi4-*-omp*
