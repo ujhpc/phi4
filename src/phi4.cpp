@@ -100,8 +100,9 @@ main(int argc,const char *argv[]) {
 
   std::vector<Float> field_array(Ind::n_sites());
   
-  
-  ScalarField<ScalarFieldArray<Float> , Ind> phi_field(Ind::n_sites());
+  // typedef ScalarField<ScalarFieldArray<Float> , Ind> Field;
+ 
+ Field  phi_field(Ind::n_sites());
 
 
 
@@ -141,7 +142,7 @@ main(int argc,const char *argv[]) {
   
   
 
-  MagnetisationMeasurer magnetisation;
+  MagnetisationMeasurer<Field::n_components> magnetisation;
   accepted=0;
   for(sweep=0;sweep<n_prod;sweep++)    {
       
