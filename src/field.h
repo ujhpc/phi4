@@ -99,7 +99,7 @@ public:
     void set(int i, vector_t v) { 
       int offset =i*N_COMP;
       
-      for(int j=0;j<N_COMP;j++;offset++) {
+      for(int j=0;j<N_COMP;j++,offset++) {
 	pfield_[offset]=v[j];
       }
     }
@@ -107,7 +107,7 @@ public:
     void set(int i, scalar_t s) { 
       int offset =i*N_COMP;
       
-      for(int j=0;j<N_COMP;j++;offset++) {
+      for(int j=0;j<N_COMP;j++,offset++) {
 	pfield_[offset]=s;
       }
     }
