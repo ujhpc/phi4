@@ -98,12 +98,8 @@ main(int argc,const char *argv[]) {
   Ind::init(dim);
   std::cerr<<"n_sites "<<Ind::n_sites()<<std::endl;
 
-  std::vector<Float> field_array(Ind::n_sites());
-  
-  // typedef ScalarField<ScalarFieldArray<Float> , Ind> Field;
  
- Field  phi_field(Ind::n_sites());
-
+  Field  phi_field(Ind::n_sites());
 
 
   fprintf(stderr,"%f %f %f\n",pars.m_2,pars.g,pars.i_Lambda);
@@ -124,7 +120,7 @@ main(int argc,const char *argv[]) {
   rand_array_t::init(n_threads,seed);
   
   for(int i=0;i<Ind::n_sites();i++) {
-    phi_field.set(i,2*drand48()-1.0);
+    phi_field.set(i,0,2*drand48()-1.0);
     }
 
   /*

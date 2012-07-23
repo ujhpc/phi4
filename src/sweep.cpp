@@ -122,7 +122,7 @@ public:
       
       
       for(int k=0;k<F::n_components;++k) {
-	field.set(i,phi_tmp[k]);
+	field.set(i,k,phi_tmp[k]);
       }
        
       old_action=new_action;
@@ -185,7 +185,10 @@ make_sweep(F &field, const parameters<Float> &pars, const P &partition ) {
 
 
 template
-long int make_sweep< ScalarField<ScalarFieldArray<Float>, Ind>, Partition >( ScalarField<ScalarFieldArray<Float>, Ind>&, const parameters<Float> &, 
+long int make_sweep< Field, Partition >( Field &,  
+const parameters<Float> &,
 const  Partition  &partition 
 );
+
+
 

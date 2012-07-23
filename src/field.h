@@ -78,20 +78,21 @@ class VectorFieldArray {
 
 public:
   typedef std::vector<T> storage_t;
+  typedef T scalar_t;
   typedef T* vector_t;
   
   VectorFieldArray(int n):n_fields_(n),
 				 field_(n_fields_*N_COMP) {};
 
   class VectorFieldAccesor {
-  
+  public:
     vector_t get(int i) const {return &pfield_[i*N_COMP];}
-    T get(int i,int j) const {return get(i*N_COMP+j);}
+    scalar_t get(int i,int j) const {return pfield_[i*N_COMP+j];}
     vector_t operator()(int i) const  {return get(i);}
-    T operator()(int i,int) const  {return get(i);}
+    scalar_t operator()(int i,int j) const  {return get(i,j);}
     
 
-    void set(int i, int j,T t) { (*pfield_)[i*N_COMP+j]=t;}
+    void set(int i, int j,T t) { pfield_[i*N_COMP+j]=t;}
     void set(int i, vector_t v) { 
       int offset =i*N_COMP;
       
@@ -102,14 +103,15 @@ public:
 
 
   private:
-    VectorFieldAccesor(storage_t *p):pfield_(p);		       
-    storage_t *pfield_;
+  VectorFieldAccesor(storage_t &p):pfield_(p) {};		       
+    storage_t &pfield_;
+    friend  class VectorFieldArray;
   };
 
 
   typedef  VectorFieldAccesor accessor_t;
 
-  accessor_t accessor() const {
+  accessor_t accessor()  {
     return VectorFieldAccesor(field_);
   }
 
@@ -119,6 +121,35 @@ private:
   int n_fields_;
   storage_t field_;
   
+};
+
+template<typename A, typename Indexer>
+class VectorField {
+ public:
+  typedef  typename A::scalar_t scalar_t;
+  typedef  typename A::vector_t vector_t;
+  typedef  Indexer indexer_t;
+  typedef typename A::accessor_t accessor_t;
+
+  static const int n_components=A::n_components;
+
+ VectorField(int n = indexer_t::n_sites()):field_(n), 
+    accessor_(field_.accessor()) {
+  };
+
+  vector_t get(int i) const {return accessor_.get(i);}
+  scalar_t get(int i,int j) const {return accessor_.get(i,j);}
+  vector_t operator()(int i) const  {return get(i);}
+  scalar_t operator()(int i,int j) const  {return get(i,j);}
+    
+  void set(int i,     vector_t t) { accessor_.set(i,t);}
+  void set(int i,int j, scalar_t t) { accessor_.set(t,i,j);}
+  
+  accessor_t accessor() {return accessor_;}
+
+ private:
+  A field_;
+  accessor_t accessor_;
 };
 
 
