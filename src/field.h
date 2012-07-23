@@ -92,15 +92,25 @@ public:
     scalar_t operator()(int i,int j) const  {return get(i,j);}
     
 
-    void set(int i, int j,T t) { pfield_[i*N_COMP+j]=t;}
+    void set(int i, int j,T t) { 
+      pfield_[i*N_COMP+j]=t;
+      //std::cerr<<"seting field "<<i<<" "<<t<<std::endl;
+    }
     void set(int i, vector_t v) { 
       int offset =i*N_COMP;
       
       for(int j=0;j<N_COMP;j++;offset++) {
-	(*pfield_)[offset]=v[j];
+	pfield_[offset]=v[j];
       }
     }
 
+    void set(int i, scalar_t s) { 
+      int offset =i*N_COMP;
+      
+      for(int j=0;j<N_COMP;j++;offset++) {
+	pfield_[offset]=s;
+      }
+    }
 
   private:
   VectorFieldAccesor(storage_t &p):pfield_(p) {};		       
@@ -142,8 +152,9 @@ class VectorField {
   vector_t operator()(int i) const  {return get(i);}
   scalar_t operator()(int i,int j) const  {return get(i,j);}
     
-  void set(int i,     vector_t t) { accessor_.set(i,t);}
-  void set(int i,int j, scalar_t t) { accessor_.set(t,i,j);}
+  void set(int i,  vector_t t) { accessor_.set(i,t);}
+  void set(int i,  scalar_t t) { accessor_.set(i,t);}
+  void set(int i,int j, scalar_t t) { accessor_.set(i,j,t);}
   
   accessor_t accessor() {return accessor_;}
 

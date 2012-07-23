@@ -21,6 +21,7 @@ public:
 
       for(int k=0;k<N_COMP;k++) {
 	Float fi=field.get(site,k);
+
 	local_mag_[k]+=fi;
 	local_phi2_+= fi*fi;
       }
