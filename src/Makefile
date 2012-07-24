@@ -33,7 +33,7 @@ VPATH         = $(HOME)/downloads/gtest-1.6.0/src
 
 EXEC          = phi4$(SUFFIX)
 MAIN          = phi4$(SUFFIX).o
-OBJECTS       = sweep$(SUFFIX).o random$(SUFFIX).o
+OBJECTS       = sweep$(SUFFIX).o random$(SUFFIX).o file.o
 TESTS_OBJECTS = $(subst .cpp,.o,$(wildcard *_test.cpp)) gtest-all.o
 DEPEND        = $(subst .o,.d,$(MAIN)) $(subst .o,.d,$(OBJECTS)) $(subst .o,.d,$(TESTS_OBJECTS))
 

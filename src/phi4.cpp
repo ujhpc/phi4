@@ -6,6 +6,9 @@ using namespace std;
 #include <cmath>
 #include <popt.h>
 
+
+
+
 template<typename T> int poptType();
 template<> int poptType<float>()  { return POPT_ARG_FLOAT; }
 template<> int poptType<double>() { return POPT_ARG_DOUBLE; }
@@ -17,6 +20,7 @@ template<> int poptType<double>() { return POPT_ARG_DOUBLE; }
 #include "typedefs.h"
 #include "sweep.h"
 #include "measurments.h"
+#include "file.h"
 
 const int  meas_freq   =     25;
 const int write_out   = 1;
@@ -58,29 +62,31 @@ main(int argc,const char *argv[]) {
       "set number of OpenMP threads" },
 #endif
     { "n-x", 0, POPT_ARG_INT, &n_x, 0,
-      "set x size" },
+      "x size" },
     { "n-y", 0, POPT_ARG_INT, &n_y, 0,
-      "set y size" },
+      "y size" },
 #if DIM >= 3
     { "n-z", 0, POPT_ARG_INT, &n_z, 0,
-      "set z size" },
+      "z size" },
 #endif
     { "term", 't', POPT_ARG_INT, &n_term, 0,
-      "n-term" },
+      "number of termalisation sweeps" },
     { "sweep", 'n', POPT_ARG_INT, &n_prod, 0,
-      "n-sweep" },
+      "number of measurments sweeps" },
     { "seed", 's', POPT_ARG_INT, &seed, 0,
-      "seed" },
+      "rng seed" },
     { "mass-squared", 'm', poptType<Float>(), &pars.m_2, 0,
-      "set m^2 size" },
+      "m^2 value" },
     { NULL, 'g', poptType<Float>(), &pars.g, 0,
-      "set g size" },
+      "g value" },
     { "i-Lambda", 'L', poptType<Float>(), &pars.i_Lambda, 0,
-      "set inverse Lambda size" },
+      "inverse Lambda value" },
     { "tag", 0, POPT_ARG_STRING, &tag, 0, "tag"},
     POPT_AUTOHELP
     POPT_TABLEEND
   };
+
+  
   optCon = poptGetContext(NULL, argc, argv, options, 0);
 
   while((rc = poptGetNextOpt(optCon)) > 0);
@@ -91,11 +97,14 @@ main(int argc,const char *argv[]) {
     exit(-1);
   }
 
+  print_parameters(std::cerr,options);
+
   dim[0]=n_x;
   dim[1]=n_y;
 #if DIM >= 3
   dim[2]=n_z;
 #endif
+
 
   
   std::cerr<<"tag "<<tag<<std::endl;
