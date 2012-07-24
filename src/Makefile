@@ -15,9 +15,9 @@ endif
 SED := sed
 MV  := mv
 
-SUFFIX := -$(DIM)d-$(FLOAT)-no-omp
+SUFFIX := -$(NCOMP)nc-$(DIM)d-$(FLOAT)-no-omp
 ifdef OPENMP
-SUFFIX := -$(DIM)d-$(FLOAT)-omp
+SUFFIX := -$(NCOMP)nc-$(DIM)d-$(FLOAT)-omp
 ifneq ($(CC), icc)
 CXXFLAGS += -fopenmp
 LDFLAGS  += -fopenmp
