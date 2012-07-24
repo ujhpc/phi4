@@ -18,7 +18,7 @@ template<> int poptType<double>() { return POPT_ARG_DOUBLE; }
 #include "sweep.h"
 #include "measurments.h"
 
-const int  meas   =     25;
+const int  meas_freq   =     25;
 const int write_out   = 1;
 
 
@@ -70,7 +70,7 @@ main(int argc,const char *argv[]) {
       "n-sweep" },
     { "seed", 's', POPT_ARG_INT, &seed, 0,
       "seed" },
-    { NULL, 'm', poptType<Float>(), &pars.m_2, 0,
+    { "mass-squared", 'm', poptType<Float>(), &pars.m_2, 0,
       "set m^2 size" },
     { NULL, 'g', poptType<Float>(), &pars.g, 0,
       "set g size" },
@@ -133,18 +133,26 @@ main(int argc,const char *argv[]) {
   for(sweep=0;sweep<n_term;sweep++)    {
     accepted+=make_sweep(phi_field,pars,partition);      
   }
-  fprintf(stderr,"acceptance %f\n",((Float) accepted)/(N_HIT*Ind::n_sites()*n_term));
+
+  if(n_term>0)
+    fprintf(stderr,"acceptance %f\n",((Float) accepted)/(N_HIT*Ind::n_sites()*n_term));
   
   
 
   MagnetisationMeasurer<Field::n_components> magnetisation;
   accepted=0;
+  
+  /*
+   * main  simulation loop
+   */
+
+  int n_meas=0;
   for(sweep=0;sweep<n_prod;sweep++)    {
       
     accepted+=make_sweep(phi_field,pars,partition);
     
-    int n_meas=0;
-    if( (sweep+1)%meas==0 ) {
+    
+    if( (sweep+1)%meas_freq==0 ) {
 
       magnetisation.measure(phi_field);
       
@@ -158,16 +166,19 @@ main(int argc,const char *argv[]) {
 		);
 		magnetisation.reset();
       }
-    
-    if((sweep+1)%(100*meas) == 0)
-      fflush(stdout);
-
+      n_meas++;      
     }
+
+    if(n_meas>0 && n_meas%100==0 )
+      fflush(stdout);
+    
   }
 
+  
   if(n_prod>0)
     fprintf(stderr,"acceptance %f\n",
 	    ((Float) accepted)/(N_HIT*Ind::n_sites()*n_prod));
+  
   
   Ind::clean();
 }
