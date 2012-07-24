@@ -98,7 +98,6 @@ main(int argc,const char *argv[]) {
   Ind::init(dim);
   std::cerr<<"n_sites "<<Ind::n_sites()<<std::endl;
 
- 
   Field  phi_field(Ind::n_sites());
 
 

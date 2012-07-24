@@ -23,13 +23,16 @@ public:
     quadratic_coef(quadratic_coef_1+quadratic_coef_2), gr(pars.g/24.0) 
   {
   
-
+    set_epsilon(1.0);
     #ifdef _OPENMP
     #endif
     
-};
+  };
   
-  
+  void set_epsilon(Float epsilon) {
+    epsilon_=epsilon/std::sqrt(F::n_components);
+    
+  }
 
   int operator()(int i) {
 #ifdef _OPENMP
@@ -104,7 +107,7 @@ public:
       for(int k=0;k<F::n_components;++k) {
 	phi_tmp[k]=field.get(i,k);
 	
-	phi_tmp[k] += (Float)EPSILON*(RAND(tid)  -(Float)0.5);
+	phi_tmp[k] += epsilon_*(RAND(tid)  -(Float)0.5);
 
 	new_action+=corona[k]*phi_tmp[k];
 
@@ -135,7 +138,7 @@ public:
     return accepted;
   }
 
-  
+  Float epsilon_;
   F &field;
   const P &partition_;
   const parameters<Float> pars_;

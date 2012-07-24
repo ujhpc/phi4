@@ -17,7 +17,7 @@ typedef FLOAT Float;
 
 typedef Indexer<DIM> Ind;
 //typedef  ScalarField<ScalarFieldArray<Float> , Ind> Field;
-typedef  VectorField<VectorFieldArray<Float,1> ,Ind> Field;
+typedef  VectorField<VectorFieldArray<Float,NCOMP> ,Ind> Field;
 
 #if CELL_PARTITION
 typedef cell_partition<DIM, octal_cell<DIM>, Ind> Partition;

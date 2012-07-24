@@ -4,7 +4,7 @@
 #include "partition.h"
 #include "typedefs.h"
 
-const Float EPSILON =  1.0;
+//const Float EPSILON =  1.0;
 const int N_HIT=8;
 
 

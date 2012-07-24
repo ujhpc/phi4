@@ -1,5 +1,6 @@
 CC       := icc
 DIM      := 3
+NCOMP    := 1
 FLOAT    := double
 
 ifneq ($(CC), icc)
@@ -27,7 +28,7 @@ endif
 endif
 
 LDFLAGS      += -g -lpopt
-CPPFLAGS     += -MMD -DDIM=$(DIM) -DFLOAT=$(FLOAT)
+CPPFLAGS     += -MMD -DDIM=$(DIM) -DFLOAT=$(FLOAT) -DNCOMP=$(NCOMP)
 VPATH         = $(HOME)/downloads/gtest-1.6.0/src
 
 EXEC          = phi4$(SUFFIX)
@@ -52,3 +53,6 @@ test: $(OBJECTS) $(TESTS_OBJECTS)
 
 clean:
 	rm -f $(MAIN) $(OBJECTS) $(TESTS_OBJECTS) $(DEPEND)
+
+clean-all:
+	rm -rf phi4-* *.o *.d *.dSYM
