@@ -13,6 +13,13 @@ template<typename T> int poptType();
 template<> int poptType<float>()  { return POPT_ARG_FLOAT; }
 template<> int poptType<double>() { return POPT_ARG_DOUBLE; }
 
+template<typename T> struct numericType {
+  static const char name[8];
+};
+
+template<> const char  numericType<float>::name[8]="float"; 
+template<> const char  numericType<double>::name[8]="double"; 
+
 #ifdef _OPENMP
   #include <omp.h>
 #endif
@@ -98,7 +105,9 @@ main(int argc,const char *argv[]) {
   }
 
   print_parameters(std::cerr,options);
-
+  std::cerr<<"# n-components "<<Field::n_components<<"\n";
+  std::cerr<<"# Float "<<numericType<Float>::name<<"\n";
+ 
   dim[0]=n_x;
   dim[1]=n_y;
 #if DIM >= 3
@@ -107,22 +116,13 @@ main(int argc,const char *argv[]) {
 
 
   
-  std::cerr<<"tag "<<tag<<std::endl;
   std::string mag_file_name("mag.");
   mag_file_name+=std::string(tag);
 
-  std::cerr<<"mag file name "<<mag_file_name<<std::endl;
   Ind::init(dim);
-  std::cerr<<"n_sites "<<Ind::n_sites()<<std::endl;
-
 
   Field  phi_field(Ind::n_sites());
-
-
-  fprintf(stderr,"%f %f %f\n",pars.m_2,pars.g,pars.i_Lambda);
-  fprintf(stderr,"%d %d %d\n",n_term,n_prod,seed);
- 
-  
+   
   srand48(seed);
 
 #ifdef _OPENMP
@@ -130,10 +130,15 @@ main(int argc,const char *argv[]) {
     omp_set_num_threads(threads);
   }
   int n_threads=omp_get_max_threads();
+
+  std::cerr<<"# OpenMP Yes  "<<n_threads<<" threads\n";
+
+
 #else
   int n_threads=1;
+  std::cerr<<"# OpenMP No\n";
 #endif
-  std::cerr<<"n threads = "<<n_threads<<std::endl;
+  
   rand_array_t::init(n_threads,seed);
   
   for(int i=0;i<Ind::n_sites();i++) {
@@ -143,6 +148,9 @@ main(int argc,const char *argv[]) {
   /*
    * termalisation loop 
    */
+
+
+  
 
   long int accepted=0;
 

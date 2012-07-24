@@ -79,42 +79,38 @@ public:
 
   static void init_arrays() {
 
-    std::cerr<<"nlinks_ " <<n_links_<<std::endl;
-
-     up_  = new coordinate_t[n_links_];
-     dn_  = new coordinate_t[n_links_];
+    up_  = new coordinate_t[n_links_];
+    dn_  = new coordinate_t[n_links_];
      
+    
+    for(iterator it=begin();it!=end();++it) {
       
+      for(int mu=0;mu<Dim;++mu) {
+	
+	int coord[Dim];
+	for(int i=0;i<Dim;++i) {
 
-
-      for(iterator it=begin();it!=end();++it) {
-
-	for(int mu=0;mu<Dim;++mu) {
-
-	  int coord[Dim];
-	  for(int i=0;i<Dim;++i) {
-
-	    coord[i]=(*it)[i];
-	  }
-
-
-	  coord[mu]=(*it)[mu]+1;
-	  if(coord[mu]>= dim(mu))
-	    coord[mu] -= dim(mu);
-
-
-	  up_[index( *it,mu)] = site(coord); 
-	  
-	  
-	  coord[mu]=(*it)[mu]-1;
-	  if(coord[mu]<0)
-	    coord[mu]+=dims_[mu];
-
-	  dn_[index( *it,mu)] = site(coord); 
-	  
+	  coord[i]=(*it)[i];
 	}
-      }
 
+
+	coord[mu]=(*it)[mu]+1;
+	if(coord[mu]>= dim(mu))
+	  coord[mu] -= dim(mu);
+	
+
+	up_[index( *it,mu)] = site(coord); 
+	  
+	  
+	coord[mu]=(*it)[mu]-1;
+	if(coord[mu]<0)
+	  coord[mu]+=dims_[mu];
+	
+	dn_[index( *it,mu)] = site(coord); 
+	  
+      }
+    }
+    
   }
 
 
