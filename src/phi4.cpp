@@ -42,7 +42,8 @@ main(int argc,const char *argv[]) {
 #ifdef _OPENMP
   int threads = 0;
 #endif
-  
+  char *tag;
+
   struct parameters<Float> pars = {
     .g        = (Float)0.0,
     .m_2      = (Float)0.25,
@@ -76,6 +77,7 @@ main(int argc,const char *argv[]) {
       "set g size" },
     { "i-Lambda", 'L', poptType<Float>(), &pars.i_Lambda, 0,
       "set inverse Lambda size" },
+    { "tag", 0, POPT_ARG_STRING, &tag, 0, "tag"},
     POPT_AUTOHELP
     POPT_TABLEEND
   };
@@ -95,8 +97,15 @@ main(int argc,const char *argv[]) {
   dim[2]=n_z;
 #endif
 
+  
+  std::cerr<<"tag "<<tag<<std::endl;
+  std::string mag_file_name("mag.");
+  mag_file_name+=std::string(tag);
+
+  std::cerr<<"mag file name "<<mag_file_name<<std::endl;
   Ind::init(dim);
   std::cerr<<"n_sites "<<Ind::n_sites()<<std::endl;
+
 
   Field  phi_field(Ind::n_sites());
 
@@ -146,6 +155,13 @@ main(int argc,const char *argv[]) {
    * main  simulation loop
    */
 
+  FILE *fmag;
+  if(
+     NULL==(fmag=fopen(mag_file_name.c_str(),"w")) 
+     ) {
+    std::cerr<<"cannot open file `"<<mag_file_name<<"' for  writing"<<std::endl;
+    exit(2);
+  }
   int n_meas=0;
   for(sweep=0;sweep<n_prod;sweep++)    {
       
@@ -158,7 +174,7 @@ main(int argc,const char *argv[]) {
       
       if((magnetisation.n_meas())%write_out == 0)  {
 	   
-	fprintf(stdout,"%.12g  %.16g %.16g %.16g\n",
+	fprintf(fmag,"%.12g  %.16g %.16g %.16g\n",
 		magnetisation.phi2()/Ind::n_sites(),
 		magnetisation.mag(),
 		magnetisation.xi(),
@@ -170,7 +186,7 @@ main(int argc,const char *argv[]) {
     }
 
     if(n_meas>0 && n_meas%100==0 )
-      fflush(stdout);
+      fflush(fmag);
     
   }
 
