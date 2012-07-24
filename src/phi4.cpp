@@ -210,7 +210,7 @@ main(int argc,const char *argv[]) {
   
   if(n_prod>0)
     fprintf(stderr,"acceptance %f\n",
-	    ((Float) accepted)/(N_HIT*Ind::n_sites()*n_prod));
+	    ((Float) accepted)/((Float)N_HIT*(Float)Ind::n_sites()*(Float)n_prod));
   
   
   Ind::clean();
