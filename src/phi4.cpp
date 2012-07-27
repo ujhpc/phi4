@@ -53,7 +53,7 @@ main(int argc,const char *argv[]) {
 #ifdef _OPENMP
   int threads = 0;
 #endif
-  char *tag;
+  char *tag = "txt";
 
   struct parameters<Float> pars = {
     .g        = (Float)0.0,
