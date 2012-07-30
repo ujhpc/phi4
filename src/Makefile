@@ -1,5 +1,6 @@
 CC       := icc
 DIM      := 3
+NCOMP    := 1
 FLOAT    := double
 
 ifneq ($(CC), icc)
@@ -14,9 +15,9 @@ endif
 SED := sed
 MV  := mv
 
-SUFFIX := -$(DIM)d-$(FLOAT)-no-omp
+SUFFIX := -$(NCOMP)nc-$(DIM)d-$(FLOAT)-no-omp
 ifdef OPENMP
-SUFFIX := -$(DIM)d-$(FLOAT)-omp
+SUFFIX := -$(NCOMP)nc-$(DIM)d-$(FLOAT)-omp
 ifneq ($(CC), icc)
 CXXFLAGS += -fopenmp
 LDFLAGS  += -fopenmp
@@ -27,12 +28,12 @@ endif
 endif
 
 LDFLAGS      += -g -lpopt
-CPPFLAGS     += -MMD -DDIM=$(DIM) -DFLOAT=$(FLOAT)
+CPPFLAGS     += -MMD -DDIM=$(DIM) -DFLOAT=$(FLOAT) -DNCOMP=$(NCOMP)
 VPATH         = $(HOME)/downloads/gtest-1.6.0/src
 
 EXEC          = phi4$(SUFFIX)
 MAIN          = phi4$(SUFFIX).o
-OBJECTS       = sweep$(SUFFIX).o random$(SUFFIX).o
+OBJECTS       = sweep$(SUFFIX).o random$(SUFFIX).o file.o
 TESTS_OBJECTS = $(subst .cpp,.o,$(wildcard *_test.cpp)) gtest-all.o
 DEPEND        = $(subst .o,.d,$(MAIN)) $(subst .o,.d,$(OBJECTS)) $(subst .o,.d,$(TESTS_OBJECTS))
 

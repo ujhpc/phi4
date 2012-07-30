@@ -48,7 +48,39 @@ protected:
   int cell_points[n_points][D];
 };
 
+template<> class octal_cell<3> {
+public:
+  enum {D=3};
+  enum {n_start_points=16};
+  enum {n_points=4};
 
+  octal_cell() {
+    int sp[n_start_points][D]={{0,0,0},{1,0,0},{2,0,0},{3,0,0},
+			       {0,1,0},{1,1,0},{2,1,0},{3,1,0},
+			       {0,0,1},{1,0,1},{2,0,1},{3,0,1},
+			       {0,1,1},{1,1,1},{2,1,1},{3,1,1}};
+
+    int cp[n_points][D]={{0,0,0},{1,1,2},{2,2,0},{3,3,2}};
+    
+    for(int p=0;p<n_start_points;++p) 
+      for(int i=0;i<D;++i)
+	start_points[p][i]=sp[p][i];
+
+    
+    for(int p=0;p<n_points;++p) 
+      for(int i=0;i<D;++i)
+	cell_points[p][i]=cp[p][i];
+    
+    cell_dims[0]=4;
+    cell_dims[1]=4;
+    cell_dims[2]=4;
+  }
+
+protected:
+  int cell_dims[D];
+  int start_points[n_start_points][D];
+  int cell_points[n_points][D];
+};
 
 
 template<int D, typename Cell,typename indexer_t> 
