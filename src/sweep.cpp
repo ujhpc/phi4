@@ -151,6 +151,7 @@ public:
 
 };
 
+#if 0
 template<typename F, typename P  > 
 long int 
 make_sweep(F &field, const parameters<Float> &pars, const P &partition ) {
@@ -185,6 +186,31 @@ make_sweep(F &field, const parameters<Float> &pars, const P &partition ) {
   return accepted;
  
 }
+
+#else
+template<typename F, typename P  > 
+long int 
+make_sweep(F &field, const parameters<Float> &pars, const P &partition ) {
+
+  long int accepted=0;
+
+  Updater<F,Partition> update(field,partition,pars);
+#pragma omp parallel default(none) shared(partition,update,accepted)
+  for(int p=0;p<partition.n_partitions();++p) {
+
+    /* this loop can be parallelised */
+#pragma omp for reduction(+:accepted)
+    for(int s=0;s<partition.partition_size();++s) {
+      int i=partition.partition(p,s);
+
+      accepted+=update(i);
+
+    }
+
+  }
+  return accepted;
+}
+#endif
 
 
 template
