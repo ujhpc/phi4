@@ -48,7 +48,9 @@ main(int argc,const char *argv[]) {
   int n_x = 128;
   int n_y = 128;
 #if DIM >= 3
-  int n_z = 128;
+  n_x=32;
+  n_y=32;
+  int n_z = 32;
 #endif
 #ifdef _OPENMP
   int threads = 0;
