@@ -5,10 +5,39 @@
 #include <cstdio>
 #include "typedefs.h"
 
-template<typename S, int SEEDS_PER_GEN, int PITCH>  
+template<typename S, int SEEDS_PER_GEN, int ALIGMENT_IN_BYTES>  
 class random_array_state {
 
+ 
+    public:
+  random_array_state(int n_gen):n_gen_(n_gen), SEEDS_BLOCK_SIZE(ALIGMENT_IN_BYTES*((sizeof(S)*SEEDS_PER_GEN+ALIGMENT_IN_BYTES-1)/ALIGMENT_IN_BYTES))
+  {
+      posix_memalign((void **)&seeeds_,SEEDS_BLOCK_SIZE*n_gen_);
+  }
+
+
+  void set_seeds(const S *seed) {
+    for(int i=0;i<n_gen_;++i) {
+      for(int j=0;j<SEEDS_PER_GEN;++j)
+	seeds_[i*SEEDS_BLOCK_SIZE/sizeof(S)+j]=seeds[i*SEEDS_PER_GEN+j];
+    }
+  }
+
+
+  void get_seeds(S *seed) const {
+    for(int i=0;i<n_gen_;++i) {
+      for(int j=0;j<SEEDS_PER_GEN;++j)
+	seeds[i*SEEDS_PER_GEN+j]=seeds_[i*SEEDS_BLOCK_SIZE/sizeof(S)+j];
+    }
+  }
+
+
+
+
  protected:
+  const int SEEDS_BLOCK_SIZE;
+  int n_gen_;
+  S   *seeds_;
  
 
 };
