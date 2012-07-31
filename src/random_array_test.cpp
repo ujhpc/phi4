@@ -2,7 +2,7 @@
 #include<gtest/gtest.h>
 
 
-#include"random.h"
+#include"typedefs.h"
 
 class rand48_arrayTest : public ::testing::Test {
 protected:

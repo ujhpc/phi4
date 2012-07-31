@@ -1,6 +1,8 @@
 #ifndef __FIELD_H__
 #define __FIELD_H__
 
+#include<cstdio>
+
 #include<vector>
 
 
@@ -39,6 +41,13 @@ public:
     return ScalarFieldAccessor(field_);
   }
 
+  int fwrite(FILE *fout) {
+    return std::fwrite(&field_[0],sizeof(T),field_.size(),fout);
+  }
+  
+  int fread(FILE *fin) {
+    return std::fread(&field_[0],sizeof(T),field_.size(),fin);
+  }
 
 private:
   storage_t field_;
@@ -67,6 +76,16 @@ class ScalarField {
   
   accessor_t accessor() {return accessor_;}
   static const int n_components = 1;
+
+  int  fwrite(FILE *fout) {
+    field_.fwrite(fout);
+  }
+ 
+  int  fread(FILE *fin) {
+    field_.fread(fin);
+  }
+
+  
  private:
   A field_;
   accessor_t accessor_;
@@ -81,8 +100,9 @@ public:
   typedef T scalar_t;
   typedef T* vector_t;
   
-  VectorFieldArray(int n):n_fields_(n),
-				 field_(n_fields_*N_COMP) {};
+  VectorFieldArray(int n):
+  n_fields_(n),
+    field_(n_fields_*N_COMP) {};
 
   class VectorFieldAccesor {
   public:
@@ -94,7 +114,6 @@ public:
 
     void set(int i, int j,T t) { 
       pfield_[i*N_COMP+j]=t;
-      //std::cerr<<"seting field "<<i<<" "<<t<<std::endl;
     }
     void set(int i, vector_t v) { 
       int offset =i*N_COMP;
@@ -111,7 +130,8 @@ public:
 	pfield_[offset]=s;
       }
     }
-
+    
+    
   private:
   VectorFieldAccesor(storage_t &p):pfield_(p) {};		       
     storage_t &pfield_;
@@ -123,6 +143,14 @@ public:
 
   accessor_t accessor()  {
     return VectorFieldAccesor(field_);
+  }
+
+  int fwrite(FILE *fout) {
+      return std::fwrite(&field_[0],sizeof(T),field_.size(),fout);
+  }
+  
+  int fread(FILE *fin) {
+      return std::fread(&field_[0],sizeof(T),field_.size(),fin);
   }
 
   static const int n_components = N_COMP;
@@ -157,6 +185,14 @@ class VectorField {
   void set(int i,int j, scalar_t t) { accessor_.set(i,j,t);}
   
   accessor_t accessor() {return accessor_;}
+
+  int  fwrite(FILE *fout) {
+    field_.fwrite(fout);
+  }
+ 
+  int  fread(FILE *fin) {
+    field_.fread(fin);
+  }
 
  private:
   A field_;

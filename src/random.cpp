@@ -1,4 +1,5 @@
 #include<cstdlib>
+#include<cstdio>
 
 #include "typedefs.h"
 
@@ -21,6 +22,10 @@ void rand48_array::get_seeds(unsigned  short *seed) const {
     seed[i]=seeds_[i];
   }
 
+}
+
+int rand48_array::fwrite_state(FILE *fout) {
+  return std::fwrite(seeds_,sizeof(short),n_generators_,fout);
 }
 
 rand48_array *rand48_array::generator_;
