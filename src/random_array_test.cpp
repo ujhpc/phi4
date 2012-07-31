@@ -14,6 +14,12 @@ protected:
     r_array002->gen_seeds(1213);
   }
 
+  
+  virtual void TearDown() {
+    delete r_array001;
+    delete r_array002;
+    
+  }
   rand48_array *r_array001;
   rand48_array *r_array002;
   rand48_array *r_array004;
@@ -91,7 +97,61 @@ TEST_F(rand48_arrayTest,two_generators_eq) {
 
 }
 
+TEST_F(rand48_arrayTest,save_restore_test) {
 
+  FILE *fout=fopen("test.rng","w");
+  test_gen(r_array002,0,517);
+  test_gen(r_array002,1,1256);
+  
+  r_array002->fwrite_state(fout);
+  double bval0=r_array002->rand(0);
+  double bval1=r_array002->rand(1);
+  fclose(fout);
+  
+  test_gen(r_array002,0,717);
+  test_gen(r_array002,1,926);
+
+  FILE *fin=fopen("test.rng","r");
+  r_array002->fread_state(fin);
+  fclose(fin);
+  
+  double eval0=r_array002->rand(0);
+  double eval1=r_array002->rand(1);
+
+
+  ASSERT_DOUBLE_EQ(bval0,eval0);
+  ASSERT_DOUBLE_EQ(bval1,eval1);
+  
+  
+}
+
+
+TEST_F(rand48_arrayTest,save_restore_two_rng_test) {
+
+  FILE *fout=fopen("test.rng","w");
+  test_gen(r_array002,0,517);
+  test_gen(r_array002,1,1256);
+  
+  r_array002->fwrite_state(fout);
+  double bval0=r_array002->rand(0);
+  double bval1=r_array002->rand(1);
+  fclose(fout);
+  
+  
+  rand48_array array002(2);
+  FILE *fin=fopen("test.rng","r");
+  array002.fread_state(fin);
+  fclose(fin);
+  
+  double eval0=array002.rand(0);
+  double eval1=array002.rand(1);
+
+
+  ASSERT_DOUBLE_EQ(bval0,eval0);
+  ASSERT_DOUBLE_EQ(bval1,eval1);
+  
+  
+}
 int 
 main(int argc,char *argv[]) {
 ::testing::InitGoogleTest(&argc,argv);
