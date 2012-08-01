@@ -15,6 +15,16 @@ endif
 SED := sed
 MV  := mv
 
+INCLUDE_DIRS+=-I${HOME}/local/include
+LIB_DIRS+=-L${HOME}/local/lib
+
+ARCH=sse3
+CXXFLAGS+=-m${ARCH}
+LDFLAGS+=-m${ARCH}
+
+LDFLAGS+=${LIB_DIRS}
+CXXFLAGS+=${INCLUDE_DIRS}
+
 SUFFIX := -$(NCOMP)nc-$(DIM)d-$(FLOAT)-no-omp
 ifdef OPENMP
 SUFFIX := -$(NCOMP)nc-$(DIM)d-$(FLOAT)-omp
@@ -26,6 +36,7 @@ CXXFLAGS += -openmp
 LDFLAGS  += -openmp
 endif
 endif
+
 
 LDFLAGS      += -g -lpopt
 CPPFLAGS     += -MMD -DDIM=$(DIM) -DFLOAT=$(FLOAT) -DNCOMP=$(NCOMP)
