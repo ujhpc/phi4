@@ -58,9 +58,9 @@ main(int argc,const char *argv[]) {
   char *tag = "txt";
 
   struct parameters<Float> pars = {
-    .g        = (Float)0.0,
-    .m_2      = (Float)0.25,
-    .i_Lambda = (Float)2.0
+    /* g        */ (Float)0.0,
+    /* m_2      */ (Float)0.25,
+    /* i_Lambda */ (Float)2.0
   };
 
   poptContext optCon;
