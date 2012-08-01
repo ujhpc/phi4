@@ -22,7 +22,7 @@ public:
     T operator()(int i,int) const  {return get(i);}
     
     void set(int i, T t) { field_[i]=t;}
-    void set(int i,int,T t) { set(t,i);}
+    void set(int i,int,T t) { set(i,t);}
     
 
   private:
@@ -63,7 +63,7 @@ class ScalarField {
   scalar_t operator()(int i,int) const  {return get(i);}
     
   void set(int i,     scalar_t t) { accessor_.set(i,t);}
-  void set(int i,int, scalar_t t) { set(t,i);}
+  void set(int i,int, scalar_t t) { set(i,t);}
   
   accessor_t accessor() {return accessor_;}
   static const int n_components = 1;
