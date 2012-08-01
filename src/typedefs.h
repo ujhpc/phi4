@@ -22,9 +22,8 @@ typedef Indexer<DIM> Ind;
   typedef VectorField<VectorFieldArray<Float, NCOMP>, Ind> Field;
 #endif
 
-#define CELL_PARTITION
-#ifdef CELL_PARTITION
-typedef cell_partition<DIM, octal_cell<DIM>, Ind> Partition;
+#if _OPENMP || SIMD > 1
+  typedef cell_partition<DIM, octal_cell<DIM>, Ind> Partition;
 #else
   typedef single_partition<Ind> Partition;
 #endif
