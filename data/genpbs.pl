@@ -39,6 +39,7 @@ print STDERR "$OMP $tag\n";
 
 $queue='mp4'  if($OMP > 0);
 $queue='mp8'  if($OMP > 7);
+$queue='mp16'  if($OMP > 15);
 $queue='mp24' if($OMP > 23);
 
 my $omp_tag;
