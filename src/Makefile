@@ -18,6 +18,10 @@ MV  := mv
 INCLUDE_DIRS+=-I${HOME}/local/include
 LIB_DIRS+=-L${HOME}/local/lib
 
+ARCH=sse3
+CXXFLAGS+=-m${ARCH}
+LDFLAGS+=-m${ARCH}
+
 LDFLAGS+=${LIB_DIRS}
 CXXFLAGS+=${INCLUDE_DIRS}
 
