@@ -16,7 +16,11 @@ typedef FLOAT Float;
 #include "partition.h"
 
 typedef Indexer<DIM> Ind;
-typedef  VectorField<VectorFieldArray<Float,NCOMP> ,Ind> Field;
+#if NCOMP <= 1
+  typedef ScalarField<ScalarFieldArray<Float>, Ind> Field;
+#else
+  typedef VectorField<VectorFieldArray<Float, NCOMP>, Ind> Field;
+#endif
 
 #define CELL_PARTITION
 #ifdef CELL_PARTITION
