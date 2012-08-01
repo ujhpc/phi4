@@ -27,7 +27,7 @@ rand48_array *rand48_array::generator_;
 
 void taus_array::gen_seeds(long seed) {
   srand48(seed);
-  for(int i=0;i<4*n_generators_;++i) {   
+  for(int i=0;i<pitch*n_generators_;++i) {   
     unsigned r;
     while( (r=lrand48()) < 128) {};
     seeds_[i]=r;
