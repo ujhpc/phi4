@@ -4,13 +4,14 @@
 
 #include"typedefs.h"
 
-class rand48_arrayTest : public ::testing::Test {
+template<typename R>
+class rand_array_test : public ::testing::Test {
 protected:
   virtual void SetUp() {
-    r_array001=new rand48_array(1);
+    r_array001=new  R(1);
     r_array001->gen_seeds(1213);
 
-    r_array002=new rand48_array(2);
+    r_array002=new R(2);
     r_array002->gen_seeds(1213);
   }
 
@@ -20,15 +21,17 @@ protected:
     delete r_array002;
     
   }
-  rand48_array *r_array001;
-  rand48_array *r_array002;
+  R *r_array001;
+  R *r_array002;
  
 
 };
 
+TYPED_TEST_CASE_P(rand_array_test);
 
+template<typename R>
 void 
-test_gen(rand48_array *gen,int k,int n) {
+test_gen(R *gen,int k,int n) {
   Float tol=5.0*sqrt((1.0/12.0)/n);
 
   Float mean=0;
@@ -46,31 +49,34 @@ test_gen(rand48_array *gen,int k,int n) {
 
 }
 
-TEST_F(rand48_arrayTest,one_generator) {
+TYPED_TEST_P(rand_array_test,one_generator) {
 
-  test_gen(r_array001,0,10000);
+  test_gen(this->r_array001,0,10000);
   
 }
 
 
-TEST_F(rand48_arrayTest,two_generators) {
+
+TYPED_TEST_P(rand_array_test,two_generators) {
 
   
  
 
-  test_gen(r_array002,0,10000);
-  test_gen(r_array002,1,10000);
+  test_gen(this->r_array002,0,10000);
+  test_gen(this->r_array002,1,10000);
   
  
 }
 
-TEST_F(rand48_arrayTest,two_generators_eq) {
+
+
+TYPED_TEST_P(rand_array_test,two_generators_eq) {
  
   unsigned short seeds1[3];
   unsigned short seeds2[6];
   
-  r_array001->get_seeds(seeds1);
-  r_array002->get_seeds(seeds2);
+  this->r_array001->get_seeds(seeds1);
+  this->r_array002->get_seeds(seeds2);
   
   ASSERT_EQ(seeds1[0],seeds2[0]);
   ASSERT_EQ(seeds1[1],seeds2[1]);
@@ -84,9 +90,9 @@ TEST_F(rand48_arrayTest,two_generators_eq) {
   for(int i=0;i<n;++i) {
 
 
-    Float value1=r_array001->rand(0);
-    Float value2=r_array002->rand(0);
-    Float value3=r_array002->rand(1);
+    Float value1=this->r_array001->rand(0);
+    Float value2=this->r_array002->rand(0);
+    Float value3=this->r_array002->rand(1);
 
     ASSERT_DOUBLE_EQ(value1,value2)<<i;
     ASSERT_NE(value2,value3)<<i;
@@ -96,42 +102,15 @@ TEST_F(rand48_arrayTest,two_generators_eq) {
 
 }
 
-TEST_F(rand48_arrayTest,save_restore_test) {
-
-  FILE *fout=fopen("test.rng","w");
-  test_gen(r_array002,0,517);
-  test_gen(r_array002,1,1256);
-  
-  r_array002->fwrite_state(fout);
-  double bval0=r_array002->rand(0);
-  double bval1=r_array002->rand(1);
-  fclose(fout);
-  
-  test_gen(r_array002,0,717);
-  test_gen(r_array002,1,926);
-
-  FILE *fin=fopen("test.rng","r");
-  r_array002->fread_state(fin);
-  fclose(fin);
-  
-  double eval0=r_array002->rand(0);
-  double eval1=r_array002->rand(1);
 
 
-  ASSERT_DOUBLE_EQ(bval0,eval0);
-  ASSERT_DOUBLE_EQ(bval1,eval1);
-  
-  
-}
 
-
-TEST_F(rand48_arrayTest,save_restore_n_test) {
+TYPED_TEST_P(rand_array_test,save_restore_n_test) {
 
   const int n=128;
 
-  rand48_array r_array(n) ;
+  TypeParam r_array(n) ;
   
-
   for(int i =0;i<n;++i) {
     test_gen(&r_array,i,i*13+17);
   };
@@ -163,35 +142,41 @@ TEST_F(rand48_arrayTest,save_restore_n_test) {
   
 }
 
-TEST_F(rand48_arrayTest,save_restore_two_rng_test) {
 
+
+TYPED_TEST_P(rand_array_test,save_restore_n_two_rng_test) {
+
+  const int n=128;
+  TypeParam r_array1(n);
+
+  for(int i =0;i<n;++i) {
+    test_gen(&r_array1,i,i*17+13);
+  };
+  
   FILE *fout=fopen("test.rng","w");
-  test_gen(r_array002,0,517);
-  test_gen(r_array002,1,1256);
-  
-  r_array002->fwrite_state(fout);
-  double bval0=r_array002->rand(0);
-  double bval1=r_array002->rand(1);
+  r_array1.fwrite_state(fout);
   fclose(fout);
+
   
-  
-  rand48_array array002(2);
+  TypeParam r_array2(n);
   FILE *fin=fopen("test.rng","r");
-  array002.fread_state(fin);
+  r_array2.fread_state(fin);
   fclose(fin);
   
-  double eval0=array002.rand(0);
-  double eval1=array002.rand(1);
-
-
-  ASSERT_DOUBLE_EQ(bval0,eval0);
-  ASSERT_DOUBLE_EQ(bval1,eval1);
-  
+  for(int i =0;i<n;++i) {
+    ASSERT_EQ(r_array1.rand(i),r_array2.rand(i));
+  };
   
 }
 
+REGISTER_TYPED_TEST_CASE_P(rand_array_test,
+			   one_generator,
+			   two_generators,
+			   two_generators_eq,
+			   save_restore_n_test,
+			   save_restore_n_two_rng_test);
 
-
+INSTANTIATE_TYPED_TEST_CASE_P(My,rand_array_test,rand48_array);
 
 int 
 main(int argc,char *argv[]) {
