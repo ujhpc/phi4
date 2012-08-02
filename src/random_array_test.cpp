@@ -7,6 +7,7 @@
 template<typename R>
 class rand_array_test : public ::testing::Test {
 protected:
+
   virtual void SetUp() {
     r_array001=new  R(1);
     r_array001->gen_seeds(1213);
@@ -71,20 +72,19 @@ TYPED_TEST_P(rand_array_test,two_generators) {
 
 
 TYPED_TEST_P(rand_array_test,two_generators_eq) {
- 
-  unsigned short seeds1[3];
-  unsigned short seeds2[6];
+  
+  const int seeds_per_gen=TypeParam::seeds_per_gen;
+  typename TypeParam::seed_t seeds1[seeds_per_gen];
+  typename TypeParam::seed_t seeds2[2*seeds_per_gen];
   
   this->r_array001->get_seeds(seeds1);
   this->r_array002->get_seeds(seeds2);
   
-  ASSERT_EQ(seeds1[0],seeds2[0]);
-  ASSERT_EQ(seeds1[1],seeds2[1]);
-  ASSERT_EQ(seeds1[2],seeds2[2]);
+  for(int i=0;i<seeds_per_gen;++i) {
+    ASSERT_EQ(seeds1[i],seeds2[i]);
+  }
 
 
-
-  ASSERT_DOUBLE_EQ(erand48(seeds1),erand48(seeds2));
 
   int n=10000;
   for(int i=0;i<n;++i) {
@@ -176,7 +176,8 @@ REGISTER_TYPED_TEST_CASE_P(rand_array_test,
 			   save_restore_n_test,
 			   save_restore_n_two_rng_test);
 
-INSTANTIATE_TYPED_TEST_CASE_P(My,rand_array_test,rand48_array);
+typedef ::testing::Types<rand48_array,taus_array> Tested_Types;
+INSTANTIATE_TYPED_TEST_CASE_P(My,rand_array_test,Tested_Types);
 
 int 
 main(int argc,char *argv[]) {

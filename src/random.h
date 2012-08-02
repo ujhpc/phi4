@@ -15,11 +15,15 @@ class random_array_state {
 
  
     public:
-  random_array_state(int n_gen):
+
+  typedef S seed_t;
+  
+  static const int seeds_per_gen=SEEDS_PER_GEN;
+
+ random_array_state(int n_gen):
     n_gen_(n_gen), 
     SEEDS_BLOCK_SIZE(ALIGNMENT_IN_BYTES*((sizeof(S)*SEEDS_PER_GEN+ALIGNMENT_IN_BYTES-1)/ALIGNMENT_IN_BYTES)),
-    SEEDS_BLOCK(SEEDS_BLOCK_SIZE/sizeof(S)),
-    seeds_per_gen(SEEDS_PER_GEN)
+    SEEDS_BLOCK(SEEDS_BLOCK_SIZE/sizeof(S))
   {
     posix_memalign((void **)&seeds_,ALIGNMENT_IN_BYTES,SEEDS_BLOCK_SIZE*n_gen_);
   }
@@ -91,7 +95,6 @@ class random_array_state {
 protected:
   const int SEEDS_BLOCK_SIZE;
   const int SEEDS_BLOCK;
-  const int seeds_per_gen;
   int n_gen_;
   S   *seeds_;
  
