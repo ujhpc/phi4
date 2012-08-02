@@ -22,13 +22,14 @@ typedef Indexer<DIM> Ind;
   typedef VectorField<VectorFieldArray<Float, NCOMP>, Ind> Field;
 #endif
 
+
 #if _OPENMP || SIMD > 1
   typedef cell_partition<DIM, octal_cell<DIM>, Ind> Partition;
 #else
   typedef single_partition<Ind> Partition;
 #endif
 
-#if USE_RAND48
+#ifdef USE_RAND48
   inline Float RAND(int i) { return rand48_array::generator()->rand(i); }
   typedef rand48_array rand_array_t;
 #else
