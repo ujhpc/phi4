@@ -22,8 +22,7 @@ protected:
   }
   rand48_array *r_array001;
   rand48_array *r_array002;
-  rand48_array *r_array004;
-  rand48_array *r_array128;
+ 
 
 };
 
@@ -126,6 +125,44 @@ TEST_F(rand48_arrayTest,save_restore_test) {
 }
 
 
+TEST_F(rand48_arrayTest,save_restore_n_test) {
+
+  const int n=128;
+
+  rand48_array r_array(n) ;
+  
+
+  for(int i =0;i<n;++i) {
+    test_gen(&r_array,i,i*13+17);
+  };
+  
+  FILE *fout=fopen("test.rng","w");
+  r_array.fwrite_state(fout);
+
+  std::vector<Float> check1(n);
+  for(int i =0;i<n;++i) {
+    check1[i]=r_array.rand(i);
+  };
+
+  fclose(fout);
+  
+  for(int i =0;i<n;++i) {
+    test_gen(&r_array,i,(n-i)*7+213);
+  };
+
+  FILE *fin=fopen("test.rng","r");
+  r_array.fread_state(fin);
+  fclose(fin);
+  
+  
+  for(int i =0;i<n;++i) {
+    ASSERT_EQ(check1[i],r_array.rand(i));
+  };
+  
+  
+  
+}
+
 TEST_F(rand48_arrayTest,save_restore_two_rng_test) {
 
   FILE *fout=fopen("test.rng","w");
@@ -152,6 +189,10 @@ TEST_F(rand48_arrayTest,save_restore_two_rng_test) {
   
   
 }
+
+
+
+
 int 
 main(int argc,char *argv[]) {
 ::testing::InitGoogleTest(&argc,argv);
