@@ -29,7 +29,7 @@ private:
     template<typename T>  Log &operator<<(const T &val) { 
       current_entry_level_=level_;
       out_<<val;
-      return *this;
+      return *;
     }
 
   private:
