@@ -24,15 +24,21 @@
 \end{center}
 \end{samepage}
 
-{\bf Abstract.} Recent publications regarding high-performance GPU computing claim that in many application GPU can present 100x advantage over generic purpose CPU. We wanted to evaluate this statement on the real problem and real application of Monte Carlo simulation of 3D $\phi^4$ Model as described by \cite{PhysRevE.64.066113}. We took into consideration also contrary opinion presented by \emph{Intel} in \cite{Lee:2010:DGV:1816038.1816021}.
+{\bf Abstract.} Recent publications regarding high-performance GPU computing claim that in many application GPU can present $100\times$ advantage over generic purpose CPU. We wanted to evaluate this statement on the real problem and real application of Monte Carlo simulation of 3D $\phi^4$ Model as described by \cite{PhysRevE.64.066113}. We took into consideration also contrary opinion presented by \emph{Intel}\cite{Lee:2010:DGV:1816038.1816021}.
 
-Trying to be as much unbiased as possible we have put an effort to create CPU and GPU optimized source-code, using \emph{OpenMP} and \emph{SSE/AVX} SIMD vectorization for \emph{Intel Core 2} CPU and \emph{Compute Capability 2.0} for \emph{CUDA} SIMT on \emph{NVIDIA Fermi} similar to \cite{Preis20094468}.
+Trying to be as much unbiased as possible we have put an effort to create CPU and GPU optimized source-code, using \emph{OpenMP} and \emph{SSE/AVX} SIMD vectorization for \emph{Intel Core i7} CPU and \emph{Compute Capability 2.0} for \emph{CUDA} SIMT on \emph{NVIDIA Fermi}\cite{Preis20094468}.
 
-To expect valid simulation results we had to provide efficient random number good statistical quality and long period. We have chosen \emph{Tausworthe} random generator\cite{LEcuyer96} as the best one providing uniform distribution for our simulation. Our GPU CUDA implementation is based on GPU Gems 3\cite{howes_thomas07}, while CPU implementation uses SSE3 SIMD integer extensions.
+To ensure valid simulation results we had to provide efficient random number good statistical quality and long period. We have chosen \emph{Tausworthe} random generator\cite{LEcuyer96} as the best one providing uniform distribution for the simulation. Our GPU \emph{CUDA} implementation is based on \emph{GPU Gems 3}\cite{howes_thomas07}, while our own CPU implementation uses \emph{SSE2} SIMD integer extensions.
 
-We have encountered peculiar problems specific to both CPU and GPU. Markov chain of $\phi^4$ model lattice updates needs to satisfy constraints, such as update dependencies separation for simultaneously updated lattice fields. These do not matter in serial single threaded execution model, but impact on correctness under multi-threaded vectorized execution.
+We have encountered peculiar problems specific to both CPU and GPU. Markov chain of $\phi^4$ model needs to satisfy lattice update constraints, such as dependency separation for simultaneously processed lattice fields. These do not matter in serial single threaded execution model, but impact on correctness under multi-threaded vectorized execution.
 
-Greatest challenge for GPU implementation was to provide efficient memory synchronization satisfying Markov chain constraints. Shared memory was used extensively to minimize update latencies between single threads. Each GPU warp is processing shared memory mapped lattice block. Synchronization triggered by boundary conditions ensures synchronization between separate warps and blocks.
+Greatest challenge for GPU implementation was to provide efficient memory synchronization satisfying Markov chain constraints. Shared memory was used extensively to minimize update latencies between single threads. Each GPU warp is processing shared memory mapped lattice block, while topology conditions trigger synchronization between separate warps and blocks.
+
+While SSE gives theoretical $4\times$ benefit for single precision floating point operations, AVX providing $8\times$, our CPU implementation has to struggle missing counterparts for all scalar \emph{x86} instructions, such as missing direct \emph{XMM} registers gatter and scatter and lack of vectorized integer operation for full length 256-bit registers. Initially planned for AVX standard, these were postponed to AVX2 planned for 2013.
+
+Altogether we managed to achieve $0.13$ nanoseconds for single lattice field update on \emph{NVIDIA GTX 470}, reaching around $430$ Gflops of $1088$ Gflops peak performance of this device. Our CPU \emph{OpenMP} and \emph{SSE/AVX} implementation compiled via GCC 4.4 or higher and running on \emph{Intel Core i5 2.5 Ghz} quad core CPU presented $15\times$ performance boost comparing to single threaded scalar code and $3.76$ nanoseconds for single lattice field update.
+
+This gives around $28\times$ advantage to GPU, which is noticeably less than promised by many publications, however much higher that comes from comparison of $160$ Gflops peak performance of tested i5 CPU to \emph{GTX 470}. As soon AVX2 capable CPU devices appear on the market we plan to revise our evaluation.
 
 \bibliography{MC3-abstract}{}
 \bibliographystyle{plain}
