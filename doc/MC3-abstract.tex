@@ -1,0 +1,40 @@
+\documentclass[11pt,a4paper]{article}
+ 
+\usepackage[utf8]{inputenc}
+
+% Page Format
+\topmargin      = 0pt
+\oddsidemargin  = 0pt
+\evensidemargin = 0pt
+\parindent      = 0pt
+\parskip        = 10pt
+\textheight     = 220truemm
+\textwidth      = 170truemm
+
+\begin{document}
+
+\begin{samepage}
+\begin{center}
+{\Large{\bf GPU-accelerated and CPU SIMD Optimized \\ Monte Carlo Simulation of $\phi^4$ Model }}
+
+\vspace {5mm}
+{\bf P. Białas, J. Kowal, A. Strzelecki}\\
+{\em Faculty of Physics, Astronomy and Applied Computer Science, \\ Jagiellonian University in Krakow }\\
+
+\end{center}
+\end{samepage}
+
+{\bf Abstract.} Recent publications regarding high-performance GPU computing claim that in many application GPU can present 100x advantage over generic purpose CPU. We wanted to evaluate this statement on the real problem and real application of Monte Carlo simulation of 3D $\phi^4$ Model as described by \cite{PhysRevE.64.066113}. We took into consideration also contrary opinion presented by \emph{Intel} in \cite{Lee:2010:DGV:1816038.1816021}.
+
+Trying to be as much unbiased as possible we have put an effort to create CPU and GPU optimized source-code, using \emph{OpenMP} and \emph{SSE/AVX} SIMD vectorization for \emph{Intel Core 2} CPU and \emph{Compute Capability 2.0} for \emph{CUDA} SIMT on \emph{NVIDIA Fermi} similar to \cite{Preis20094468}.
+
+To expect valid simulation results we had to provide efficient random number good statistical quality and long period. We have chosen \emph{Tausworthe} random generator\cite{LEcuyer96} as the best one providing uniform distribution for our simulation. Our GPU CUDA implementation is based on GPU Gems 3\cite{howes_thomas07}, while CPU implementation uses SSE3 SIMD integer extensions.
+
+We have encountered peculiar problems specific to both CPU and GPU. Markov chain of $\phi^4$ model lattice updates needs to satisfy constraints, such as update dependencies separation for simultaneously updated lattice fields. These do not matter in serial single threaded execution model, but impact on correctness under multi-threaded vectorized execution.
+
+Greatest challenge for GPU implementation was to provide efficient memory synchronization satisfying Markov chain constraints. Shared memory was used extensively to minimize update latencies between single threads. Each GPU warp is processing shared memory mapped lattice block. Synchronization triggered by boundary conditions ensures synchronization between separate warps and blocks.
+
+\bibliography{MC3-abstract}{}
+\bibliographystyle{plain}
+
+\end{document}
