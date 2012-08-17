@@ -15,7 +15,7 @@
 
 \begin{samepage}
 \begin{center}
-{\Large{\bf GPU-accelerated and CPU SIMD Optimized \\ Monte Carlo Simulation of $\phi^4$ Model }}
+{\Large{\bf GPU-accelerated and CPU SIMD Optimized \\ Monte Carlo Simulations of $\phi^4$ Model }}
 
 \vspace {5mm}
 {\bf P. Białas, J. Kowal, A. Strzelecki}\\
@@ -24,21 +24,71 @@
 \end{center}
 \end{samepage}
 
-{\bf Abstract.} Recent publications regarding high-performance GPU computing claim that in many application GPU can present $100\times$ advantage over generic purpose CPU. We wanted to evaluate this statement on the real problem and real application of Monte Carlo simulation of 3D $\phi^4$ Model as described by \cite{PhysRevE.64.066113}. We took into consideration also contrary opinion presented by \emph{Intel}\cite{Lee:2010:DGV:1816038.1816021}.
+{\bf Abstract.}  We present a high-performance implementation of
+Monte-Carlo simulations of 2 and 3 dimensional $\varphi^4$ model
+\cite{PhysRevE.64.066113} both on GPU and on CPU using \emph{OpenMP}
+and \emph{SSE/AVX} SIMD vectorization for \emph{Intel Core i7}. This
+simulation is a part of on ongoing educational project but we took this
+oportunity to compare the two programming models and check the claims
+of over $100\times$ advantage of GPU over generic CPU made recently in
+the literature.
 
-Trying to be as much unbiased as possible we have put an effort to create CPU and GPU optimized source-code, using \emph{OpenMP} and \emph{SSE/AVX} SIMD vectorization for \emph{Intel Core i7} CPU and \emph{Compute Capability 2.0} for \emph{CUDA} SIMT on \emph{NVIDIA Fermi}\cite{Preis20094468}.
+The implemented model differs from the ones presented in the
+literature ({\em e.g.} \cite{Preis20094468}) by the extended
+neighborhood that has to be taken into acount when updating a single
+lattice field. While model is inherently parallelisable, grid points
+that lie in the same neighborhood cannot be updated together. That
+proved to be a problem especially on the GPU where much more threads
+access the grid in parallel.  Taking into account a larger
+neighborhood means that a simple checkerboard decomposition pattern
+cannot be used and we have devised a new two-level grid decomposition
+scheme.  Greatest challenge for GPU implementation was to provide
+efficient memory synchronization satisfying those constraint.  Shared
+memory was used extensively to minimize update latencies between
+single threads.
 
-To ensure valid simulation results we had to provide efficient random number good statistical quality and long period. We have chosen \emph{Tausworthe} random generator\cite{LEcuyer96} as the best one providing uniform distribution for the simulation. Our GPU \emph{CUDA} implementation is based on \emph{GPU Gems 3}\cite{howes_thomas07}, while our own CPU implementation uses \emph{SSE2} SIMD integer extensions.
+The CPU implementation have run into similar problems althought less
+severe because of smaller number of parallel threads. We have however opted to
+use the same partitioning scheme as on the GPU.
 
-We have encountered peculiar problems specific to both CPU and GPU. Markov chain of $\phi^4$ model needs to satisfy lattice update constraints, such as dependency separation for simultaneously processed lattice fields. These do not matter in serial single threaded execution model, but impact on correctness under multi-threaded vectorized execution.
+To ensure valid simulation results we had to provide efficient random
+number good statistical quality and long period. We have chosen
+\emph{Tausworthe} random generator\cite{LEcuyer96} as the best one
+providing uniform distribution for the simulation. Our GPU \emph{CUDA}
+implementation is based on \emph{GPU Gems 3}\cite{howes_thomas07},
+while our own CPU implementation uses \emph{SSE2} SIMD integer
+extensions.
 
-Greatest challenge for GPU implementation was to provide efficient memory synchronization satisfying Markov chain constraints. Shared memory was used extensively to minimize update latencies between single threads. Each GPU warp is processing shared memory mapped lattice block, while topology conditions trigger synchronization between separate warps and blocks.
+Altogether we managed to achieve $0.13$ nanoseconds for single lattice
+field update on \emph{NVIDIA GTX 470}, reaching around $430$ Gflops of
+$1088$ Gflops peak performance of this device. 
 
-While SSE gives theoretical $4\times$ benefit for single precision floating point operations, AVX providing $8\times$, our CPU implementation has to struggle missing counterparts for all scalar \emph{x86} instructions, such as missing direct \emph{XMM} registers gatter and scatter and lack of vectorized integer operation for full length 256-bit registers. Initially planned for AVX standard, these were postponed to AVX2 planned for 2013.
 
-Altogether we managed to achieve $0.13$ nanoseconds for single lattice field update on \emph{NVIDIA GTX 470}, reaching around $430$ Gflops of $1088$ Gflops peak performance of this device. Our CPU \emph{OpenMP} and \emph{SSE/AVX} implementation compiled via GCC 4.4 or higher and running on \emph{Intel Core i5 2.5 Ghz} quad core CPU presented $15\times$ performance boost comparing to single threaded scalar code and $3.76$ nanoseconds for single lattice field update.
+While SSE gives theoretical $4\times$ benefit for single precision
+floating point operations, AVX providing $8\times$, our CPU
+implementation has to struggle missing counterparts for all scalar
+\emph{x86} instructions, such as missing direct \emph{XMM} registers
+gatter and scatter and lack of vectorized integer operation for full
+length 256-bit registers. Initially planned for AVX standard, these
+were postponed to AVX2 planned for 2013.
 
-This gives around $28\times$ advantage to GPU, which is noticeably less than promised by many publications, however much higher that comes from comparison of $160$ Gflops peak performance of tested i5 CPU to \emph{GTX 470}. As soon AVX2 capable CPU devices appear on the market we plan to revise our evaluation.
+
+Our CPU \emph{OpenMP} and \emph{SSE/AVX} implementation compiled via
+GCC 4.4 or higher and running on \emph{Intel Core i5 2.5 Ghz} quad
+core CPU presented $15\times$ performance boost comparing to single
+threaded scalar code and $3.76$ nanoseconds for single lattice field
+update. Which gives the ... of peak power. .. This can be traced back
+to ineficient store and load operations ... which can be partially
+mitigated by the reorganising the way in which the grid is stored in
+the memory. 
+
+This gives around $28\times$ advantage to GPU, which is noticeably
+less than promised by many publications, however much higher that
+comes from comparison of $160$ Gflops peak performance of tested i5
+CPU to \emph{GTX 470} \cite{Lee:2010:DGV:1816038.1816021}. 
+
+As soon AVX2 capable CPU devices appear on the
+market we plan to revise our evaluation.
 
 \bibliography{MC3-abstract}{}
 \bibliographystyle{plain}
