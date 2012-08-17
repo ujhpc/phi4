@@ -29,14 +29,14 @@ Monte-Carlo simulations of 2 and 3 dimensional $\varphi^4$ model
 \cite{PhysRevE.64.066113} both on GPU and on CPU using \emph{OpenMP}
 and \emph{SSE/AVX} SIMD vectorization for \emph{Intel Core i7}. This
 simulation is a part of on ongoing educational project but we took
-this oportunity to compare the two programming models and check the
+this opportunity to compare the two programming models and check the
 claims of over $100\times$ advantage of GPU over generic CPU made
 recently in the literature.
 
 The implemented model differs from the ones presented in the
 literature ({\em e.g.} \cite{Preis20094468}) by the extended
-neighborhood that has to be taken into acount when updating a single
-lattice field. While model is inherently parallelisable, grid points
+neighborhood that has to be taken into account when updating a single
+lattice field. While model is inherently parallelizable, grid points
 that lie in the same neighborhood cannot be updated together. That
 proved to be a problem especially on the GPU where much more threads
 access the grid in parallel.  Taking into account a larger
@@ -46,7 +46,7 @@ scheme.  Greatest challenge for GPU implementation was to provide
 efficient memory synchronization satisfying those constraint.  Shared
 memory was used extensively to minimize update latencies between
 single threads.  The CPU implementation have run into similar problems
-althought less severe because of smaller number of parallel
+although less severe because of smaller number of parallel
 threads. We have however opted to use the same partitioning scheme as
 on the GPU.
 
@@ -66,7 +66,7 @@ $1088$ Gflops peak performance of this device.
 While SSE gives theoretical $4\times$ benefit for single precision
 floating point operations, AVX providing $8\times$, not all scalar
 \emph{x86} instructions, have vector counterparts.  In particular
-direct \emph{XMM} registers gatter and scatter and vectorized integer
+direct \emph{XMM} registers gather and scatter and vectorized integer
 operation for full length 256-bit registers are missing. Initially
 planned for AVX standard, these were postponed to AVX2 planned for
 2013. As soon AVX2 capable CPU devices appear on the
@@ -84,8 +84,8 @@ This gives around $28\times$ advantage to GPU, which is noticeably
 less than promised by many publications, however much higher that
 comes from comparison of $160$ Gflops peak performance of tested i5
 CPU to \emph{GTX 470} \cite{Lee:2010:DGV:1816038.1816021}.This can be
-traced back to ineficient store and load operations (gather/scatter)
-which can be partially mitigated by the reorganising the way in which
+traced back to inefficient store and load operations (gather/scatter)
+which can be partially mitigated by the reorganizing the way in which
 the grid is stored in the memory. This is the subject of an ongoing
 work.
 
