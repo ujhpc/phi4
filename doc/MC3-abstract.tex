@@ -7,7 +7,7 @@
 \oddsidemargin  = 0pt
 \evensidemargin = 0pt
 \parindent      = 0pt
-\parskip        = 10pt
+\parskip        = 5pt
 \textheight     = 220truemm
 \textwidth      = 170truemm
 
@@ -28,10 +28,10 @@
 Monte-Carlo simulations of 2 and 3 dimensional $\varphi^4$ model
 \cite{PhysRevE.64.066113} both on GPU and on CPU using \emph{OpenMP}
 and \emph{SSE/AVX} SIMD vectorization for \emph{Intel Core i7}. This
-simulation is a part of on ongoing educational project but we took this
-oportunity to compare the two programming models and check the claims
-of over $100\times$ advantage of GPU over generic CPU made recently in
-the literature.
+simulation is a part of on ongoing educational project but we took
+this oportunity to compare the two programming models and check the
+claims of over $100\times$ advantage of GPU over generic CPU made
+recently in the literature.
 
 The implemented model differs from the ones presented in the
 literature ({\em e.g.} \cite{Preis20094468}) by the extended
@@ -45,19 +45,18 @@ cannot be used and we have devised a new two-level grid decomposition
 scheme.  Greatest challenge for GPU implementation was to provide
 efficient memory synchronization satisfying those constraint.  Shared
 memory was used extensively to minimize update latencies between
-single threads.
-
-The CPU implementation have run into similar problems althought less
-severe because of smaller number of parallel threads. We have however opted to
-use the same partitioning scheme as on the GPU.
+single threads.  The CPU implementation have run into similar problems
+althought less severe because of smaller number of parallel
+threads. We have however opted to use the same partitioning scheme as
+on the GPU.
 
 To ensure valid simulation results we had to provide efficient random
-number good statistical quality and long period. We have chosen
-\emph{Tausworthe} random generator\cite{LEcuyer96} as the best one
-providing uniform distribution for the simulation. Our GPU \emph{CUDA}
-implementation is based on \emph{GPU Gems 3}\cite{howes_thomas07},
-while our own CPU implementation uses \emph{SSE2} SIMD integer
-extensions.
+number generator with good statistical quality and long period. We
+have chosen \emph{Tausworthe} random generator\cite{LEcuyer96} as the
+best one providing uniform distribution for the simulation. Our GPU
+\emph{CUDA} implementation is based on \emph{GPU Gems
+  3}\cite{howes_thomas07}, while our own CPU implementation uses
+\emph{SSE2} SIMD integer extensions.
 
 Altogether we managed to achieve $0.13$ nanoseconds for single lattice
 field update on \emph{NVIDIA GTX 470}, reaching around $430$ Gflops of
@@ -65,30 +64,30 @@ $1088$ Gflops peak performance of this device.
 
 
 While SSE gives theoretical $4\times$ benefit for single precision
-floating point operations, AVX providing $8\times$, our CPU
-implementation has to struggle missing counterparts for all scalar
-\emph{x86} instructions, such as missing direct \emph{XMM} registers
-gatter and scatter and lack of vectorized integer operation for full
-length 256-bit registers. Initially planned for AVX standard, these
-were postponed to AVX2 planned for 2013.
+floating point operations, AVX providing $8\times$, not all scalar
+\emph{x86} instructions, have vector counterparts.  In particular
+direct \emph{XMM} registers gatter and scatter and vectorized integer
+operation for full length 256-bit registers are missing. Initially
+planned for AVX standard, these were postponed to AVX2 planned for
+2013. As soon AVX2 capable CPU devices appear on the
+market we plan to revise our evaluation.
 
 
 Our CPU \emph{OpenMP} and \emph{SSE/AVX} implementation compiled via
 GCC 4.4 or higher and running on \emph{Intel Core i5 2.5 Ghz} quad
 core CPU presented $15\times$ performance boost comparing to single
 threaded scalar code and $3.76$ nanoseconds for single lattice field
-update. Which gives the ... of peak power. .. This can be traced back
-to ineficient store and load operations ... which can be partially
-mitigated by the reorganising the way in which the grid is stored in
-the memory. 
+update.  Which gives the ... flops. There is no significant increase
+in performance while switching from SSE to AVX instructions.
 
 This gives around $28\times$ advantage to GPU, which is noticeably
 less than promised by many publications, however much higher that
 comes from comparison of $160$ Gflops peak performance of tested i5
-CPU to \emph{GTX 470} \cite{Lee:2010:DGV:1816038.1816021}. 
-
-As soon AVX2 capable CPU devices appear on the
-market we plan to revise our evaluation.
+CPU to \emph{GTX 470} \cite{Lee:2010:DGV:1816038.1816021}.This can be
+traced back to ineficient store and load operations (gather/scatter)
+which can be partially mitigated by the reorganising the way in which
+the grid is stored in the memory. This is the subject of an ongoing
+work.
 
 \bibliography{MC3-abstract}{}
 \bibliographystyle{plain}

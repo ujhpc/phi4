@@ -24,8 +24,6 @@ public:
   {
   
     set_epsilon(1.0);
-    #ifdef _OPENMP
-    #endif
     
   };
   
@@ -151,7 +149,7 @@ public:
 
 };
 
-#if 0
+#ifdef STRIPS
 template<typename F, typename P  > 
 long int 
 make_sweep(F &field, const parameters<Float> &pars, const P &partition ) {
