@@ -26,12 +26,11 @@
 
 {\bf Abstract.}  We present a high-performance implementation of
 Monte-Carlo simulations of 2 and 3 dimensional $\varphi^4$ model
-\cite{PhysRevE.64.066113} both on GPU and on CPU using \emph{OpenMP}
-and \emph{SSE/AVX} SIMD vectorization for \emph{Intel Core i7}. This
-simulation is a part of on ongoing educational project but we took
-this opportunity to compare the two programming models and check the
-claims of over $100\times$ advantage of GPU over generic CPU made
-recently in the literature.
+both on GPU and on CPU using \emph{OpenMP} and \emph{SSE/AVX} SIMD
+vectorization for \emph{Intel Core i7}. This simulation is a part of
+on ongoing educational project but we took this opportunity to compare
+the two programming models and check the claims of over $100\times$
+advantage of GPU over generic CPU made recently in the literature.
 
 The implemented model differs from the ones presented in the
 literature ({\em e.g.} \cite{Preis20094468}) by the extended
@@ -67,27 +66,31 @@ While SSE gives theoretical $4\times$ benefit for single precision
 floating point operations, AVX providing $8\times$, not all scalar
 \emph{x86} instructions, have vector counterparts.  In particular
 direct \emph{XMM} registers gather and scatter and vectorized integer
-operation for full length 256-bit registers are missing. Initially
-planned for AVX standard, these were postponed to AVX2 planned for
-2013. As soon AVX2 capable CPU devices appear on the
-market we plan to revise our evaluation.
+operation for full length AVX 256-bit registers are missing, which makes
+impossible to port random number generator from 128-bit SSE to 256-bit
+AVX. Initially planned for AVX standard, these were postponed to AVX2
+planned for 2013. As soon AVX2 capable CPU devices appear on the market
+we plan to revise our evaluation.
 
 
 Our CPU \emph{OpenMP} and \emph{SSE/AVX} implementation compiled via
 GCC 4.4 or higher and running on \emph{Intel Core i5 2.5 Ghz} quad
 core CPU presented $15\times$ performance boost comparing to single
 threaded scalar code and $3.76$ nanoseconds for single lattice field
-update.  Which gives the ... flops. There is no significant increase
+update.  Which gives the $15$ Gflops. There is no significant increase
 in performance while switching from SSE to AVX instructions.
+
+\newpage
 
 This gives around $28\times$ advantage to GPU, which is noticeably
 less than promised by many publications, however much higher that
 comes from comparison of $160$ Gflops peak performance of tested i5
-CPU to \emph{GTX 470} \cite{Lee:2010:DGV:1816038.1816021}.This can be
-traced back to inefficient store and load operations (gather/scatter)
-which can be partially mitigated by the reorganizing the way in which
-the grid is stored in the memory. This is the subject of an ongoing
-work.
+CPU to \emph{GTX 470}\cite{Lee:2010:DGV:1816038.1816021}. This can be
+traced back to 128-bit only \emph{Tausworthe} random number generator
+implementation and inefficient store and load operations
+(gather/scatter) which can be partially mitigated by the reorganizing
+the way in which the grid is stored in the memory. This is the subject
+of an ongoing work.
 
 \bibliography{MC3-abstract}{}
 \bibliographystyle{plain}
