@@ -60,7 +60,7 @@ because of the lats term in \eqref{eq:ham} this neigborhood is
 extended compared to usual nearest neigbours (see figure~\ref{fig:nn}). 
 \begin{figure}
 \begin{center} 
-\begin{tikzpicture}[scale=0.65]
+\begin{tikzpicture}[scale=0.55]
 %\draw[->,rounded corners=0.2cm,shorten >=2pt] (0,2)-- (1,2);
 %\draw (0,0) grid (4,4);
 \draw[help lines] (-3.0,-3.0) grid (7.0,7.0);    
@@ -133,6 +133,22 @@ overlap. We had to devise a way of partitioning the lattice into
 disjoint sublattices such that points on each partition can be updated
 simultaneously. In two dimensions this required eight partitions (see
 figure~\ref{fig:nn}) and 16 in case of three dimensions.
+
+On the GPU we first divide the whole lattice in blocks $32\times 32$
+points. Then we start a kernel that process every forth block (see
+figure~\ref{fig:nn}).  Each block is assigned to a block of 128
+threads. Each thread is fetching eight lattice points from global to
+shared memory. Then the border points lying outside the block are
+fetched by some of the threads. The neccesity to fetch those points
+greatly increases the complexity of the code. After that each thread
+updates one ppoint form the first partition. Then after
+synchronisation partition two is updated and so on. After processing
+all eight partitions the kernel writes the shared memeory back into
+global and new kernel is started processing next batch of blocks.
+
+Two tricks are used to speed upthe calculations. After loading the
+fields to shared memory 
+
 
 
 \end{document}
