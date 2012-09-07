@@ -51,7 +51,7 @@ that a simple checkerboard decomposition pattern cannot be used and we
 have devised a new grid decomposition scheme.
 \begin{figure}
 \begin{center}
-\begin{tikzpicture}[scale=0.6]
+\begin{tikzpicture}[scale=0.5]
 \begin{scope}[scale=0.66]
 \draw[very thin, gray] (-0.5,-0.5) grid (15.5,15.5);
 
@@ -160,13 +160,38 @@ $40\%$ of $1088$ Gflops peak performance of this device .
 
 % CPU implementation
 In order to provide unbiased CPU vs GPU speed up results we provide
-multithreaded vectorized CPU implementation. It uses OpenMP for parallel
-execution, CPU SSE/AVX and compiler vector extensions for vectorization.
-This implementation  does mimic GPU SIMT execution model.
-So instead vectorizing only parts of the existing generic algorithm it does
-process several field updates within single thread.
+multithreaded vectorized CPU implementation. It uses OpenMP for
+parallel execution, CPU SSE/AVX and compiler vector extensions for
+vectorization.  This implementation does mimic GPU SIMT execution
+model.  The SIMD instructions are used to process four (SSE) or eight
+(AVX) updates in parallel. We use partitions as on CPU but we use only
+one level {\em i.e.} we do not partition the lattice into blocks.
+However not all scalar \emph{x86} instructions have vector
+counterparts.  In particular direct \emph{XMM} registers gather and
+scatter and vectorized integer operation for full length AVX 256-bit
+registers are missing, which makes impossible to port random number
+generator from 128-bit SSE to 256-bit AVX. Initially planned for AVX
+standard, these were postponed to AVX2 planned for 2013. As soon AVX2
+capable CPU devices appear on the market we plan to revise our
+evaluation.
 
 
+Our CPU \emph{OpenMP} and \emph{SSE/AVX} implementation compiled via
+GCC 4.4 or higher and running on \emph{Intel Core i5 2.5 Ghz} quad
+core CPU presented $15\times$ performance boost comparing to single
+threaded scalar code and $3.76$ nanoseconds for single lattice field
+update.  Which gives the $15$ Gflops. There is no significant increase
+in performance while switching from SSE to AVX instructions.
+
+This gives around $28\times$ advantage to GPU, which is noticeably
+less than promised by many publications, however much higher that
+comes from comparison of $160$ Gflops peak performance of tested i5
+CPU to \emph{GTX 470}\cite{Lee:2010:DGV:1816038.1816021}. This can be
+traced back to 128-bit only \emph{Tausworthe} random number generator
+implementation and inefficient store and load operations
+(gather/scatter) which can be partially mitigated by the reorganizing
+the way in which the grid is stored in the memory. This is the subject
+of an ongoing work.
 
 \begin{thebibliography}{9}
 \bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus Books Publishing (1998).
