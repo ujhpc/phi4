@@ -57,8 +57,8 @@ P=\max\left\{1,\exp(-\Delta H)\right\}.
 \end{equation}
 The crucial feature of this algorithm is that the $\Delta H$ depends
 only on the immediate neighborhood of the point $\vj$. In our case
-because of the lats term in \eqref{eq:ham} this neighborhood is
-extended compared to usual nearest neighbors (see figure~\ref{fig:nn}).
+because of the last term in \eqref{eq:ham} this neighborhood is
+extended compared to usual nearest neighbors (see figure~\ref{fig:nn} (Right)).
 
 \begin{figure}
 \begin{center}
@@ -136,7 +136,7 @@ node[lightgray,scale=3] at (5.5cm,5.5) {$4$} ;
 
 \end{tikzpicture}
 \end{center}
-\caption{\label{fig:nn}The neighborhood used to update the center point.}
+\caption{\label{fig:nn} (Left) The partition of the lattice  into blocks. The blocks with same number are processed in parallel. The gray vertices are the border.  (Right) Partitioning of the blocks into disjoint sublattices. Red points are proceses in parallel.}
 \end{figure}
 
 Two points of the lattice can be updated in parallel provided one
@@ -150,7 +150,6 @@ can be updated simultaneously.
 % GPU implementation
 On GPU we adopt the hierarchical scheme from
 ref.~\cite{weigel} suitably modified to account for bigger neighborhood.
-
 We first divide the whole lattice in blocks $32\times 32$
 points. Then we start a kernel that process every forth block (see
 figure~\ref{fig:nn}).  Each block is assigned to a block of 128
@@ -182,7 +181,7 @@ process several field updates within single thread.
 \section{Conclusions}
 
 \begin{thebibliography}{9}
-\bibitem{parisi} G.~Parisi ``Statistical Field Theory''
+\bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus Books Publishing (1998).
 \bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
 \end{thebibliography}
 \end{document}
