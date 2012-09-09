@@ -58,10 +58,10 @@ have devised a new grid decomposition scheme.
 \foreach \x in {0,8}
 \foreach \y in {0,8}
 \draw[xshift=\x cm, yshift = \y cm]
-node[lightgray,scale=3] at (1.5cm,1.5) {$1$}
-node[lightgray,scale=3] at (1.5cm,5.5) {$2$}
-node[lightgray,scale=3] at (5.5cm,1.5) {$3$}
-node[lightgray,scale=3] at (5.5cm,5.5) {$4$} ;
+node[darkgray,scale=3] at (1.5cm,1.5) {$1$}
+node[darkgray,scale=3] at (5.5cm,1.5) {$2$}
+node[darkgray,scale=3] at (1.5cm,5.5) {$3$}
+node[darkgray,scale=3] at (5.5cm,5.5) {$4$} ;
 
 \foreach \x in {0,...,15}
  \foreach \y in {0,...,15} {
@@ -98,28 +98,28 @@ node[lightgray,scale=3] at (5.5cm,5.5) {$4$} ;
 % lattice points
 \foreach \x in {-2,-1,0,1,2,3,4,5,6}
   \foreach \y in {-2,-1,0,1,2,3,4,5,6}
-    \fill (\x,\y) + (0.0,0.0) circle (0.16);
+    \draw (\x,\y) + (0.0,0.0) circle (0.16);
 
 % neighborhood
 \foreach \p in {(-2.5,4.0),(-2.5,-0.0),(1.5,4.0),(1.5,-0.0)}
-  \draw[rounded corners=0.1cm,shorten >=2pt]
+  \path[draw=black,fill, fill opacity=0.25,rounded corners=0.1cm,shorten >=2pt]
     \p-- ++(0,-0.5)-- ++(1,0)-- ++(0,-0.5)-- ++(0,-0.5)-- ++(1,0)--
     ++(0,-1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)--
     ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,-1)--
     ++(-1,0)-- ++(0,-1)-- ++(-1,0)-- ++(0,-0.6);
 
 % main center neighborhood
-\draw[line width=0.1cm,color=red,cap=round,join=round]
+\path[draw=black,fill,fill opacity=0.5,rounded corners=0.1cm,shorten >=2pt,line width=0.75mm,cap=round,join=round]
   (-0.5,2.0)-- ++(0,-0.5)-- ++(1,0)-- ++(0,-0.5)-- ++(0,-0.5)-- ++(1,0)--
   ++(0,-1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)--
   ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,-1)--
   ++(-1,0)-- ++(0,-1)-- ++(-1,0)-- ++(0,-0.6);
 
-\fill[red] (2,2) circle(0.16);
-\fill[red] (0,4) circle(0.16);
-\fill[red] (0,0) circle(0.16);
-\fill[red] (4,0) circle(0.16);
-\fill[red] (4,4) circle(0.16);
+\fill[black] (2,2) circle(0.16);
+\fill[black] (0,4) circle(0.16);
+\fill[black] (0,0) circle(0.16);
+\fill[black] (4,0) circle(0.16);
+\fill[black] (4,4) circle(0.16);
 
 \end{scope}
 
