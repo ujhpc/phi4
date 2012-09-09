@@ -33,20 +33,20 @@ $\vphi_i$.
 The actual generation is done by the mean of the Metropolis
 algorithm. This amounts to sequentially updating all the points of
 the lattice. The crucial feature of this algorithm is that the update
-is local {{\em i.e.} The new value of the field in a given point
-  depends only on the values of fields in the immediate neighborhood of
-  the updated point. In our case this neighborhood is extended
-  compared to usual nearest neighbors (see figure~\ref{fig:nn}
-  (Right)). The update is random and requires a good source of
-  pseudo-random numbers. We use the  Tausworthe RNG\cite{howes_thomas07}. 
+is local {\em i.e.} The new value of the field in a given point
+depends only on the values of fields in the immediate neighborhood of
+the updated point. In our case this neighborhood is extended
+compared to usual nearest neighbors (see figure~\ref{fig:nn}
+(Right)). The update is random and requires a good source of
+pseudo-random numbers. We use the  Tausworthe RNG\cite{howes_thomas07}.
 
 
 
-  While model is inherently parallelizable, grid points that lie in
-  the same neighborhood cannot be updated together. Taking into
-  account a larger neighborhood means that a simple checkerboard
-  decomposition pattern cannot be used and we have devised a new grid
-  decomposition scheme.
+While model is inherently parallelizable, grid points that lie in
+the same neighborhood cannot be updated together. Taking into
+account a larger neighborhood means that a simple checkerboard
+decomposition pattern cannot be used and we have devised a new grid
+decomposition scheme.
 \begin{figure}
 \begin{center}
 \begin{tikzpicture}[scale=0.5]
