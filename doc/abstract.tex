@@ -22,7 +22,6 @@ ul. Reymonta 4, 30-059 Krakow, Poland }
 \maketitle
 
 
-
 This contribution is concerned with an efficient implementation of the
 Monte-Carlo simulations of the $\varphi^4$ model as defined in ref.~\cite{parisi}. The
 problem is defined as follows: having a vector field $\vphi$ defined
@@ -91,7 +90,8 @@ node[darkgray,scale=3] at (5.5cm,5.5) {$4$} ;
 
 \end{scope}
 
-\begin{scope}[xshift=13.5cm,yshift=3cm]
+\begin{scope}[xshift=14.5cm,yshift=3cm]
+\clip (-3,-3) rectangle (7,7);
 
 \draw[help lines] (-3.0,-3.0) grid (7.0,7.0);
 
@@ -101,34 +101,50 @@ node[darkgray,scale=3] at (5.5cm,5.5) {$4$} ;
     \draw (\x,\y) + (0.0,0.0) circle (0.16);
 
 % neighborhood
-\foreach \p in {(-2.5,4.0),(-2.5,-0.0),(1.5,4.0),(1.5,-0.0)}
-  \path[draw=black,fill, fill opacity=0.25,rounded corners=0.1cm,shorten >=2pt]
+\foreach \p in {(-2.5,4.0),(1.5,4.0),
+                (-2.5,0.0),(1.5,0.0),
+                (-4.5,2.0),(3.5,2.0),
+                (-4.5,6.0),(-0.5,6.0),(3.5,6.0),
+                (-4.5,-2.0),(-0.5,-2.0),(3.5,-2.0)
+            }
+  \path[draw=black,fill, fill opacity=0.20,rounded corners=0.1cm,shorten >=2pt]
     \p-- ++(0,-0.5)-- ++(1,0)-- ++(0,-0.5)-- ++(0,-0.5)-- ++(1,0)--
     ++(0,-1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)--
     ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,-1)--
     ++(-1,0)-- ++(0,-1)-- ++(-1,0)-- ++(0,-0.6);
 
 % main center neighborhood
-\path[draw=black,fill,fill opacity=0.5,rounded corners=0.1cm,shorten >=2pt,line width=0.75mm,cap=round,join=round]
+
+\path[draw=black,fill,fill opacity=0.4,rounded corners=0.1cm,shorten >=2pt,line width=0.75mm,cap=round,join=round]
   (-0.5,2.0)-- ++(0,-0.5)-- ++(1,0)-- ++(0,-0.5)-- ++(0,-0.5)-- ++(1,0)--
   ++(0,-1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)--
   ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,-1)--
   ++(-1,0)-- ++(0,-1)-- ++(-1,0)-- ++(0,-0.6);
 
+\fill[black] (-2,2) circle(0.16);
 \fill[black] (2,2) circle(0.16);
+\fill[black] (6,2) circle(0.16);
 \fill[black] (0,4) circle(0.16);
 \fill[black] (0,0) circle(0.16);
 \fill[black] (4,0) circle(0.16);
 \fill[black] (4,4) circle(0.16);
+\fill[black] (-2,-2) circle(0.16);
+\fill[black] ( 2,-2) circle(0.16);
+\fill[black] ( 6,-2) circle(0.16);
+\fill[black] (-2,6) circle(0.16);
+\fill[black] ( 2,6) circle(0.16);
+\fill[black] ( 6,6) circle(0.16);
+
 
 \end{scope}
 
 \end{tikzpicture}
 \end{center}
 \caption{\label{fig:nn} (Left) The partition of the lattice into
-  blocks. The blocks with same number are processed in parallel.
-  (Right) Partitioning of the blocks into disjoint sublattices. Black
-  points are proceses in parallel.}
+  blocks. The blocks with same number are processed in parallel by
+  different thread blocks.  (Right) Partitioning of the blocks into
+  disjoint sublattices. Black points are proceses in parallel by
+  different threads of the same thread block.}
 \end{figure}
 
 
