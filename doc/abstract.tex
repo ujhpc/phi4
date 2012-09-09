@@ -11,6 +11,12 @@
 \newcommand{\vj}{{\vec{j}}}
 \newcommand{\vmu}{\vec{\mu}}
 
+\def\neighborhood{--
+  ++(0,-0.5)-- ++(1,0)-- ++(0,-0.5)-- ++(0,-0.5)-- ++(1,0)--
+  ++(0,-1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)--
+  ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,-1)--
+  ++(-1,0)-- ++(0,-1)-- ++(-1,0)-- ++(0,-0.6)}
+
 \title{ GPU-accelerated and CPU SIMD Optimized \\ Monte Carlo Simulation of $\phi^4$ Model}
 \author{Piotr Bialas \and Jakub Kowal \and Adam Strzelecki}
 \institute{Faculty of Physics, Astronomy and Applied Computer Science\\
@@ -106,19 +112,11 @@ node[darkgray,scale=3] at (5.5cm,5.5) {$4$} ;
                 (-4.5,6.0),(-0.5,6.0),(3.5,6.0),
                 (-4.5,-2.0),(-0.5,-2.0),(3.5,-2.0)
             }
-  \path[draw=black,fill, fill opacity=0.20,rounded corners=0.1cm,shorten >=2pt]
-    \p-- ++(0,-0.5)-- ++(1,0)-- ++(0,-0.5)-- ++(0,-0.5)-- ++(1,0)--
-    ++(0,-1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)--
-    ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,-1)--
-    ++(-1,0)-- ++(0,-1)-- ++(-1,0)-- ++(0,-0.6);
+  \path[draw=black,fill, fill opacity=0.20,rounded corners=0.1cm,shorten >=2pt] \p \neighborhood;
 
 % main center neighborhood
 
-\path[draw=black,fill,fill opacity=0.4,rounded corners=0.1cm,shorten >=2pt,line width=0.75mm,cap=round,join=round]
-  (-0.5,2.0)-- ++(0,-0.5)-- ++(1,0)-- ++(0,-0.5)-- ++(0,-0.5)-- ++(1,0)--
-  ++(0,-1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)--
-  ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,-1)--
-  ++(-1,0)-- ++(0,-1)-- ++(-1,0)-- ++(0,-0.6);
+\path[draw=black,fill,fill opacity=0.4,rounded corners=0.1cm,shorten >=2pt,line width=0.75mm,cap=round,join=round] (-0.5,2.0) \neighborhood;
 
 \fill[black] (-2,2) circle(0.16);
 \fill[black] (2,2) circle(0.16);
