@@ -31,10 +31,10 @@ $\exp(-H(\vphi))$ where $H(\vphi)$ is some function of all the fields
 $\vphi_i$.
 
 The actual generation is done by the mean of the Metropolis
-algorithm. This amounts to sequantially updating all the points off
+algorithm. This amounts to sequentially updating all the points of
 the lattice. The crucial feature of this algorithm is that the update
 is local {{\em i.e.} The new value of the field in a given point
-  depends only on the values of fields in the imediate neighborhood of
+  depends only on the values of fields in the immediate neighborhood of
   the updated point. In our case this neighborhood is extended
   compared to usual nearest neighbors (see figure~\ref{fig:nn}
   (Right)). The update is random and requires a good source of
@@ -173,7 +173,7 @@ model.  The SIMD instructions are used to process four (SSE) or eight
 one level {\em i.e.} we do not partition the lattice into blocks.
 However not all scalar \emph{x86} instructions have vector
 counterparts.  In particular direct \emph{XMM} registers gather and
-scatter and vectorized integer operation for full length AVX 256-bit
+scatter and vectorized integer operations for full length AVX 256-bit
 registers are missing, which makes impossible to port random number
 generator from 128-bit SSE to 256-bit AVX. Initially planned for AVX
 standard, these were postponed to AVX2 planned for 2013. As soon AVX2
