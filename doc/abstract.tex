@@ -5,6 +5,7 @@
 \usetikzlibrary{positioning}
 \usetikzlibrary{calc}
 \usetikzlibrary{arrows,shapes,backgrounds}
+\usetikzlibrary{shadows}
 
 \newcommand{\vphi}{\vec{\varphi}}
 \newcommand{\vi}{{\vec{i}}}
@@ -59,39 +60,35 @@ decomposition scheme.
 \begin{scope}[scale=0.66]
 \draw[very thin, gray] (-0.5,-0.5) grid (15.5,15.5);
 
-\foreach \x in {0,8}
-\foreach \y in {0,8}
-\draw[xshift=\x cm, yshift = \y cm]
-node[darkgray,scale=3] at (1.5cm,1.5) {$1$}
-node[darkgray,scale=3] at (5.5cm,1.5) {$2$}
-node[darkgray,scale=3] at (1.5cm,5.5) {$3$}
-node[darkgray,scale=3] at (5.5cm,5.5) {$4$} ;
+\foreach \x in {0,4,...,12}
+  \foreach \y in {0,4,...,12}
+    \draw[black,xshift=\x cm, yshift=\y cm, rounded corners = 2pt] (-.4,-0.4)
+      rectangle (3.4cm,3.4cm);
 
 \foreach \x in {0,...,15}
- \foreach \y in {0,...,15} {
-  \fill[white] (\x, \y) circle(0.25);
-  \draw[black] (\x, \y) circle(0.25);
-}
+  \foreach \y in {0,...,15}
+    \path[draw=black,fill=white] (\x, \y) circle(0.25);
+
+\foreach \x in {0,8}
+  \foreach \y in {0,8}
+    \draw[xshift=\x cm, yshift=\y cm]
+      node[black,fill opacity=0.3,scale=4,font=\bfseries\sffamily] at (1.5cm,1.5) {1}
+      node[black,fill opacity=0.3,scale=4,font=\bfseries\sffamily] at (5.5cm,1.5) {2}
+      node[black,fill opacity=0.3,scale=4,font=\bfseries\sffamily] at (1.5cm,5.5) {3}
+      node[black,fill opacity=0.3,scale=4,font=\bfseries\sffamily] at (5.5cm,5.5) {4} ;
 
 \foreach \x in {4,...,7}
   \foreach \y in {4,...,7}
     \fill[black] (\x, \y) circle(0.25);
 
 \foreach \x in {4,...,7}
-  \foreach \y in {2,3,8,9}
-    \fill[gray] (\x, \y) circle(0.25);
-
-\foreach \x in {2,3,8,9}
-  \foreach \y in {4,...,7}
-    \fill[gray] (\x, \y) circle(0.25);
+  \foreach \y in {2,3,8,9} {
+    \fill[gray] (\x,\y) circle(0.25);
+    \fill[gray] (\y,\x) circle(0.25);
+  }
 
 \foreach \p in {(3,3),(3,8),(8,3),(8,8)}
   \fill[gray] \p circle(0.25);
-
-\foreach \x in {0,4,...,12}
-  \foreach \y in {0,4,...,12}
-    \draw[black,xshift=\x cm, yshift=\y cm, rounded corners = 2pt] (-.4,-0.4)
-      rectangle (3.4cm,3.4cm);
 
 \end{scope}
 
@@ -110,28 +107,19 @@ node[darkgray,scale=3] at (5.5cm,5.5) {$4$} ;
                 (-2.5,0.0),(1.5,0.0),
                 (-4.5,2.0),(3.5,2.0),
                 (-4.5,6.0),(-0.5,6.0),(3.5,6.0),
-                (-4.5,-2.0),(-0.5,-2.0),(3.5,-2.0)
-            }
-  \path[draw=black,fill, fill opacity=0.20,rounded corners=0.1cm,shorten >=2pt] \p \neighborhood;
+                (-4.5,-2.0),(-0.5,-2.0),(3.5,-2.0)}
+  \path[draw=black,fill,fill opacity=0.2,rounded corners=0.1cm,shorten >=2pt] \p \neighborhood;
 
 % main center neighborhood
 
 \path[draw=black,fill,fill opacity=0.4,rounded corners=0.1cm,shorten >=2pt,line width=0.75mm,cap=round,join=round] (-0.5,2.0) \neighborhood;
 
-\fill[black] (-2,2) circle(0.16);
-\fill[black] (2,2) circle(0.16);
-\fill[black] (6,2) circle(0.16);
-\fill[black] (0,4) circle(0.16);
-\fill[black] (0,0) circle(0.16);
-\fill[black] (4,0) circle(0.16);
-\fill[black] (4,4) circle(0.16);
-\fill[black] (-2,-2) circle(0.16);
-\fill[black] ( 2,-2) circle(0.16);
-\fill[black] ( 6,-2) circle(0.16);
-\fill[black] (-2,6) circle(0.16);
-\fill[black] ( 2,6) circle(0.16);
-\fill[black] ( 6,6) circle(0.16);
-
+\foreach \p in {
+  (-2, 2),( 2, 2),( 6, 2),
+  ( 0, 4),( 0, 0),( 4, 0),( 4, 4),
+  (-2,-2),( 2,-2),( 6,-2),
+  (-2, 6),( 2, 6),( 6, 6)}
+  \fill[black] \p circle(0.16);
 
 \end{scope}
 
@@ -159,7 +147,7 @@ and new kernel is started processing next batch of blocks.
 Altogether in this
 way we managed to achieve $0.13$ nanoseconds for single lattice field
 update on \emph{NVIDIA GTX 470}, reaching around $430$ Gflops that is
-$40\%$ of $1088$ Gflops peak performance of this device .
+$40\%$ of $1088$ Gflops peak performance of this device.
 
 % CPU implementation
 In order to provide unbiased CPU vs GPU speed up results we provide
