@@ -23,31 +23,30 @@ ul. Reymonta 4, 30-059 Krakow, Poland }
 
 
 This contribution is concerned with an efficient implementation of the
-Monte-Carlo simulations of the $\varphi^4$ model as defined in ref.~\cite{parisi}. The
+Monte-Carlo simulations of the $\varphi^4$ model\cite{parisi}. The
 problem is defined as follows: having a vector field $\vphi$ defined
 on a regular rectangular two or three dimensional grid we want to
 generate the field configurations with probability proportional to
-$\exp(-H(\vphi))$
-where $H(\vphi)$ is some function of all the fields $\vphi_i$.  
+$\exp(-H(\vphi))$ where $H(\vphi)$ is some function of all the fields
+$\vphi_i$.
 
 The actual generation is done by the mean of the Metropolis
-algorithm. For a given lattice point $\vj$ we produce a new field
-$\widetilde{\vphi}_\vj=\vphi_\vj+\vec{\epsilon}$ where $\epsilon$ is
-some random vector. Then we calculate the difference $\Delta H =
-H(\widetilde{\vphi})-H(\vphi)$.  We then replace $\vphi_\vj$ with
-$\widetilde{\vphi}_\vj$ with the probability
-$P=\max\left\{1,\exp(-\Delta H)\right\}$.  The crucial feature of this
-algorithm is that the $\Delta H$ depends only on the immediate
-neighborhood of the point $\vj$. In our case this neighborhood is
-extended compared to usual nearest neighbors (see figure~\ref{fig:nn}
-(Right)).
+algorithm. This amounts to sequantially updating all the points off
+the lattice. The crucial feature of this algorithm is that the update
+is local {{\em i.e.} The new value of the field in a given point
+  depends only on the values of fields in the imediate neighborhood of
+  the updated point. In our case this neighborhood is extended
+  compared to usual nearest neighbors (see figure~\ref{fig:nn}
+  (Right)). The update is random and requires a good source of
+  pseudo-random numbers. We use the  Tausworthe RNG\cite{howes_thomas07}. 
 
-While model is inherently parallelizable, grid points that
-lie in the same neighborhood cannot be updated together. That proved
-to be a problem especially on the GPU where much more threads access
-the grid in parallel.  Taking into account a larger neighborhood means
-that a simple checkerboard decomposition pattern cannot be used and we
-have devised a new grid decomposition scheme.
+
+
+  While model is inherently parallelizable, grid points that lie in
+  the same neighborhood cannot be updated together. Taking into
+  account a larger neighborhood means that a simple checkerboard
+  decomposition pattern cannot be used and we have devised a new grid
+  decomposition scheme.
 \begin{figure}
 \begin{center}
 \begin{tikzpicture}[scale=0.5]
@@ -143,7 +142,7 @@ node[darkgray,scale=3] at (5.5cm,5.5) {$4$} ;
 \caption{\label{fig:nn} (Left) The partition of the lattice into
   blocks. The blocks with same number are processed in parallel by
   different thread blocks.  (Right) Partitioning of the blocks into
-  disjoint sublattices. Black points are proceses in parallel by
+  disjoint sublattices.  Thick black line denotes the neighborhood  used in updating the center point. Black points are processes in parallel by
   different threads of the same thread block.}
 \end{figure}
 
@@ -153,26 +152,16 @@ On GPU we adopt the hierarchical scheme from ref.~\cite{weigel}
 suitably modified to account for bigger neighborhood.  We first divide
 the whole lattice in blocks of $32\times 32$ points. Then we start a
 kernel that process every forth block (see figure~\ref{fig:nn}).  Each
-block is assigned to a block of 128 threads. Each thread is fetching
-eight lattice points from global to shared memory (black points). Then
-the border points lying outside the block are fetched by some of the
-threads (gray points).  After that each thread updates
+block is assigned to a block of 128 threads. First we fetch the values of the fields from global to shared memory (including border points).  
+After that each thread updates
 one point from the first partition. Then after synchronization, next
 partition is updated and so on. After processing all eight(2D) or 16
 (3D) partitions the kernel writes the shared memory back into global
-and new kernel is started processing next batch of blocks.  Two
-``tricks'' are used to speed up the calculations. First we use so
-called multi-hit Metropolis algorithm, where each lattice point is
-updated several times (four to eight)) one after another. This is more
-efficient as some of the precalculated values are already in
-registers. Secondly we do the same on the level of blocks, updating
-every block many times in a row (typically 25-50). 
-
+and new kernel is started processing next batch of blocks. 
 Altogether in this
 way we managed to achieve $0.13$ nanoseconds for single lattice field
 update on \emph{NVIDIA GTX 470}, reaching around $430$ Gflops that is
 $40\%$ of $1088$ Gflops peak performance of this device .
-
 
 % CPU implementation
 In order to provide unbiased CPU vs GPU speed up results we provide
@@ -196,21 +185,26 @@ Our CPU \emph{OpenMP} and \emph{SSE/AVX} implementation compiled via
 GCC 4.4 or higher and running on \emph{Intel Core i5 2.5 Ghz} quad
 core CPU presented $15\times$ performance boost comparing to single
 threaded scalar code and $3.76$ nanoseconds for single lattice field
-update.  Which gives the $15$ Gflops. There is no significant increase
-in performance while switching from SSE to AVX instructions.
+update.  Which gives the $15$ Gflops that is $\sim10\%$ of the  $160$
+Gflops peak performance of tested i5 CPU. There is no significant
+increase in performance while switching from SSE to AVX instructions.
 
 This gives around $28\times$ advantage to GPU, which is noticeably
 less than promised by many publications, however much higher that
-comes from comparison of $160$ Gflops peak performance of tested i5
-CPU to \emph{GTX 470}\cite{Lee:2010:DGV:1816038.1816021}. This can be
+comes from comparison of  tested i5
+CPU to \emph{GTX 470}. This can be
 traced back to 128-bit only \emph{Tausworthe} random number generator
-implementation and inefficient store and load operations
-(gather/scatter) which can be partially mitigated by the reorganizing
-the way in which the grid is stored in the memory. This is the subject
-of an ongoing work.
+implementation and inefficient vector store and load operations
+(gather/scatter).
 
 \begin{thebibliography}{9}
 \bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus Books Publishing (1998).
 \bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
+\bibitem{howes_thomas07}
+Lee Howes and David Thomas.
+``{\em Efficient random number generation and application using {CUDA}.}''
+In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
+  Wesley, August 2007.
 \end{thebibliography}
+
 \end{document}
