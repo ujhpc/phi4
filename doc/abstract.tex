@@ -38,14 +38,14 @@ $\exp(-H(\vphi))$ where $H(\vphi)$ is some function of all the fields
 $\vphi_i$.
 
 The actual generation is done by the mean of the Metropolis
-algorithm. This amounts to sequentially updating all the points of
-the lattice. The crucial feature of this algorithm is that the update
-is local {\em i.e.} The new value of the field in a given point
-depends only on the values of fields in the immediate neighborhood of
-the updated point. In our case this neighborhood is extended
-compared to usual nearest neighbors (see figure~\ref{fig:nn}
-(Right)). The update is random and requires a good source of
-pseudo-random numbers. We use the  Tausworthe RNG\cite{howes_thomas07}.
+algorithm. This amounts to sequentially updating all the points of the
+lattice. The crucial feature of this algorithm is that the update is
+local {\em i.e.} the new value of the field in a given point depends
+only on the values of fields in the immediate neighborhood of the
+updated point. In our case this neighborhood is extended compared to
+usual nearest neighbors (see figure~\ref{fig:nn} (Right)). The update
+is random and requires a good source of pseudo-random numbers. We use
+the Tausworthe RNG\cite{howes_thomas07}.
 
 
 
@@ -152,10 +152,10 @@ $40\%$ of $1088$ Gflops peak performance of this device.
 % CPU implementation
 In order to provide unbiased CPU vs GPU speed up results we provide
 multithreaded vectorized CPU implementation. It uses OpenMP for
-parallel execution, CPU SSE/AVX and compiler vector extensions for
+parallel execution,  SSE/AVX and compiler vector extensions for
 vectorization.  This implementation does mimic GPU SIMT execution
 model.  The SIMD instructions are used to process four (SSE) or eight
-(AVX) updates in parallel. We use partitions as on CPU but we use only
+(AVX) updates in parallel. We use partitions as on GPU but we use only
 one level {\em i.e.} we do not partition the lattice into blocks.
 However not all scalar \emph{x86} instructions have vector
 counterparts.  In particular direct \emph{XMM} registers gather and
