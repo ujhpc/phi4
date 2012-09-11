@@ -1,3 +1,4 @@
+doc/a0header.ps
 doc/*.pdf
 !doc/*-logo.pdf
 doc/*.out
