@@ -1,0 +1,273 @@
+% tikzpostermacros.tex, version 1.0
+% this is the required file for tikzposter.tex 
+% Original template created by Elena Botoeva [botoeva@inf.unibz.it], June 2012
+% 
+% This file is distributed under the Creative Commons Attribution-NonCommercial 2.0
+% Generic (CC BY-NC 2.0) license
+% http://creativecommons.org/licenses/by-nc/2.0/ 
+
+%%%%% -------- Parameters that change the layout of the poster --------- %%%%%
+%% margin for the geometry package
+\newcommand{\margin}{4}
+
+%% the space between the blocks
+\newcommand{\blockspacing}{2}
+
+%% the height of the title stripe in block nodes, decrease it to save space
+\newcommand{\blocktitlehight}{3}
+
+%% the number of columns in the poster
+\newcommand{\colnumber}{2}
+
+%% the space between two groups of authors from different institution
+\newcommand{\authorshift}{10}
+
+
+%%%%% -------- maketitle --------- %%%%%
+\makeatletter
+\def\maketitle{%
+  \vbox{%
+    \hsize\textwidth \linewidth\hsize 
+    \centering
+    \normalfont
+    {\LARGE \bf\@title\par} \vskip 1cm plus 1fil minus 0.25cm
+    {\def\and{\unskip\enspace{\rm and}\enspace}%
+      \def\And{\end{tabular}\hss \egroup \hskip \authorshift cm plus 2fil 
+      \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c}\large\bf}%
+      \def\AND{\end{tabular}\hss\egroup \hfil\hfil\egroup
+      \vskip 0.5cm plus 1fil minus 0.317cm
+      % hg: Changed Large to normalsize on next line
+      \hbox to \linewidth\bgroup\normalsize \hfil\hfil
+      \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c}\large\bf}
+      \hbox to \linewidth\bgroup\normalsize \hfil\hfil
+      \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c}\large\bf\@author 
+      \end{tabular}\hss\egroup
+      \hfil\hfil\egroup}
+  }
+}
+\makeatother
+
+
+
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,decorations,shadows}
+\usetikzlibrary{calc}
+\usetikzlibrary{fadings}
+\usepgflibrary{arrows}
+
+\setlength{\unitlength}{1cm}%
+
+
+
+%%%%% -------- Colors --------- %%%%%
+\definecolor{colorone}{HTML}{116699}
+\definecolor{colortwo}{HTML}{cccccc}
+\definecolor{colorthree}{HTML}{991111}
+
+
+
+%%%%% -------- the background picture --------- %%%%%
+\usepackage{eso-pic}
+\newcommand\BackgroundPicture{
+  \put(-14,0){
+    \parbox[b][1.05\paperheight]{1.05\paperwidth}{%
+      \centering %
+      \begin{tikzpicture} %
+        \clip (0,0) rectangle ($(\paperwidth,\paperheight)+(10,10)$);
+
+        \draw[draw=none, bottom color=colorone!70, top color=colorone!70!black]%
+        (0,0) rectangle ($(\paperwidth,\paperheight)+(10,10)$);
+
+        \foreach \a in {10,20,...,80}{
+          \draw[colorone, line width=0.1cm] (0,0) -- ($(0,0)!1!\a:(120+rnd*40,0)$);
+        }
+
+        \foreach \i in {1,2,...,35}{
+          \begin{scope}[shift={($(rand*60,rand*70)$)}]
+            \draw[white!40!colorone, line width=0.1cm] (60,40) circle (4);
+          \end{scope}
+        }        
+      \end{tikzpicture}
+    }}
+}
+
+
+\tikzset{
+  frame/.style={rounded corners=30, line width=0.4cm, inner sep=1cm},
+  innerframe/.style={rounded corners=15, line width=0.2cm, inner sep=0.6cm},
+}
+\usepackage{ifthen}
+
+
+
+%% here the coordinates used for the layout of the poster are defined
+\newcommand{\initializesizeandshifts}{  
+  %% these coordinates depend on the size of the document
+  \coordinate (southwest) at ($(\margin,\margin)+(0.001,0.001)-0.5*(\paperwidth,0)-0.5*(0,\paperheight)$); %
+  \coordinate (northeast) at ($(0,0)-(southwest)$);
+  
+  %% shifts for the blocks
+  %% if colnumber = 2 => xshift=(\paperwidth-2*\margin -\blockspacing)/colnumber/2 +
+  %%                                                \blockspacing/2
+  %% if colnumber = 3 => xshift=(\paperwidth-2*\marging -2*\blockspacing)/colnumber +
+  %%                                                \blockspacing   
+  \ifthenelse{\equal{\colnumber}{2}}{\coordinate (xshift) at 
+    ($0.5/\colnumber*(\paperwidth,0) - 1/\colnumber*(\margin,0) -
+    0.5/\colnumber*(\blockspacing,0) + 0.5*(\blockspacing,0)$); }{}
+  \ifthenelse{\equal{\colnumber}{3}}{\coordinate (xshift) at 
+    ($1/\colnumber*(\paperwidth,0) - 2/\colnumber*(\margin,0) -
+    2/\colnumber*(\blockspacing,0) + (\blockspacing,0) $); }{}
+  %% or define your own: 
+  % \coordinate (xshift) at (20,0);
+  
+  %% yshift = \blocktitlehight + \blockspacing ( we add \blocktitlehight because
+  %% the anchor of each block is the north point of the white part)
+  \coordinate (yshift) at ($(0,\blocktitlehight)+(0,\blockspacing)$);
+  %% or define your own: 
+  % \coordinate (yshift) at (0,4);
+  
+  
+  %% the boundaries of the content
+  \clip (southwest) rectangle (northeast);
+  \draw[draw=none] (southwest) rectangle (northeast);
+}
+
+
+
+
+%%%%% ---------- Macros for blocks ---------- %%%%%
+% #1 - where
+% #2 - width
+\newcommand{\titleblock}[2][($0.5*(0,\paperheight)-(0,\margin)$)]{%
+\node[draw,frame,color=colortwo,fill=white,anchor=north,text=black] (title) at #1
+   {
+    \begin{minipage}{#2 cm}
+      \maketitle
+    \end{minipage}
+  };
+}
+
+
+
+
+%% Block node
+% #1 - where
+% #2 - title
+% #3 - text
+\newcommand{\blocknode}[3][($(box.south)-(yshift)$)]{%
+  %% if colnumber = 2 => halfwidth = (\paperwidth-2*\margin 
+  %%                                                          -\blockspacing)/colnumber/2 - 0.15  
+  %% if colnumber = 3 => halfwidth = (\paperwidth-2*\margin
+  %%                                                          -2*\blockspacing)/colnumber/2 - 0.15 
+  %% width of the minipage = halfwidth*2 - 2 
+  %% 
+  %% 
+  \ifthenelse{\equal{\colnumber}{2}}{\coordinate (halfwidth) at
+    ($0.5/\colnumber*(\paperwidth,0) - 1/\colnumber*(\margin,0) -
+    0.5/\colnumber*(\blockspacing,0) - (0.15,0)$);}{}
+  \ifthenelse{\equal{\colnumber}{3}}{\coordinate (halfwidth) at
+    ($0.5/\colnumber*(\paperwidth,0) - 1/\colnumber*(\margin,0) -
+    1/\colnumber*(\blockspacing,0) - (0.15,0)$); }{}
+  
+
+  %% the gray part on the top
+  \draw[color=colortwo, fill,frame] ($#1 - (halfwidth) - (0,2.6)$) rectangle ($#1
+  + (halfwidth) + (0,\blocktitlehight)$) ; 
+
+
+  %% the title of the block
+  %%%%% replace #1 by (box.north) and move this code to the end of the macro if
+  %%%%% you get errors or erroneous behavior 
+  \node[text=colorone,anchor=north west] at ($#1 - (halfwidth) + (0,\blocktitlehight)
+  +(0.5,-0.8)$) {\bf\LARGE #2};  
+
+
+  %% the content of the block
+  \draw let \p1=($2*(halfwidth)-(2,0)$) in node[draw,color=colortwo, fill=white, frame,
+  anchor=north,text=black] (box) at #1 {
+    \begin{minipage}{\x1}%30.45cm}
+      #3
+    \end{minipage}};
+}
+
+
+
+%% Block node with varying width
+% #1 - where
+% #2 - width
+% #3 - title
+% #4 - text
+\newcommand{\blocknodew}[4][($(box.south)-(yshift)$)]{%
+  %% halfwidth = (#2)/2 - 0.15
+  %% width of the minipage = halfwidth*2 - 2
+  %% 
+  %% 
+  \coordinate (halfwidth) at ($0.5*(#2,0) - (0.15,0)$);   
+ 
+
+  %% the gray part on the top
+  \draw[color=colortwo, fill,frame] ($#1 - (halfwidth) - (0,2.6)$) rectangle ($#1
+  + (halfwidth) + (0,\blocktitlehight)$) ; 
+
+
+  %% the title of the block
+  %%%%% replace #1 by (box.north) and move this code to the end of the macro if
+  %%%%% you get errors or erroneous behavior 
+  \node[text=colorone,anchor=north west] at ($#1 - (halfwidth) + (0,\blocktitlehight)
+  +(0.5,-0.7)$) {\bf\LARGE #3};  
+
+
+  %% the content of the block
+  \draw let \p1=($2*(halfwidth)-(2,0)$) in node[draw,color=colortwo, fill=white, frame,
+  anchor=north,text=black] (box) at #1 {
+    \begin{minipage}{\x1}%30.45cm}
+      #4
+    \end{minipage}};
+}
+
+
+
+
+% #1 - title
+% #2 - text
+% should not be used inside tikzpicture environment
+\newcommand{\innerblock}[2]{%
+  \begin{tikzpicture}
+    %% halfwidth = halfwidth of block node - 0.95
+    %% width of the minipage = halfwidth*2 - 1.2 
+    %% 
+    %% 
+    \ifthenelse{\equal{\colnumber}{2}}{\coordinate (halfwidth) at
+      ($0.5/\colnumber*(\paperwidth,0) - 1/\colnumber*(\margin,0) -
+    0.5/\colnumber*(\blockspacing,0) - (0.15,0) - (0.95,0)$); 
+    }{}
+    \ifthenelse{\equal{\colnumber}{3}}{\coordinate (halfwidth) at
+      ($0.5/\colnumber*(\paperwidth,0) - 1/\colnumber*(\margin,0) -
+    1/\colnumber*(\blockspacing,0) - (0.15,0) - (0.95,0)$); }{}
+    
+
+    %% the orange part on the top
+    \draw[color=colorthree, fill, innerframe] ($(0,0) - (halfwidth) - (0,2)$)
+    rectangle ($(0,0) + (halfwidth) + (0,1.6)$) ;
+
+    %% the title of the block
+    \node[text=white,anchor=north west] at ($(0,0) - (halfwidth)+(0,2)$) {\bf\large #1};
+
+    %% the content of the block
+    \draw let \p1=($2*(halfwidth)-(1.2,0)$) in node[draw, color=colorthree,
+    fill=white, innerframe, anchor=north, text=black] (b) at (0,0) {
+      \begin{minipage}{\x1}%29.4cm}
+        #2
+      \end{minipage}};
+ \end{tikzpicture}
+}
+
+\endinput
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "tikzposter"
+%%% TeX-PDF-mode: t
+%%% save-place: t
+%%% End:
