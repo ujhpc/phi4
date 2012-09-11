@@ -1,5 +1,11 @@
+doc/*.pdf
+!doc/*-logo.pdf
+doc/*.out
 doc/*.aux
 doc/*.bbl
 doc/*.blg
 doc/*.log
 doc/*.synctex.gz
+src/*.o
+src/*.d
+src/phi4-*
