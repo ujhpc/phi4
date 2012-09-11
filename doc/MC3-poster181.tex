@@ -33,6 +33,7 @@
 % add your packages here
 \usepackage{hyperref}
 \usepackage{listings}
+\usepackage{bold-extra}
 
 \lstdefinelanguage
   [GCC]{C++}
@@ -44,8 +45,8 @@
 
 \lstset{
   language={[GCC]C++},%
-  basicstyle=\footnotesize\ttfamily,%
-  keywordstyle=\ttfamily\bfseries,%
+  basicstyle=\small\ttfamily,%
+  keywordstyle=\color{blue}\ttfamily\bfseries,%
   keywordstyle=[2]\bfseries\color{darkgray},%
   keywordstyle=[3]\itshape,%
   commentstyle=\color{gray},%
@@ -103,7 +104,7 @@ ul. Reymonta 4, 30-059 Krakow, Poland \\
 \initializesizeandshifts
 \titleblock{50}
 
-\blocknode[($(title.south)-(xshift)-(yshift)$)]{Introduction}{
+\begin{blocknode}[($(title.south)-(xshift)-(yshift)$)]{Introduction}
 
 This contribution is concerned with an efficient implementation of the
 Monte-Carlo simulations of the $\varphi^4$ model\cite{parisi}. The problem is
@@ -121,9 +122,11 @@ extended compared to usual nearest neighbors. The update is random and requires
 a good source of pseudo-random numbers. We use the Tausworthe
 RNG\cite{howes_thomas07}.
 
-}
+\end{blocknode}
 
-\blocknode{Parallelization}{
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{blocknode}{Parallelization}
 
 While model is inherently parallelizable, grid points that lie in the same
 neighborhood cannot be updated together. Taking into account a larger
@@ -215,9 +218,19 @@ number are processed in parallel by different thread blocks. \\
 black line denotes the neighborhood used in updating the center point. Black
 points are processes in parallel by different threads of the same thread block.
 
-}
+\end{blocknode}
 
-\blocknode[($(title.south)+(xshift)-(yshift)$)]{GPU Implementation}{
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{blocknode}[($(title.south)+(xshift)-(yshift)$)]{Tausworthe RNG}
+
+\lstinputlisting{MC3-tausworthe.cpp}
+
+\end{blocknode}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{blocknode}{GPU Implementation}
 
 On GPU we adopt the hierarchical scheme from ref.~\cite{weigel} suitably
 modified to account for bigger neighborhood. We first divide the whole lattice
@@ -228,13 +241,15 @@ points). After that each thread updates one point from the first partition.
 Then after synchronization, next partition is updated and so on. After
 processing all eight(2D) or 16 (3D) partitions the kernel writes the shared
 memory back into global and new kernel is started processing next batch of
-blocks. Altogether in this way we managed to achieve $.13$ nanoseconds for
+blocks. Altogether in this way we managed to achieve $0.13$ nanoseconds for
 single lattice field update on \emph{NVIDIA GTX 470}, reaching around $430$
 Gflops that is $40\%$ of $1088$ Gflops peak performance of this device.
 
-}
+\end{blocknode}
 
-\blocknode{CPU Implementation}{
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{blocknode}{CPU Implementation}
 
 In order to provide unbiased CPU vs GPU speed up results we provide
 multithreaded vectorized CPU implementation. It uses OpenMP for parallel
@@ -250,9 +265,11 @@ are missing, which makes impossible to port random number generator from
 postponed to AVX2 planned for 2013. As soon AVX2 capable CPU devices appear on
 the market we plan to revise our evaluation.
 
-}
+\end{blocknode}
 
-\blocknode{Conclusions}{
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{blocknode}{Conclusions}
 
 Our CPU \emph{OpenMP} and \emph{SSE/AVX} implementation compiled via GCC 4.4 or
 higher and running on \emph{Intel Core i5 2.5 Ghz} quad core CPU presented
@@ -262,26 +279,35 @@ that is $\sim10\%$ of the $160$ Gflops peak performance of tested i5 CPU. There
 is no significant increase in performance while switching from SSE to AVX
 instructions. \\
 
+\innerblock{Benchmark Results}{
+\begin{center}
+\huge \textbf{GPU} $0.13$ ns/update \ \textbf{CPU} \huge $3.76$ ns/update
+\end{center}}
+
 This gives around $28\times$ advantage to GPU, which is noticeably less than
 promised by many publications, however much higher that comes from comparison
 of tested i5 CPU to \emph{GTX 470}. This can be traced back to 128-bit only
 \emph{Tausworthe} random number generator implementation and inefficient vector
 store and load operations (gather/scatter).
 
-}
+\end{blocknode}
 
-\blocknode{References}{
-  \renewcommand{\section}[2]{}
-  \begin{thebibliography}{9}
-  \bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus Books Publishing (1998).
-  \bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
-  \bibitem{howes_thomas07}
-  Lee Howes and David Thomas.
-  ``{\em Efficient random number generation and application using {CUDA}.}''
-  In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
-    Wesley, August 2007.
-  \end{thebibliography}
-}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{blocknode}{References}
+
+\renewcommand{\section}[2]{}
+\begin{thebibliography}{9}
+\bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus Books Publishing (1998).
+\bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
+\bibitem{howes_thomas07}
+Lee Howes and David Thomas.
+``{\em Efficient random number generation and application using {CUDA}.}''
+In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
+  Wesley, August 2007.
+\end{thebibliography}
+
+\end{blocknode}
 
 \end{tikzpicture}
 

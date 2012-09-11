@@ -49,7 +49,7 @@
 
 
 
-
+\usepackage{environ}
 \usepackage{tikz}
 \usetikzlibrary{shapes,decorations,shadows}
 \usetikzlibrary{calc}
@@ -155,14 +155,7 @@
 % #1 - where
 % #2 - title
 % #3 - text
-\newcommand{\blocknode}[3][($(box.south)-(yshift)$)]{%
-  %% if colnumber = 2 => halfwidth = (\paperwidth-2*\margin 
-  %%                                                          -\blockspacing)/colnumber/2 - 0.15  
-  %% if colnumber = 3 => halfwidth = (\paperwidth-2*\margin
-  %%                                                          -2*\blockspacing)/colnumber/2 - 0.15 
-  %% width of the minipage = halfwidth*2 - 2 
-  %% 
-  %% 
+\NewEnviron{blocknode}[2][($(box.south)-(yshift)$)]{%
   \ifthenelse{\equal{\colnumber}{2}}{\coordinate (halfwidth) at
     ($0.5/\colnumber*(\paperwidth,0) - 1/\colnumber*(\margin,0) -
     0.5/\colnumber*(\blockspacing,0) - (0.15,0)$);}{}
@@ -186,12 +179,7 @@
   %% the content of the block
   \draw let \p1=($2*(halfwidth)-(2,0)$) in node[draw,color=colortwo, fill=white, frame,
   anchor=north,text=black] (box) at #1 {
-    \begin{minipage}{\x1}%30.45cm}
-      #3
-    \end{minipage}};
-}
-
-
+    \begin{minipage}{\x1} \BODY \end{minipage} }; }
 
 %% Block node with varying width
 % #1 - where
