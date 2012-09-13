@@ -270,9 +270,36 @@ the lattice into blocks. However not all scalar \emph{x86} instructions have
 vector counterparts. In particular direct \emph{XMM} registers gather and
 scatter and vectorized integer operations for full length AVX 256-bit registers
 are missing, which makes impossible to port random number generator from
-128-bit SSE to 256-bit AVX. Initially planned for AVX standard, these were
-postponed to AVX2 planned for 2013. As soon AVX2 capable CPU devices appear on
-the market we plan to revise our evaluation.
+128-bit SSE to 256-bit AVX.
+
+\end{blocknode}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{blocknode}{Benchmarks}
+
+Our CPU \emph{OpenMP} and \emph{SSE/AVX} implementation compiled via GCC 4.4 or
+higher and running on quad core \emph{Intel Core i5 2.5 Ghz} CPU presented
+$15\times$ performance boost comparing to single threaded scalar code. This
+gives $\sim15$ Gflops that is $\sim10\%$ of the $160$ Gflops peak performance
+of tested i5 CPU for 3D $64^3$ lattice case. There is no significant difference
+switching from SSE to AVX. \\
+
+\innerblock{Performance Boost}{
+\begin{center}
+\def\arraystretch{1.1}%
+\setlength{\tabcolsep}{1em}
+\huge
+\begin{tabular}{ r r r | r }
+  Lattice  &     GPU      &      CPU     & Boost \\
+  \hline
+   $32^3$  &  $1.262 ns$  &  $4.316 ns$  &  $3.419 \times$ \\
+   $64^3$  &  $0.165 ns$  &  $4.857 ns$  & $29.436 \times$ \\
+  $128^3$  &  $0.125 ns$  &  $5.444 ns$  & $43.552 \times$ \\
+  $256^3$  &  $0.113 ns$  &  $7.099 ns$  & $62.823 \times$
+\end{tabular}
+\end{center}
+}
 
 \end{blocknode}
 
@@ -280,24 +307,20 @@ the market we plan to revise our evaluation.
 
 \begin{blocknode}{Conclusions}
 
-Our CPU \emph{OpenMP} and \emph{SSE/AVX} implementation compiled via GCC 4.4 or
-higher and running on \emph{Intel Core i5 2.5 Ghz} quad core CPU presented
-$15\times$ performance boost comparing to single threaded scalar code and
-$3.76$ nanoseconds for single lattice field update. Which gives the $15$ Gflops
-that is $\sim10\%$ of the $160$ Gflops peak performance of tested i5 CPU. There
-is no significant increase in performance while switching from SSE to AVX
-instructions. \\
+Our benchmarks give visible advantage to GPU, which is less than promised by
+many publications, however much higher that comes from theoretical performance
+comparison of tested \emph{i5 CPU 2.5 Ghz} to \emph{GTX 470}. This can be
+traced back to 128-bit only \emph{Tausworthe} RNG implementation, inefficient
+gather/scatter operations and smaller CPU memory bandwidth. \\
 
-\innerblock{Benchmark Results}{
-\begin{center}
-\huge \textbf{GPU} $0.13$ ns/update \ \textbf{CPU} \huge $3.76$ ns/update
-\end{center}}
+\emph{Intel x86} gather/scatter instruction initially planned for \emph{Sandy
+Bridge} AVX standard, were postponed to \emph{Haswell} AVX2 planned for 2013.
+As soon AVX2 capable CPU devices appear on the market we plan to revise our
+evaluation. \\
 
-This gives around $28\times$ advantage to GPU, which is noticeably less than
-promised by many publications, however much higher that comes from comparison
-of tested i5 CPU to \emph{GTX 470}. This can be traced back to 128-bit only
-\emph{Tausworthe} random number generator implementation and inefficient vector
-store and load operations (gather/scatter).
+We also consider evaluating \emph{NVIDIA Kepler} devices to determine if their
+improved global memory cache can replace complicated shared memory access
+scheme.
 
 \end{blocknode}
 
