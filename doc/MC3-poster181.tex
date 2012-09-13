@@ -1,3 +1,13 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Poster [182] for Facing the Multi-Core Challenge conference Stuttgart 2012
+% http://www.multicore-challenge.org
+% 
+% Authors: P. Bialas, J. Kowal, A. Strzelecki
+% http://www.uj.edu.pl/web/zaklad-technologii-gier
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \documentclass{a0poster}
 
 \newcommand{\vphi}{\vec{\varphi}}
@@ -9,7 +19,7 @@
 
 \usetikzlibrary{positioning}
 \usetikzlibrary{calc}
-\usetikzlibrary{arrows,shapes,backgrounds}
+\usetikzlibrary{arrows, shapes, backgrounds}
 \usetikzlibrary{shadows}
 
 \renewcommand{\margin}{2}
@@ -27,7 +37,7 @@
 
 % changing the fonts
 \usepackage{cmbright}
-\usepackage[light,math]{kurier}%iwona}
+\usepackage[light, math]{kurier}%iwona}
 \usepackage[T1]{fontenc}
 
 % add your packages here
@@ -40,7 +50,7 @@
   []{C++}
 {
   morekeywords={[2]__attribute__},%
-  morekeywords={[3]vector_size,vec_t,uvec_t,fvec_t}%
+  morekeywords={[3]vector_size, vec_t, uvec_t, fvec_t}%
 }
 
 \lstset{
@@ -58,7 +68,7 @@
 % backgroundcolor=\color{lightlightgray},%
 % frame=single,%
 % rulecolor=\color{lightgray},%
-% frameshape={RYRYNYYYY}{yny}{yny}{RYRYNYYYY},
+% frameshape={RYRYNYYYY}{yny}{yny}{RYRYNYYYY}, 
   tabsize=2,%
   captionpos=b,%
   breaklines=true,%
@@ -82,22 +92,21 @@ ul. Reymonta 4, 30-059 Krakow, Poland \\
 }
 
 % defined in tikzposter, but now we want to include logo
-\renewcommand{\titleblock}[2][($0.5*(0,\paperheight)-(0,\margin)$)]{%
-\node[draw,frame,color=colortwo,fill=white,anchor=north,text=black] (title) at #1
-   {
-    \begin{minipage}{1cm}
-      \includegraphics{./UJ-logo.pdf}
-    \end{minipage}
-    \begin{minipage}{#2 cm}
-      \maketitle
-    \end{minipage}
+\renewcommand{\titleblock}[2][($0.5*(0, \paperheight)-(0, \margin)$)] {%
+\node[draw, frame, color=colortwo, fill=white, anchor=north, text=black]
+  (title) at #1 {%
+  \begin{minipage}{1cm}
+    \includegraphics{./UJ-logo.pdf}
+  \end{minipage}
+  \begin{minipage}{#2 cm}
+    \maketitle
+  \end{minipage}
   };
 }
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{document}
-\AddToShipoutPicture{\BackgroundPicture}
+\begin{document} \AddToShipoutPicture{\BackgroundPicture}
 
 \noindent % to have the picture right in the center
 \begin{tikzpicture}
@@ -124,7 +133,7 @@ RNG\cite{howes_thomas07}.
 
 \end{blocknode}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{blocknode}{Parallelization}
 
@@ -137,30 +146,32 @@ used and we have devised a new grid decomposition scheme. \\
 
 \begin{tikzpicture}[scale=1.9]
 
-\draw[very thin, gray] (-.5,-.5) grid (15.5,15.5);
+\draw[very thin, gray] (-.5, -.5) grid (15.5, 15.5);
 
-\foreach \x in {0,4,...,12}
-  \foreach \y in {0,4,...,12} {
-    \pgfmathtruncatemacro\n{Mod(\x/4,2)+2*Mod(\y/4,2)+1}
+\foreach \x in {0, 4, ..., 12}
+  \foreach \y in {0, 4, ..., 12} {
+    \pgfmathtruncatemacro\n{Mod(\x/4, 2)+2 * Mod(\y/4, 2)+1}
     \draw[colorone, xshift=\x cm, yshift=\y cm, rounded corners=2pt]
-      (-.4,-.4) rectangle node[red, fill opacity=.5, anchor=center, font=\Huge\bfseries\sffamily] {\n} (3.4,3.4);
+      (-.4, -.4) rectangle
+      node[red, fill opacity=.5, anchor=center, font=\Huge\bfseries\sffamily]
+      {\n} (3.4, 3.4);
   }
 
-\foreach \x in {0,...,15}
-  \foreach \y in {0,...,15}
-    \path[draw=black,fill=white] (\x, \y) circle(.25);
+\foreach \x in {0, ..., 15}
+  \foreach \y in {0, ..., 15}
+    \path[draw=black, fill=white] (\x, \y) circle(.25);
 
-\foreach \x in {4,...,7}
-  \foreach \y in {4,...,7}
+\foreach \x in {4, ..., 7}
+  \foreach \y in {4, ..., 7}
     \fill[black] (\x, \y) circle(.25);
 
-\foreach \x in {4,...,7}
-  \foreach \y in {2,3,8,9} {
-    \fill[gray] (\x,\y) circle(.25);
-    \fill[gray] (\y,\x) circle(.25);
+\foreach \x in {4, ..., 7}
+  \foreach \y in {2, 3, 8, 9} {
+    \fill[gray] (\x, \y) circle(.25);
+    \fill[gray] (\y, \x) circle(.25);
   }
 
-\foreach \p in {(3,3),(3,8),(8,3),(8,8)}
+\foreach \p in {(3, 3), (3, 8), (8, 3), (8, 8)}
   \fill[gray] \p circle(.25);
 
 \end{tikzpicture}
@@ -175,39 +186,40 @@ number are processed in parallel by different thread blocks. \\
 
 \begin{tikzpicture}[scale=3]
 
-\clip[rounded corners=0cm] (-3,-3) rectangle (7,7);
+\clip[rounded corners=0cm] (-3, -3) rectangle (7, 7);
 
-\draw[help lines] (-3.0,-3.0) grid (7.0,7.0);
+\draw[help lines] (-3.0, -3.0) grid (7.0, 7.0);
 
 % lattice points
-\foreach \x in {-2,-1,0,1,2,3,4,5,6}
-  \foreach \y in {-2,-1,0,1,2,3,4,5,6}
-    \draw (\x,\y) + (.0,.0) circle (.16);
+\foreach \x in {-2, -1, 0, 1, 2, 3, 4, 5, 6}
+  \foreach \y in {-2, -1, 0, 1, 2, 3, 4, 5, 6}
+    \draw (\x, \y) + (.0, .0) circle (.16);
 
 % neighborhood
 \def\neighborhood{--
-  ++(0,-.5)-- ++(1,0)-- ++(0,-.5)-- ++(0,-.5)-- ++(1,0)--
-  ++(0,-1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)--
-  ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,-1)--
-  ++(-1,0)-- ++(0,-1)-- ++(-1,0)-- ++(0,-.6)}
+  ++( 0,  -.5)-- ++( 1,  0)-- ++( 0, -.5 )-- ++(0, -.5)-- ++( 1, 0  )--
+  ++( 0, -1.0)-- ++( 1,  0)-- ++( 0,  1.0)-- ++(1, 0  )-- ++( 0, 1.0)--
+  ++( 1,  0  )-- ++( 0,  1)-- ++(-1,  0  )-- ++(0, 1  )-- ++(-1, 0  )--
+  ++( 0,  1  )-- ++(-1,  0)-- ++( 0, -1  )--
+  ++(-1,  0  )-- ++( 0, -1)-- ++(-1,  0  )-- ++(0, -.6)}
 
-\foreach \p in {(-2.5,4.0),(1.5,4.0),
-                (-2.5,.0),(1.5,.0),
-                (-4.5,2.0),(3.5,2.0),
-                (-4.5,6.0),(-.5,6.0),(3.5,6.0),
-                (-4.5,-2.0),(-.5,-2.0),(3.5,-2.0)}
-  \path[draw=black,fill,fill opacity=.2,rounded corners=.5cm,shorten >=2pt]
+\foreach \p in {(-2.5,  4.0), (1.5,  4.0), 
+                (-2.5,   .0), (1.5,   .0), 
+                (-4.5,  2.0), (3.5,  2.0), 
+                (-4.5,  6.0), (-.5,  6.0), (3.5,  6.0), 
+                (-4.5, -2.0), (-.5, -2.0), (3.5, -2.0)}
+  \path[draw=black, fill, fill opacity=.2, rounded corners=.5cm, shorten >=2pt]
     \p \neighborhood;
 
 % main center neighborhood
-
-\path[draw=red,fill=red,fill opacity=.4,rounded corners=.5cm,shorten >=2pt,line width=.75mm,cap=round,join=round] (-.5,2.0) \neighborhood;
+\path[draw=red, fill=red, fill opacity=.4, rounded corners=.5cm, shorten >=2pt, 
+      line width=.75mm, cap=round, join=round] (-.5, 2.0) \neighborhood;
 
 \foreach \p in {
-  (-2, 2),( 2, 2),( 6, 2),
-  ( 0, 4),( 0, 0),( 4, 0),( 4, 4),
-  (-2,-2),( 2,-2),( 6,-2),
-  (-2, 6),( 2, 6),( 6, 6)}
+  (-2,  2), ( 2,  2), ( 6,  2), 
+  ( 0,  4), ( 0,  0), ( 4,  0), ( 4, 4), 
+  (-2, -2), ( 2, -2), ( 6, -2), 
+  (-2,  6), ( 2,  6), ( 6,  6)}
   \fill[black] \p circle(.16);
 
 \end{tikzpicture}
@@ -220,7 +232,7 @@ points are processes in parallel by different threads of the same thread block.
 
 \end{blocknode}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{blocknode}[($(title.south)+(xshift)-(yshift)$)]{Tausworthe RNG}
 
@@ -228,7 +240,7 @@ points are processes in parallel by different threads of the same thread block.
 
 \end{blocknode}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{blocknode}{GPU Implementation}
 
@@ -247,7 +259,7 @@ Gflops that is $40\%$ of $1088$ Gflops peak performance of this device.
 
 \end{blocknode}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{blocknode}{CPU Implementation}
 
@@ -267,7 +279,7 @@ the market we plan to revise our evaluation.
 
 \end{blocknode}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{blocknode}{Conclusions}
 
@@ -292,13 +304,14 @@ store and load operations (gather/scatter).
 
 \end{blocknode}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{blocknode}{References}
 
 \renewcommand{\section}[2]{}
 \begin{thebibliography}{9}
-\bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus Books Publishing (1998).
+\bibitem{parisi} G.~Parisi ``Statistical Field Theory''
+  Chapter 5, Perseus Books Publishing (1998).
 \bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
 \bibitem{howes_thomas07}
 Lee Howes and David Thomas.
