@@ -147,25 +147,25 @@ used and we have devised a new grid decomposition scheme. \\
 
 \begin{center}
 
-\begin{tikzpicture}[scale=1.14]
+\begin{tikzpicture}[scale=1.1/4]
 
-\draw[very thin, gray] (-.5, -.5) grid (15.5, 15.5);
+\draw[very thin, gray] (-.5, -.5) grid (63.5, 63.5);
 
-\foreach \x in {0, 4, ..., 12}
-  \foreach \y in {0, 4, ..., 12} {
-    \pgfmathtruncatemacro\n{Mod(\x/4, 2)+2 * Mod(\y/4, 2)+1}
+\foreach \x in {0, 16, ..., 48}
+  \foreach \y in {0, 16, ..., 48} {
+    \pgfmathtruncatemacro\n{Mod(\x/16, 2)+2 * Mod(\y/16, 2)+1}
     \draw[colorone, xshift=\x cm, yshift=\y cm, rounded corners=2pt]
       (-.4, -.4) rectangle
       node[red, fill opacity=.5, anchor=center, font=\Huge\bfseries\sffamily]
-      {\n} (3.4, 3.4);
+      {\n} (15.4, 15.4);
   }
 
-\foreach \x in {0, ..., 15}
-  \foreach \y in {0, ..., 15}
+\foreach \x in {0, ..., 63}
+  \foreach \y in {0, ..., 63}
     \path[draw=black, fill=white] (\x, \y) circle(.25);
 
-\foreach \x in {4, ..., 7}
-  \foreach \y in {4, ..., 7}
+\foreach \x in {16, ..., 31}
+  \foreach \y in {16, ..., 31}
     \fill[black] (\x, \y) circle(.25);
 
 \foreach \x in {4, ..., 7}
