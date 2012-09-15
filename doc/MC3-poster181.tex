@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% Poster [182] for Facing the Multi-Core Challenge conference Stuttgart 2012
+% Poster [181] for Facing the Multi-Core Challenge conference Stuttgart 2012
 % http://www.multicore-challenge.org
 % 
 % Authors: P. Bialas, J. Kowal, A. Strzelecki
@@ -87,7 +87,7 @@
 \title{GPU-accelerated and CPU SIMD Optimized \\
 Monte Carlo Simulation of $\phi^4$ Model}
 
-\author{Piotr Bialas \and Jakub Kowal \and Adam Strzelecki \\
+\author{Piotr Bialas,  Jakub Kowal \and Adam Strzelecki \\
 Faculty of Physics, Astronomy and Applied Computer Science \\
 Jagiellonian University \\
 ul. Reymonta 4, 30-059 Krakow, Poland \\
@@ -333,9 +333,10 @@ In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
   On GPU we adopt the hierarchical scheme from ref.~\cite{weigel}
   suitably modified to account for bigger neighborhood. We first
   divide the whole lattice in blocks of $32\times 32$ points in 2D or
-  $\ldots\times\ldots\times\ldots$ in 3D.  I Then we start a kernel
+  $16\times16\times16$ in 3D.  I Then we start a kernel
   that process every fourth block. Each block is assigned to a block
-  of 128 threads. First we fetch the values of the fields from global
+  of 128 threads or 256 in 3D. 
+  First we fetch the values of the fields from global
   to shared memory (including border points).
 
   After that each thread updates one point from the first partition
@@ -371,17 +372,35 @@ In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
 
 \begin{blocknode}{CPU Implementation}
 
-In order to provide unbiased CPU vs GPU speed up results we provide
+For  CPU vs GPU  comparison we provide
 multithreaded vectorized CPU implementation. It uses OpenMP for parallel
 execution, SSE/AVX and compiler vector extensions for vectorization. This
 implementation does mimic GPU SIMT execution model. The SIMD instructions are
-used to process four (SSE) or eight (AVX) updates in parallel. We use
-partitions as on GPU but we use only one level {\em i.e.} we do not partition
-the lattice into blocks. However not all scalar \emph{x86} instructions have
+used to process four (SSE) or eight (AVX) updates in parallel. 
+
+However not all scalar \emph{x86} instructions have
 vector counterparts. In particular direct \emph{XMM} registers gather and
 scatter and vectorized integer operations for full length AVX 256-bit registers
 are missing, which makes impossible to port random number generator from
 128-bit SSE to 256-bit AVX.
+
+
+We use
+partitions as on GPU but we use only one level {\em i.e.} we do not partition
+the lattice into blocks. 
+
+\subsubsection*{Performance}
+
+Contrary to the implementation on the GPU the performance of the CPU
+implementation decreases with the lattice size. This is due to an
+inefficient memeory acces pattern and many resulting cache
+misses. This can be alleviated or eliminated by adopting the second
+level of partioning the lattice as on the GPU. This is the subject of
+an ongoing work.
+
+Another performance bottleneck is the 
+
+
 
 
 \end{blocknode}
