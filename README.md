@@ -44,6 +44,24 @@ I cheat here a little, best stock i7 CPUs are clocked at **3.2 GHz** mine is **2
 	128^3 = 5.444 / 0.125 = 43.552 x
 	256^3 = 7.099 / 0.113 = 62.823 x
 
+### Usage on CPU
+
+	full     8.897 9.045
+	corona   3.579 3.642   59.73 %
+	RNG      7.732 7.790   13.88 %
+	log      7.167 7.227    6.22 %
+	update   7.167 7.227   20.17 %
+
+### Usage on GPU
+
+	total   0.13908373 ns
+	gather  0.01974461 ns   14.19 %
+	corona  0.05152493 - 0.01974461
+	        0.03178032 ns   22.84 %
+	rng     0.00927271 ns    6.66 %
+	update  0.0331992  ns   23.86 %
+	exp     0.03581418 ns   25.75 %
+
 Scratchpad
 ----------
 
