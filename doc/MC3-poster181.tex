@@ -414,17 +414,17 @@ addresses in the memory.
 \setlength{\tabcolsep}{1em}
 \large
 \begin{tabular}{ r r r | r }
-    Size   &     GPU$^a$  &   CPU$^b$    & Boost \\
+    Size   & GPU\footnotemark & CPU\footnotemark & Boost \\
   \hline
    $32^3$  &  $1.262 ns$  &  $4.316 ns$  &  $3.419 \times$ \\
    $64^3$  &  $0.165 ns$  &  $4.857 ns$  & $29.436 \times$ \\
   $128^3$  &  $0.125 ns$  &  $5.444 ns$  & $43.552 \times$ \\
   $256^3$  &  $0.113 ns$  &  $7.099 ns$  & $62.823 \times$
 \end{tabular}
+\footnotetext{$^1$\emph{GeForce GTX 470} 1.67 Ghz, 1.25GB, 448 CUDA cores, 2.0 capability}
+\footnotetext{$^2$\emph{Intel Core i5-2400S CPU} 2.50 GHz, 4 core, 6MB Cache, SSE4.x/AVX}
 \end{center}
 
-\footnotetext[1]{\emph{GeForce GTX 470} 1.67 Ghz, 1.25GB, 448 CUDA cores, 2.0 capability}
-\footnotetext[2]{\emph{Intel Core i5-2400S CPU} 2.50 GHz, 4 core, 6MB Cache, SSE4.x/AVX}
 }
 
 \blocknodew[($(box.north)+(20.25,0)$)]{16.5}{Breakdown}{
