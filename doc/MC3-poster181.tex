@@ -282,28 +282,50 @@ block.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{blocknode}{Tausworthe RNG}
+% \begin{blocknode}{Tausworthe RNG}
 
-\lstinputlisting{MC3-tausworthe.cpp}
+% \lstinputlisting{MC3-tausworthe.cpp}
 
-\end{blocknode}
+% \end{blocknode}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{blocknode}[($(title.south)+(xshift)-(yshift)$)]{GPU Implementation}
 
-On GPU we adopt the hierarchical scheme from ref.~\cite{weigel} suitably
-modified to account for bigger neighborhood. We first divide the whole lattice
-in blocks of $32\times 32$ points. Then we start a kernel that process every
-forth block. Each block is assigned to a block of 128 threads. First we fetch
-the values of the fields from global to shared memory (including border
-points). After that each thread updates one point from the first partition.
-Then after synchronization, next partition is updated and so on. After
-processing all eight(2D) or 16 (3D) partitions the kernel writes the shared
-memory back into global and new kernel is started processing next batch of
-blocks. Altogether in this way we managed to achieve $0.13$ nanoseconds for
-single lattice field update on \emph{NVIDIA GTX 470}, reaching around $430$
-Gflops that is $40\%$ of $1088$ Gflops peak performance of this device.
+  On GPU we adopt the hierarchical scheme from ref.~\cite{weigel}
+  suitably modified to account for bigger neighborhood. We first
+  divide the whole lattice in blocks of $32\times 32$ points in 2D or
+  $\ldots\times\ldots\times\ldots$ in 3D.  I Then we start a kernel
+  that process every fourth block. Each block is assigned to a block
+  of 128 threads. First we fetch the values of the fields from global
+  to shared memory (including border points).
+
+  After that each thread updates one point from the first partition
+  (see figure ...).  Each point is updated few, typically 4-8 times in
+  a row.  That speeds up the computations as most of the precalculated
+  needed values is already in the registers. This so called multi-hit
+  Metropolis algorithm.
+
+
+  Then after synchronization, next partition is updated and so on.
+  After processing all eight(2D) or 16 (3D) partitions.  We reapeat
+  the whole process up tp 50 times, using the values already in shared
+  memory. Together with multihit algorithm descriped above this
+  reduces drastically the time ntaken by global memory loads and
+  stores to the point of it being negligible.
+
+  Finally the kernel writes the shared memory back into global mempry and
+  new kernel is started processing next batch of blocks.
+
+  \subsubsection*{Performance}
+
+  The performance of the algorithm increases with growing lattice
+  size. For smaller lattices there is not enough thread blocks
+  launched to use the GPU resources eficiently.  Altogether in this
+  way we managed to achieve $0.13$ nanoseconds for single field update
+  on a $256^3$ 3D lattice using \emph{NVIDIA GTX 470} GPU, reaching
+  around $430$ Gflops that is $40\%$ of $1088$ Gflops peak performance
+  of this device.
 
 \end{blocknode}
 
