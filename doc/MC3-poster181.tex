@@ -150,8 +150,8 @@ P=\max\left\{1,\exp(-\Delta H)\right\}.
 \end{equation}
 The crucial feature of this algorithm is that the $\Delta H$ depends
 only on the immediate neighborhood of the point $\vj$. In our case
-because of the last term in \eqref{eq:ham} this neighborhood is
-extended compared to usual nearest neighbors (see figure~\ref{fig:nn} (Right)).
+because of the last term in (1) this neighborhood is
+extended compared to usual nearest neighbors (see Figure~2 ).
 
 \end{blocknode}
 
@@ -162,7 +162,7 @@ extended compared to usual nearest neighbors (see figure~\ref{fig:nn} (Right)).
 While model is inherently parallelizable, grid points that lie in the same
 neighborhood cannot be updated together. Taking into account a larger
 neighborhood means that a simple checkerboard decomposition pattern cannot be
-used and we have devised a new grid decomposition scheme. \\
+used and we have devised a new grid decomposition scheme. 
 
 \begin{center}
 
@@ -275,8 +275,8 @@ used and we have devised a new grid decomposition scheme. \\
 with same number are processed in parallel by different thread blocks. \\
 
 \textbf{Figure 2} (Right) Partitioning of the blocks into disjoint sublattices.
-Thick black line denotes the neighborhood used in updating the center point.
-Black points are processes in parallel by different threads of the same thread
+Area marked in re denotes  neighborhood used in updating the center point.
+Read points are processes in parallel by different threads of the same thread
 block.
 
 \end{blocknode}
@@ -286,14 +286,12 @@ block.
 Our benchmarks give visible advantage to GPU, which is less than promised by
 many publications, however much higher that comes from theoretical performance
 comparison of tested \emph{i5 CPU 2.5 Ghz} to \emph{GTX 470}. This can be
-traced back to 128-bit only \emph{Tausworthe} RNG implementation, inefficient
-gather/scatter operations and smaller CPU memory bandwidth. \\
+traced back to 128-bit only \emph{Tausworthe} RNG implementation, but mostly to the inefficient memory access pattern and  vector gather/scatter operations.. 
 
 \emph{Intel x86} gather/scatter instructions initially planned for \emph{Sandy
 Bridge} AVX standard, were postponed to \emph{Haswell} AVX2 planned for 2013.
 As soon AVX2 capable CPU devices appear on the market we plan to revise our
-evaluation. \\
-
+evaluation. 
 We also consider evaluating \emph{NVIDIA Kepler} devices to determine if their
 improved global memory cache can replace complicated shared memory access
 scheme.
@@ -309,11 +307,11 @@ scheme.
 \bibitem{parisi} G.~Parisi ``Statistical Field Theory''
   Chapter 5, Perseus Books Publishing (1998).
 \bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
-\bibitem{howes_thomas07}
-Lee Howes and David Thomas.
-``{\em Efficient random number generation and application using {CUDA}.}''
-In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
-  Wesley, August 2007.
+% \bibitem{howes_thomas07}
+% Lee Howes and David Thomas.
+% ``{\em Efficient random number generation and application using {CUDA}.}''
+% In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
+%   Wesley, August 2007.
 \end{thebibliography}
 
 \end{blocknode}
@@ -334,7 +332,7 @@ In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
   On GPU we adopt the hierarchical scheme from ref.~\cite{weigel}
   suitably modified to account for bigger neighborhood. We first
   divide the whole lattice in blocks of $32\times 32$ points in 2D or
-  $16\times16\times16$ in 3D.  I Then we start a kernel
+  $16\times16\times16$ in 3D (see Figure~1).  Then we start a kernel
   that process every fourth block. Each block is assigned to a block
   of 128 threads or 256 in 3D. 
   First we fetch the values of the fields from global
@@ -348,23 +346,22 @@ In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
 
 
   Then after synchronization, next partition is updated and so on.
-  After processing all eight(2D) or 16 (3D) partitions.  We reapeat
-  the whole process up tp 50 times, using the values already in shared
-  memory. Together with multihit algorithm descriped above this
-  reduces drastically the time ntaken by global memory loads and
-  stores to the point of it being negligible.
+  After processing all eight(2D) or 16 (3D) partitions.  We repeat
+  the whole process up to 50 times, using the values already in shared
+  memory. Together with multi--hit  algorithm described above this
+  reduces drastically the time taken by global memory loads. 
 
-  Finally the kernel writes the shared memory back into global mempry and
+  Finally the kernel writes the shared memory back into global memory and
   new kernel is started processing next batch of blocks.
 
   \subsubsection*{Performance}
 
   The performance of the algorithm increases with growing lattice
   size. For smaller lattices there is not enough thread blocks
-  launched to use the GPU resources eficiently.  Altogether in this
-  way we managed to achieve $0.13$ nanoseconds for single field update
+  launched to use the GPU resources efficiently.  Altogether in this
+  way we managed to achieve $0.11$ nanoseconds for single field update
   on a $256^3$ 3D lattice using \emph{NVIDIA GTX 470} GPU, reaching
-  around $430$ Gflops that is $40\%$ of $1088$ Gflops peak performance
+  around $517$ Gflops that is $47\%$ of $1088$ Gflops peak performance
   of this device.
 
 \end{blocknode}
@@ -373,33 +370,49 @@ In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
 
 \begin{blocknode}{CPU Implementation}
 
-For  CPU vs GPU  comparison we provide
-multithreaded vectorized CPU implementation. It uses OpenMP for parallel
-execution, SSE/AVX and compiler vector extensions for vectorization. This
-implementation does mimic GPU SIMT execution model. The SIMD instructions are
-used to process four (SSE) or eight (AVX) updates in parallel. 
+  For CPU vs GPU comparison we provide multithreaded vectorized CPU
+  implementation. It uses OpenMP for parallel execution, SSE/AVX and
+  compiler vector extensions for vectorization. This implementation
+  does mimic GPU SIMT execution model. The SIMD instructions are used
+  to process four (SSE) or eight (AVX) updates in parallel. After
+  programming using the SSE intrinsics we switched to using the vector
+  types provided in most of the modern compilers. This yields
+  identical assembly code and is easier to write and maintain.
 
-However not all scalar \emph{x86} instructions have
-vector counterparts. In particular direct \emph{XMM} registers gather and
-scatter and vectorized integer operations for full length AVX 256-bit registers
-are missing, which makes impossible to port random number generator from
-128-bit SSE to 256-bit AVX.
+  However not all scalar \emph{x86} instructions have vector
+  counterparts. In particular direct \emph{XMM} registers gather and
+  scatter and vectorized integer operations for full length AVX
+  256-bit registers are missing, which makes impossible to port random
+  number generator from 128-bit SSE to 256-bit AVX. 
 
 
-We use
-partitions as on GPU but we use only one level {\em i.e.} we do not partition
-the lattice into blocks. 
+  We use
+  partitions as on GPU but we use only one level {\em i.e.} we do not partition
+  the lattice into blocks. 
 
 \subsubsection*{Performance}
 
+Our CPU \emph{OpenMP} and \emph{SSE/AVX} implementation compiled via GCC 4.4 or
+higher and running on quad core \emph{Intel Core i5 2.5 Ghz} CPU presented
+$15\times$ performance boost comparing to single threaded scalar code. This
+gives $\sim15$ Gflops that is $\sim10\%$ of the $160$ Gflops peak performance
+of tested i5 CPU for 3D $64^3$ lattice case. There is no significant difference
+switching from SSE to AVX.
+
 Contrary to the implementation on the GPU the performance of the CPU
 implementation decreases with the lattice size. This is due to an
-inefficient memeory acces pattern and many resulting cache
+inefficient memory access pattern and many resulting cache
 misses. This can be alleviated or eliminated by adopting the second
-level of partioning the lattice as on the GPU. This is the subject of
+level of partitioning the lattice as on the GPU. This is the subject of
 an ongoing work.
 
-Another performance bottleneck is the 
+Another performance bottleneck are the gather/scatter vector
+operations.  As the values accessed by vector SSE instructions are not
+in consecutive memory addresses they have to be downloaded separately
+and then assembled together into one vector word. Same process applies
+to writing back. A possible solution would be rearranging the layout so
+that the values used by vector operations do lie at consecutive
+addresses in the memory. 
 
 
 
@@ -410,12 +423,7 @@ Another performance bottleneck is the
 
 \begin{blocknode}{Benchmarks}
 
-Our CPU \emph{OpenMP} and \emph{SSE/AVX} implementation compiled via GCC 4.4 or
-higher and running on quad core \emph{Intel Core i5 2.5 Ghz} CPU presented
-$15\times$ performance boost comparing to single threaded scalar code. This
-gives $\sim15$ Gflops that is $\sim10\%$ of the $160$ Gflops peak performance
-of tested i5 CPU for 3D $64^3$ lattice case. There is no significant difference
-switching from SSE to AVX. \\
+
 
 \innerblock{Performance Boost}{
 \begin{center}
