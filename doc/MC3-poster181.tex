@@ -280,6 +280,44 @@ block.
 
 \end{blocknode}
 
+\begin{blocknode}{Conclusions}
+
+Our benchmarks give visible advantage to GPU, which is less than promised by
+many publications, however much higher that comes from theoretical performance
+comparison of tested \emph{i5 CPU 2.5 Ghz} to \emph{GTX 470}. This can be
+traced back to 128-bit only \emph{Tausworthe} RNG implementation, inefficient
+gather/scatter operations and smaller CPU memory bandwidth. \\
+
+\emph{Intel x86} gather/scatter instructions initially planned for \emph{Sandy
+Bridge} AVX standard, were postponed to \emph{Haswell} AVX2 planned for 2013.
+As soon AVX2 capable CPU devices appear on the market we plan to revise our
+evaluation. \\
+
+We also consider evaluating \emph{NVIDIA Kepler} devices to determine if their
+improved global memory cache can replace complicated shared memory access
+scheme.
+
+\end{blocknode}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{blocknode}{References}
+
+\renewcommand{\section}[2]{}
+\begin{thebibliography}{9}
+\bibitem{parisi} G.~Parisi ``Statistical Field Theory''
+  Chapter 5, Perseus Books Publishing (1998).
+\bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
+\bibitem{howes_thomas07}
+Lee Howes and David Thomas.
+``{\em Efficient random number generation and application using {CUDA}.}''
+In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
+  Wesley, August 2007.
+\end{thebibliography}
+
+\end{blocknode}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % \begin{blocknode}{Tausworthe RNG}
@@ -379,42 +417,6 @@ switching from SSE to AVX. \\
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{blocknode}{Conclusions}
-
-Our benchmarks give visible advantage to GPU, which is less than promised by
-many publications, however much higher that comes from theoretical performance
-comparison of tested \emph{i5 CPU 2.5 Ghz} to \emph{GTX 470}. This can be
-traced back to 128-bit only \emph{Tausworthe} RNG implementation, inefficient
-gather/scatter operations and smaller CPU memory bandwidth. \\
-
-\emph{Intel x86} gather/scatter instructions initially planned for \emph{Sandy
-Bridge} AVX standard, were postponed to \emph{Haswell} AVX2 planned for 2013.
-As soon AVX2 capable CPU devices appear on the market we plan to revise our
-evaluation. \\
-
-We also consider evaluating \emph{NVIDIA Kepler} devices to determine if their
-improved global memory cache can replace complicated shared memory access
-scheme.
-
-\end{blocknode}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{blocknode}{References}
-
-\renewcommand{\section}[2]{}
-\begin{thebibliography}{9}
-\bibitem{parisi} G.~Parisi ``Statistical Field Theory''
-  Chapter 5, Perseus Books Publishing (1998).
-\bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
-\bibitem{howes_thomas07}
-Lee Howes and David Thomas.
-``{\em Efficient random number generation and application using {CUDA}.}''
-In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
-  Wesley, August 2007.
-\end{thebibliography}
-
-\end{blocknode}
 
 \end{tikzpicture}
 
