@@ -408,13 +408,13 @@ addresses in the memory.
 \definecolor{colorone}{HTML}{FFFFFF}
 \definecolor{colortwo}{HTML}{991111}
 
-\blocknodew[($(box.south)-(yshift)-(9.25,0)$)]{20.5}{Performance}{
+\blocknodew[($(box.south)-(yshift)-(9.25,0)$)]{20.5}{Benchmark}{
 \begin{center}
 \def\arraystretch{1.1}%
 \setlength{\tabcolsep}{1em}
 \large
 \begin{tabular}{ r r r | r }
-    Size   &     GPU      &      CPU     & Boost \\
+    Size   &     GPU$^a$  &   CPU$^b$    & Boost \\
   \hline
    $32^3$  &  $1.262 ns$  &  $4.316 ns$  &  $3.419 \times$ \\
    $64^3$  &  $0.165 ns$  &  $4.857 ns$  & $29.436 \times$ \\
@@ -422,6 +422,9 @@ addresses in the memory.
   $256^3$  &  $0.113 ns$  &  $7.099 ns$  & $62.823 \times$
 \end{tabular}
 \end{center}
+
+\footnotetext[1]{\emph{GeForce GTX 470} 1.67 Ghz, 1.25GB, 448 CUDA cores, 2.0 capability}
+\footnotetext[2]{\emph{Intel Core i5-2400S CPU} 2.50 GHz, 4 core, 6MB Cache, SSE4.x/AVX}
 }
 
 \blocknodew[($(box.north)+(20.25,0)$)]{16.5}{Breakdown}{
@@ -446,7 +449,7 @@ addresses in the memory.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{blocknode}[($(box.south)-(11,0)-(yshift)$)]{Conclusions}
+\begin{blocknode}[($(box.south)-(11,.25)-(yshift)$)]{Conclusions}
 
 Our benchmarks give visible advantage to GPU, which is less than promised by
 many publications, however much higher that comes from theoretical performance
