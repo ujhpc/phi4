@@ -164,12 +164,12 @@ neighborhood cannot be updated together. Taking into account a larger
 neighborhood means that a simple checkerboard decomposition pattern cannot be
 used and we have devised a new grid decomposition scheme. 
 
-\begin{center}
-
 \def\bksize{16}
 \def\bkcount{4}
 
-\begin{tikzpicture}[scale=.255]
+\begin{center}
+
+\begin{tikzpicture}[scale=.255*1.25]
 
 \pgfmathtruncatemacro\lcsize{\bksize * \bkcount}
 \pgfmathtruncatemacro\lcsizem{\lcsize - 1}
@@ -210,7 +210,15 @@ used and we have devised a new grid decomposition scheme.
   \fill[gray] \p circle(.25);
 
 \end{tikzpicture}
-\begin{tikzpicture}[scale=.905]
+
+\end{center}
+
+\textbf{Figure 1} The partition of the lattice into blocks. The blocks
+with same number are processed in parallel by different thread blocks.
+
+\begin{center}
+
+\begin{tikzpicture}[scale=.905*1.25]
 
 \clip[rounded corners=0cm] (-1, -1) rectangle (\bksize + 1, \bksize + 1);
 
@@ -271,30 +279,10 @@ used and we have devised a new grid decomposition scheme.
 
 \end{center}
 
-\textbf{Figure 1} (Left) The partition of the lattice into blocks. The blocks
-with same number are processed in parallel by different thread blocks. \\
-
-\textbf{Figure 2} (Right) Partitioning of the blocks into disjoint sublattices.
+\textbf{Figure 2} Partitioning of the blocks into disjoint sublattices.
 Area marked in re denotes  neighborhood used in updating the center point.
 Read points are processes in parallel by different threads of the same thread
 block.
-
-\end{blocknode}
-
-\begin{blocknode}{Conclusions}
-
-Our benchmarks give visible advantage to GPU, which is less than promised by
-many publications, however much higher that comes from theoretical performance
-comparison of tested \emph{i5 CPU 2.5 Ghz} to \emph{GTX 470}. This can be
-traced back to 128-bit only \emph{Tausworthe} RNG implementation, but mostly to the inefficient memory access pattern and  vector gather/scatter operations.. 
-
-\emph{Intel x86} gather/scatter instructions initially planned for \emph{Sandy
-Bridge} AVX standard, were postponed to \emph{Haswell} AVX2 planned for 2013.
-As soon AVX2 capable CPU devices appear on the market we plan to revise our
-evaluation. 
-We also consider evaluating \emph{NVIDIA Kepler} devices to determine if their
-improved global memory cache can replace complicated shared memory access
-scheme.
 
 \end{blocknode}
 
@@ -315,7 +303,6 @@ scheme.
 \end{thebibliography}
 
 \end{blocknode}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -412,26 +399,22 @@ in consecutive memory addresses they have to be downloaded separately
 and then assembled together into one vector word. Same process applies
 to writing back. A possible solution would be rearranging the layout so
 that the values used by vector operations do lie at consecutive
-addresses in the memory. 
-
-
-
+addresses in the memory.
 
 \end{blocknode}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{blocknode}{Benchmarks}
+\definecolor{colorone}{HTML}{FFFFFF}
+\definecolor{colortwo}{HTML}{991111}
 
-
-
-\innerblock{Performance Boost}{
+\blocknodew[($(box.south)-(yshift)-(9.25,0)$)]{20.5}{Performance}{
 \begin{center}
 \def\arraystretch{1.1}%
 \setlength{\tabcolsep}{1em}
-\huge
+\large
 \begin{tabular}{ r r r | r }
-  Lattice  &     GPU      &      CPU     & Boost \\
+    Size   &     GPU      &      CPU     & Boost \\
   \hline
    $32^3$  &  $1.262 ns$  &  $4.316 ns$  &  $3.419 \times$ \\
    $64^3$  &  $0.165 ns$  &  $4.857 ns$  & $29.436 \times$ \\
@@ -441,13 +424,13 @@ addresses in the memory.
 \end{center}
 }
 
-\innerblock{Usage}{
+\blocknodew[($(box.north)+(20.25,0)$)]{16.5}{Breakdown}{
 \begin{center}
 \def\arraystretch{1.1}%
 \setlength{\tabcolsep}{1em}
-\huge
+\large
 \begin{tabular}{ r r r }
-  Operation &     GPU      &  CPU \\
+  Type      &     GPU      &  CPU \\
   \hline
   gather    &  $14.19 \%$  &  \multirow{2}{*}{$59.73 \%$} \\
   corona    &  $22.84 \%$  &  \\
@@ -458,10 +441,29 @@ addresses in the memory.
 \end{center}
 }
 
-\end{blocknode}
+\definecolor{colorone}{HTML}{006633}
+\definecolor{colortwo}{HTML}{DDFF99}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{blocknode}[($(box.south)-(11,0)-(yshift)$)]{Conclusions}
+
+Our benchmarks give visible advantage to GPU, which is less than promised by
+many publications, however much higher that comes from theoretical performance
+comparison of tested \emph{i5 CPU 2.5 Ghz} to \emph{GTX 470}. This can be
+traced back to 128-bit only \emph{Tausworthe} RNG implementation, but mostly to the inefficient memory access pattern and  vector gather/scatter operations.. 
+
+\emph{Intel x86} gather/scatter instructions initially planned for \emph{Sandy
+Bridge} AVX standard, were postponed to \emph{Haswell} AVX2 planned for 2013.
+As soon AVX2 capable CPU devices appear on the market we plan to revise our
+evaluation. 
+We also consider evaluating \emph{NVIDIA Kepler} devices to determine if their
+improved global memory cache can replace complicated shared memory access
+scheme.
+
+\end{blocknode}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \end{tikzpicture}
 
