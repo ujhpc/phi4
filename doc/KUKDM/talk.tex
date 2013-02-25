@@ -20,6 +20,25 @@
    \fi
 }
 
+
+\newcommand{\partition}[3]{
+\pgfmathtruncatemacro\lchalf{\bksize / 2}
+      \pgfmathtruncatemacro\my{Mod(#1, 2)}
+      \ifnum \my = 0
+        \pgfmathtruncatemacro\ny{Mod(#1, 4)}
+        \ifnum \ny = 2
+          \pgfmathtruncatemacro\mx{Mod(#2+2, 4)}
+        \else
+          \pgfmathtruncatemacro\mx{Mod(#2, 4)}
+        \fi
+        \ifnum \mx = 0
+            \fill[red] (#2, #1) circle(#3);
+          \fi
+         \fi
+         
+        }
+
+
 \definecolor{colorone}{HTML}{006633} % default 116699
 \definecolor{colortwo}{HTML}{DDFF99} % default CCCCCC
 \def\bksize{8}
@@ -162,77 +181,6 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 \end{frame}
 
 
-\begin{frame}
-
-\begin{tikzpicture}[scale=0.5]
-\begin{scope}[scale=0.66]
-\draw[very thin, gray] (-0.5,-0.5) grid (15.5,15.5);
-
-\foreach \x in {0,4,...,12}
-  \foreach \y in {0,4,...,12}
-    \draw[black,xshift=\x cm, yshift=\y cm, rounded corners = 2pt] (-.4,-0.4)
-      rectangle (3.4cm,3.4cm);
-
-\foreach \x in {0,...,15}
-  \foreach \y in {0,...,15}
-    \path[draw=black,fill=white] (\x, \y) circle(0.25);
-
-\foreach \x in {0,8}
-  \foreach \y in {0,8}
-    \draw[xshift=\x cm, yshift=\y cm]
-      node[black,fill opacity=0.3,scale=4,font=\bfseries\sffamily] at (1.5cm,1.5) {1}
-      node[black,fill opacity=0.3,scale=4,font=\bfseries\sffamily] at (5.5cm,1.5) {2}
-      node[black,fill opacity=0.3,scale=4,font=\bfseries\sffamily] at (1.5cm,5.5) {3}
-      node[black,fill opacity=0.3,scale=4,font=\bfseries\sffamily] at (5.5cm,5.5) {4} ;
-
-\foreach \x in {4,...,7}
-  \foreach \y in {4,...,7}
-    \fill[black] (\x, \y) circle(0.25);
-
-\foreach \x in {4,...,7}
-  \foreach \y in {2,3,8,9} {
-    \fill[gray] (\x,\y) circle(0.25);
-    \fill[gray] (\y,\x) circle(0.25);
-  }
-
-\foreach \p in {(3,3),(3,8),(8,3),(8,8)}
-  \fill[gray] \p circle(0.25);
-
-\end{scope}
-
-\begin{scope}[xshift=14.5cm,yshift=3cm]
-\clip (-3,-3) rectangle (7,7);
-
-\draw[help lines] (-3.0,-3.0) grid (7.0,7.0);
-
-% lattice points
-\foreach \x in {-2,-1,0,1,2,3,4,5,6}
-  \foreach \y in {-2,-1,0,1,2,3,4,5,6}
-    \draw (\x,\y) + (0.0,0.0) circle (0.16);
-
-% neighborhood
-\foreach \p in {(-2.5,4.0),(1.5,4.0),
-                (-2.5,0.0),(1.5,0.0),
-                (-4.5,2.0),(3.5,2.0),
-                (-4.5,6.0),(-0.5,6.0),(3.5,6.0),
-                (-4.5,-2.0),(-0.5,-2.0),(3.5,-2.0)}
-  \path[draw=black,fill,fill opacity=0.2,rounded corners=0.1cm,shorten >=2pt] \p \neighborhood;
-
-% main center neighborhood
-
-\path[draw=black,fill,fill opacity=0.4,rounded corners=0.1cm,shorten >=2pt,line width=0.75mm,cap=round,join=round] (-0.5,2.0) \neighborhood;
-
-\foreach \p in {
-  (-2, 2),( 2, 2),( 6, 2),
-  ( 0, 4),( 0, 0),( 4, 0),( 4, 4),
-  (-2,-2),( 2,-2),( 6,-2),
-  (-2, 6),( 2, 6),( 6, 6)}
-  \fill[black] \p circle(0.16);
-
-\end{scope}
-
-\end{tikzpicture}
-\end{frame}
 
 \section{CUDA Architecture}
 
@@ -307,15 +255,18 @@ H[\varphi]&=\sum_{\vi}\Biggl(
  
     \path[draw=black, fill=white] (\x, \y) circle(.25);
 }
-\foreach \x in {\bksize, ..., \bksizem}
-  \foreach \y in {\bksize, ..., \bksizem} {
- \redblack{\x}{\y}{0.25}
-}
-\foreach \x in {\bksize, ..., \bksizem}
-  \foreach \y in {\bksizeb, \bksizec} {
+
+\foreach \x in {\bksizea, ..., \bksized}
+  \foreach \y in {\bksizea,...,\bksized} {
     \fill[gray] (\x, \y) circle(.25);
     \fill[gray] (\y, \x) circle(.25);
   }
+
+
+\foreach \x in {\bksize, ..., \bksizem}
+  \foreach \y in {\bksize, ..., \bksizem} {
+ \partition{\x}{\y}{0.25}
+}
 
 
 \end{tikzpicture}
