@@ -272,6 +272,7 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 \end{tikzpicture}
 \end{frame}
 
+
 \section{CPU}
 
 \begin{frame}
@@ -285,53 +286,69 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 
 
 
-\begin{frame}[fragile]
-\frametitle{OpenMP}
-\begin{lstlisting}
-#pragma parallel for
-for(int i=0;i<n_points/2;i++) 
-   update_red(i);
-
-#pragma parallel for
-for(int i=0;i<n_points/2;i++) 
-   update_black(i);
-\end{lstlisting}
+\begin{frame}
+\frametitle{CPU implementation}
 \begin{itemize}
-\item Distributing updates between cores/threads. 
-\item Supported by all compilers. 
+\item We use same structure as on GPU.
+\item We use OpenMP to distribute lattice blocks across cores.
+\item In each block we use SSE instructions to proces 4 or 8 lattice points in parallel. 
 \end{itemize}
+\end{frame}
 
+
+\begin{frame}
+
+\begin{tikzpicture}[scale=0.25]
+
+\pgfmathtruncatemacro\lcsize{\bksize * \bkcount}
+\pgfmathtruncatemacro\lcsizem{\lcsize - 1}
+\pgfmathtruncatemacro\lcsizeb{\lcsize - \bksize}
+\pgfmathtruncatemacro\bksizea{\bksize - 2}
+\pgfmathtruncatemacro\bksizeb{\bksize - 1}
+\pgfmathtruncatemacro\bksizec{\bksize * 2}
+\pgfmathtruncatemacro\bksizem{\bksizec - 1}
+\pgfmathtruncatemacro\bksized{\bksizec + 1}
+
+\draw[very thin, gray] (-.5, -.5) grid (\lcsize - .5, \lcsize - .5);
+
+\foreach \x in {0, \bksize, ..., \lcsizeb}
+  \foreach \y in {0, \bksize, ..., \lcsizeb} {
+    \pgfmathtruncatemacro\n{Mod(\x/\bksize, 2)+2 * Mod(\y/\bksize, 2)+1}
+    \draw[colorone, xshift=\x cm, yshift=\y cm, rounded corners=2pt]
+      (-.4, -.4) rectangle
+      node[red, fill opacity=.5, anchor=center, font=\Huge\bfseries\sffamily]
+      {\n} (\bksize - .6, \bksize - .6);
+  }
+
+\foreach \x in {0, ..., \lcsizem}
+  \foreach \y in {0, ..., \lcsizem}{
+ 
+    \path[draw=black, fill=white] (\x, \y) circle(.25);
+}
+
+\foreach \x in {\bksizea, ..., \bksized}
+  \foreach \y in {\bksizea,...,\bksized} {
+    \fill[gray] (\x, \y) circle(.25);
+    \fill[gray] (\y, \x) circle(.25);
+  }
+
+
+\foreach \x in {\bksize, ..., \bksizem}
+  \foreach \y in {\bksize, ..., \bksizem} {
+ \partition{\x}{\y}{0.25}
+}
+
+
+\end{tikzpicture}
 \end{frame}
 
 
 
 \begin{frame}
-\frametitle{SSE/AVX}
-\begin{itemize}
-\item Modern Intel and AMD processors have vector operations.
-\begin{itemize} 
-\item Streaming Side Extension  (SSE) Four single precision operations.
-\item Advanced Vector Extensions (AVX) Eight  single precision operations.
-\item Xeon $\phi$ 16  singleprecision operations.
-\end{itemize}
-\end{itemize}
+\frametitle{SSE}
+
+Adm: tutaj pare zdan na temat twojej implementacji class SSE
 \end{frame}
-
-
-
-\begin{frame}
-\frametitle{SSE/AVX}
-\begin{itemize}
-\item Programming  with vector operations can be done
-\begin{itemize}
-\item Asembler :)
-\item Instrinsincs
-\item Vector types
-\item Compiler directives (Intel 13)
-\end{itemize}
-\end{itemize}
-\end{frame}
-
 
 
 
@@ -391,11 +408,14 @@ $^2$\emph{Intel Core i5-2400S CPU} 2.50 GHz, 4 core, 6MB Cache, SSE4.x/AVX
 
 \begin{frame}
 \frametitle{Conclusions}
-\begin{itemize}
-\item Efficient use of  modern processors (CPU and GPU) requires use of parallelisation.
-\item  Parallelisation inclides vectorisation, which is much hader to achieve.
-\item  CPU can be progremed in similar way as GPU, altoght they lack several important vector instructions. 
-\item Those instructions are probably introduced in Xeon $\phi$.
+\begin{itemize} 
+\item GPU is more efficient: runs closer to the peak. 
+\item This is possible thanks to the use of shared memory. Just counting on cache is not enough. 
+\item The CUDA execution model can be ported Tobago's CPU.
+\item There is no shared memory 
+\item There are no gather/scatter vector operations.
+\item Not all the  operators have vector counterparts (e.g.integer operations).
+\item All this is availble(?) on Xeon $\phi$. 
 \end{itemize}
 \end{frame}
 
