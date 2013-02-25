@@ -366,10 +366,10 @@ Adm: tutaj pare zdan na temat twojej implementacji class SSE
 \begin{tabular}{ r r r | r }
     Size   & GPU\footnotemark & CPU\footnotemark & Boost \\
   \hline
-   $32^3$  &  $1.262 ns$  &  $4.316 ns$  &  $3.419 \times$ \\
-   $64^3$  &  $0.165 ns$  &  $4.857 ns$  & $29.436 \times$ \\
-  $128^3$  &  $0.125 ns$  &  $5.444 ns$  & $43.552 \times$ \\
-  $256^3$  &  $0.113 ns$  &  $7.099 ns$  & $62.823 \times$
+   $32^3$  &  $1.262 ns$  &  $3.875 ns$  &  $3.070 \times$ \\
+   $64^3$  &  $0.165 ns$  &  $3.094 ns$  & $18.751 \times$ \\
+  $128^3$  &  $0.125 ns$  &  $3.311 ns$  & $26.488 \times$ \\
+  $256^3$  &  $0.113 ns$  &  $3.332 ns$  & $29.486 \times$
 \end{tabular}
 \end{center}
 \vfill
@@ -390,11 +390,11 @@ $^2$\emph{Intel Core i5-2400S CPU} 2.50 GHz, 4 core, 6MB Cache, SSE4.x/AVX
 \begin{tabular}{ r r r }
   Type      &     GPU      &  CPU \\
   \hline
-  gather    &  $14.19 \%$  &  \multirow{2}{*}{$59.73 \%$} \\
+  gather    &  $14.19 \%$  &  \multirow{2}{*}{$35.10 \%$} \\
   corona    &  $22.84 \%$  &  \\
-  RNG       &  $ 6.66 \%$  &  $13.88 \%$ \\
-  exp/log   &  $23.86 \%$  &  $ 6.22 \%$ \\
-  update    &  $25.75 \%$  &  $20.17 \%$
+  RNG       &  $ 6.66 \%$  &  $22.37 \%$ \\
+  exp/log   &  $23.86 \%$  &  $10.02 \%$ \\
+  update    &  $25.75 \%$  &  $32.51 \%$
 \end{tabular}
 \end{center}
 
