@@ -38,7 +38,8 @@ endif
 endif
 
 
-LDFLAGS      += -g -lpopt
+LDFLAGS      += -g 
+LIBS	     +=  -lpopt
 CPPFLAGS     += -MMD -DDIM=$(DIM) -DFLOAT=$(FLOAT) -DNCOMP=$(NCOMP)
 VPATH         = $(HOME)/downloads/gtest-1.6.0/src
 
@@ -49,7 +50,7 @@ TESTS_OBJECTS = $(subst .cpp,.o,$(wildcard *_test.cpp)) gtest-all.o
 DEPEND        = $(subst .o,.d,$(MAIN)) $(subst .o,.d,$(OBJECTS)) $(subst .o,.d,$(TESTS_OBJECTS))
 
 $(EXEC): $(MAIN) $(OBJECTS)
-	$(CXX) $(LDFLAGS) -o $(EXEC) $^
+	$(CXX) $(LDFLAGS) -o $(EXEC) $^  $(LIBS)
 
 dsym: $(EXEC)
 	dsymutil $(EXEC)

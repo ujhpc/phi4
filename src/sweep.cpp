@@ -186,8 +186,8 @@ make_sweep(F &field, const parameters<Float> &pars, const P &partition ) {
 }
 
 #else
-template<typename F, typename P  > 
-long int 
+template<typename F, typename P  >
+long int
 make_sweep(F &field, const parameters<Float> &pars, const P &partition ) {
 
   long int accepted=0;
@@ -213,10 +213,7 @@ make_sweep(F &field, const parameters<Float> &pars, const P &partition ) {
 
 
 template
-long int make_sweep< Field, Partition >( Field &,  
+long int make_sweep< Field, Partition >( Field &,
 const parameters<Float> &,
-const  Partition  &partition 
+const  Partition  &partition
 );
-
-
-
