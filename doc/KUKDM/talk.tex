@@ -21,22 +21,29 @@
 }
 
 
-\newcommand{\mappartition}[4]{
-\pgfmathtruncatemacro\lchalf{\bksize / 2}
-      \pgfmathtruncatemacro\my{Mod(#1, 2)}
-      \ifnum \my = 0
-        \pgfmathtruncatemacro\ny{Mod(#1, 4)}
-        \ifnum \ny = 2
-          \pgfmathtruncatemacro\mx{Mod(#2+2, 4)}
-        \else
-          \pgfmathtruncatemacro\mx{Mod(#2, 4)}
-        \fi
-        \ifnum \mx = 0
-            {#4}
-          \fi
-         \fi
-         
-        }
+\newcommand{\fillblockgray}[2]{
+\pgfmathtruncatemacro\llx{\bksize*(#1)-2}
+\pgfmathtruncatemacro\lly{\bksize*(#2)-2}
+\pgfmathtruncatemacro\urx{\bksize*(#1+1)+1}
+\pgfmathtruncatemacro\ury{\bksize*(#2+1)+1}
+\foreach \x in {\llx, ..., \urx}
+  \foreach \y in {\lly,...,\ury} {
+    \fill[gray] (\x, \y) circle(.25);
+  }
+}
+
+
+\newcommand{\markpartition}[2]{
+\pgfmathtruncatemacro\llx{\bksize*(#1)}
+\pgfmathtruncatemacro\lly{\bksize*(#2)}
+\pgfmathtruncatemacro\urx{\bksize*(#1+1)-1}
+\pgfmathtruncatemacro\ury{\bksize*(#2+1)-1}
+\foreach \x in {\llx, ..., \urx}
+  \foreach \y in {\lly,...,\ury} {
+    \partition{\x}{\y}{0.25}
+  }
+}
+
 
 \newcommand{\partition}[3]{
 \pgfmathtruncatemacro\lchalf{\bksize / 2}
@@ -66,7 +73,7 @@
 
 
 \title{Monte-Carlo simulations of Ginzburg-Landau model on GPU}
-\subtitle{Comparison with CPU}
+\subtitle{with comparison with CPU}
 \date{1 March 2013}
 \author{Piotr Bialas}
 \institute{Faculty of Physics, Astronomy and Computer Science, Jagiellonian University\\
@@ -87,8 +94,6 @@ J.~Kowal, A.~Strzelecki
 \end{frame}
 
 \section{The model}
-
-
 
 
 \begin{frame}
@@ -192,7 +197,7 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 
 
 
-\section{CUDA implemnation}
+\section{CUDA implementation}
 
 \begin{frame}
 \frametitle{CUDA architecture -- SIMT}
@@ -213,6 +218,7 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 \begin{frame}
 \frametitle{Memory hierarchy}
 \begin{itemize}
+\item Registers. 
 \item Max throughput
 \begin{itemize}
 \item 32 FMAD per cycle
@@ -222,7 +228,6 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 \item 8.07 TB/s in 2.67 TB/s out
 \end{itemize}
 \end{itemize}
-\item Registers can sustain it.
 \item Shared memory
 \begin{itemize}
 \item 4 x 32 x 15 x 1401MHz/2 = 1.3TB/s
@@ -266,20 +271,25 @@ H[\varphi]&=\sum_{\vi}\Biggl(
     \path[draw=black, fill=white] (\x, \y) circle(.25);
 }
 
-\foreach \x in {\bksizea, ..., \bksized}
-  \foreach \y in {\bksizea,...,\bksized} {
-    \fill[gray] (\x, \y) circle(.25);
-    \fill[gray] (\y, \x) circle(.25);
-  }
+% \foreach \x in {\bksizea, ..., \bksized}
+%   \foreach \y in {\bksizea,...,\bksized} {
+%     \fill[gray] (\x, \y) circle(.25);
+%     \fill[gray] (\y, \x) circle(.25);
+%   }
+
+\fillblockgray{0}{0}
+\markpartition{0}{0}
+\fillblockgray{0}{2}
+\fillblockgray{2}{0}
+\fillblockgray{2}{2}
 
 
-\foreach \x in {\bksize, ..., \bksizem}
-  \foreach \y in {\bksize, ..., \bksizem} {
- \partition{\x}{\y}{0.25}
 }
 
 
 \end{tikzpicture}
+
+\tiny M.~Weigel, J.~Comput.~Phys. 231 (2012) 3064.
 \end{frame}
 
 
@@ -418,15 +428,20 @@ $^2$\emph{Intel Core i5-2400S CPU} 2.50 GHz, 4 core, 6MB Cache, SSE4.x/AVX
 
 \begin{frame}
 \frametitle{Conclusions}
-\begin{itemize} 
-\item GPU is more efficient: runs closer to the peak. 
+\begin{itemize}
+\item GPU is more efficient: runs closer to the peak.
+\begin{itemize}
 \item This is possible thanks to the use of shared memory. Just
   counting on cache is not enough.
-\item The CUDA execution model can be ported Tobago's CPU.
-\item There is no shared memory 
+\item This also takes care of indexing.
+\end{itemize}
+\item The CUDA execution model can be ported to CPU.
+\begin{itemize}
+\item There is no shared memory only cache.
 \item There are no gather/scatter vector operations.
-\item Not all the  operators have vector counterparts (e.g.integer operations).
-\item All this is availble(?) on Xeon $\phi$. 
+\item Not all the  operators have vector counterparts (e.g.integer operations in AVX).
+\item All this is availble(?) on Xeon $\phi$. Is Cyfronet plannig to install some ? 
+\end{itemize}
 \end{itemize}
 \end{frame}
 
