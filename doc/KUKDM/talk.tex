@@ -21,6 +21,23 @@
 }
 
 
+\newcommand{\mappartition}[4]{
+\pgfmathtruncatemacro\lchalf{\bksize / 2}
+      \pgfmathtruncatemacro\my{Mod(#1, 2)}
+      \ifnum \my = 0
+        \pgfmathtruncatemacro\ny{Mod(#1, 4)}
+        \ifnum \ny = 2
+          \pgfmathtruncatemacro\mx{Mod(#2+2, 4)}
+        \else
+          \pgfmathtruncatemacro\mx{Mod(#2, 4)}
+        \fi
+        \ifnum \mx = 0
+            {#4}
+          \fi
+         \fi
+         
+        }
+
 \newcommand{\partition}[3]{
 \pgfmathtruncatemacro\lchalf{\bksize / 2}
       \pgfmathtruncatemacro\my{Mod(#1, 2)}
@@ -48,8 +65,8 @@
 \lstset{basicstyle=\small}
 
 
-\title{Ginzburg-Landau model on GPU}
-%\subtitle{Wykład 2}
+\title{Monte-Carlo simulations of Ginzburg-Landau model on GPU}
+\subtitle{Comparison with CPU}
 \date{1 March 2013}
 \author{Piotr Bialas}
 \institute{Faculty of Physics, Astronomy and Computer Science, Jagiellonian University\\
@@ -75,7 +92,7 @@ J.~Kowal, A.~Strzelecki
 
 
 \begin{frame}
-\frametitle{Ginsburg-Landau model ($\phi^4$)}
+\frametitle{Ginsburg-Landau model ($\vphi^4$)}
 \begin{equation*}\label{eq:ham}\begin{split}
 H[\varphi]&=\sum_{\vi}\Biggl(
 \frac{1}{2}\sum_{\mu=1}^d(\vphi(x_\vi+\a{\mu})-\vphi(x_\vi))^2\\
@@ -90,7 +107,7 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 
 
 \begin{frame}
-\frametitle{Ginsburg-Landau model ($\phi^4$) }
+\frametitle{Ginsburg-Landau model ($\vphi^4$) }
 \begin{tikzpicture} 
 %\pgfmathtruncatemacro\lcsize{\bksize * \bkcount}
 \def\lcsize{8}
@@ -127,22 +144,12 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 }
 
 
-% \node at (2,0)  [circle,fill=gray,draw=black] {};
-% \node at (2,4)  [circle,fill=gray,draw=black] {};
-% \node at (0,2)  [circle,fill=gray,draw=black] {};
-% \node at (4,2)  [circle,fill=gray,draw=black] {};
-
-% \node at (3,3)  [circle,fill=gray,draw=black] {};
-% \node at (1,1)  [circle,fill=gray,draw=black] {};
-% \node at (3,1)  [circle,fill=gray,draw=black] {};
-% \node at (1,3)  [circle,fill=gray,draw=black] {};
-
-
 \end{tikzpicture}
 
 \end{frame}
 
 \begin{frame}
+\frametitle{Parallel partitions}
 \begin{tikzpicture}[scale=0.75]
 
 % \clip[rounded corners=0cm] (-1, -1) rectangle (\bksize + 1, \bksize + 1);
