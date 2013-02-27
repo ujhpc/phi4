@@ -20,6 +20,7 @@
    \fi
 }
 
+\definecolor{lightgray}{HTML}{EEAA66}
 
 \newcommand{\fillblockgray}[2]{
 \pgfmathtruncatemacro\llx{\bksize*(#1)-2}
@@ -28,7 +29,7 @@
 \pgfmathtruncatemacro\ury{\bksize*(#2+1)+1}
 \foreach \x in {\llx, ..., \urx}
   \foreach \y in {\lly,...,\ury} {
-    \fill[gray] (\x, \y) circle(.25);
+    \fill[lightgray] (\x, \y) circle(.25);
   }
 }
 
@@ -47,7 +48,7 @@
 \fi
 \fi
 \ifnum \num = #3
-\fill[red] (#1, #2) circle(0.25);
+\fill[black] (#1, #2) circle(0.35);
 \fi
 
 }
@@ -275,7 +276,7 @@ H[\varphi]&=\sum_{\vi}\Biggl(
     \pgfmathtruncatemacro\n{Mod(\x/\bksize, 2)+2 * Mod(\y/\bksize, 2)+1}
     \draw[colorone, xshift=\x cm, yshift=\y cm, rounded corners=2pt]
       (-.4, -.4) rectangle
-      node[red, fill opacity=.5, anchor=center, font=\Huge\bfseries\sffamily]
+      node[red, fill opacity=0, anchor=center, font=\Huge\bfseries\sffamily]
       {\n} (\bksize - .6, \bksize - .6);
   }
 
@@ -389,7 +390,7 @@ H[\varphi]&=\sum_{\vi}\Biggl(
     \pgfmathtruncatemacro\n{Mod(\x/\bksize, 2)+2 * Mod(\y/\bksize, 2)+1}
     \draw[colorone, xshift=\x cm, yshift=\y cm, rounded corners=2pt]
       (-.4, -.4) rectangle
-      node[red, fill opacity=.5, anchor=center, font=\Huge\bfseries\sffamily]
+      node[red, fill opacity=0, anchor=center, font=\Huge\bfseries\sffamily]
       {\n} (\bksize - .6, \bksize - .6);
   }
 
