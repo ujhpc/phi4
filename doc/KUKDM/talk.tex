@@ -373,7 +373,6 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 \end{itemize}
 \end{frame}
 
-
 \begin{frame}
 
 \begin{tikzpicture}[scale=0.25]
@@ -381,11 +380,7 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 \pgfmathtruncatemacro\lcsize{\bksize * \bkcount}
 \pgfmathtruncatemacro\lcsizem{\lcsize - 1}
 \pgfmathtruncatemacro\lcsizeb{\lcsize - \bksize}
-\pgfmathtruncatemacro\bksizea{\bksize - 2}
-\pgfmathtruncatemacro\bksizeb{\bksize - 1}
-\pgfmathtruncatemacro\bksizec{\bksize * 2}
-\pgfmathtruncatemacro\bksizem{\bksizec - 1}
-\pgfmathtruncatemacro\bksized{\bksizec + 1}
+
 
 \draw[very thin, gray] (-.5, -.5) grid (\lcsize - .5, \lcsize - .5);
 
@@ -404,21 +399,18 @@ H[\varphi]&=\sum_{\vi}\Biggl(
     \path[draw=black, fill=white] (\x, \y) circle(.25);
 }
 
-\foreach \x in {\bksizea, ..., \bksized}
-  \foreach \y in {\bksizea,...,\bksized} {
-    \fill[gray] (\x, \y) circle(.25);
-    \fill[gray] (\y, \x) circle(.25);
-  }
 
-
-\foreach \x in {\bksize, ..., \bksizem}
-  \foreach \y in {\bksize, ..., \bksizem} {
- \partition{\x}{\y}{0.25}
-}
-
-
+\only<1>{\fillblockgray{0}{0}
+\markpartition{0}{0}{0}
+\fillblockgray{0}{2}
+\markpartition{0}{2}{0}
+\fillblockgray{2}{0}
+\markpartition{2}{0}{0}
+\fillblockgray{2}{2}
+\markpartition{2}{2}{0}}
 \end{tikzpicture}
 \end{frame}
+
 
 
 
@@ -498,7 +490,8 @@ $^2$\emph{Intel Core i5-2400S CPU} 2.50 GHz, 4 core, 6MB Cache, SSE4.x/AVX
 \item There is no shared memory only cache.
 \item There are no gather/scatter vector operations.
 \item Not all the  operators have vector counterparts (e.g.integer operations in AVX).
-\item All this is availble(?) on Xeon $\phi$. Is Cyfronet plannig to install some ? 
+\item All this is availble(?) on Xeon $\phi$. \\
+Is Cyfronet plannig to install some ? 
 \end{itemize}
 \end{itemize}
 \end{frame}
