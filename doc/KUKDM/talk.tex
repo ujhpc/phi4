@@ -32,15 +32,34 @@
   }
 }
 
+\newcommand{\npartition}[3]{
+\pgfmathtruncatemacro\row{Mod(#2,4)}
+\ifnum \row = 0
+   \pgfmathtruncatemacro\num{Mod(#1,4)}
+\else \ifnum \row  = 1
+   \pgfmathtruncatemacro\num{Mod(#1,4)+4}
+\else \ifnum \row  = 2
+   \pgfmathtruncatemacro\num{Mod(Mod(#1,4)+2,4)}
+\else \ifnum \row  = 3
+   \pgfmathtruncatemacro\num{Mod(Mod(#1,4)+2,4)+4}
+\fi
+\fi
+\fi
+\fi
+\ifnum \num = #3
+\fill[red] (#1, #2) circle(0.25);
+\fi
 
-\newcommand{\markpartition}[2]{
+}
+
+\newcommand{\markpartition}[3]{
 \pgfmathtruncatemacro\llx{\bksize*(#1)}
 \pgfmathtruncatemacro\lly{\bksize*(#2)}
 \pgfmathtruncatemacro\urx{\bksize*(#1+1)-1}
 \pgfmathtruncatemacro\ury{\bksize*(#2+1)-1}
 \foreach \x in {\llx, ..., \urx}
   \foreach \y in {\lly,...,\ury} {
-    \partition{\x}{\y}{0.25}
+    \npartition{\x}{\y}{#3}
   }
 }
 
@@ -58,9 +77,8 @@
         \ifnum \mx = 0
             \fill[red] (#2, #1) circle(#3);
           \fi
-         \fi
-         
-        }
+         \fi         
+       }
 
 
 \definecolor{colorone}{HTML}{006633} % default 116699
@@ -248,11 +266,7 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 \pgfmathtruncatemacro\lcsize{\bksize * \bkcount}
 \pgfmathtruncatemacro\lcsizem{\lcsize - 1}
 \pgfmathtruncatemacro\lcsizeb{\lcsize - \bksize}
-\pgfmathtruncatemacro\bksizea{\bksize - 2}
-\pgfmathtruncatemacro\bksizeb{\bksize - 1}
-\pgfmathtruncatemacro\bksizec{\bksize * 2}
-\pgfmathtruncatemacro\bksizem{\bksizec - 1}
-\pgfmathtruncatemacro\bksized{\bksizec + 1}
+
 
 \draw[very thin, gray] (-.5, -.5) grid (\lcsize - .5, \lcsize - .5);
 
@@ -271,20 +285,64 @@ H[\varphi]&=\sum_{\vi}\Biggl(
     \path[draw=black, fill=white] (\x, \y) circle(.25);
 }
 
-% \foreach \x in {\bksizea, ..., \bksized}
-%   \foreach \y in {\bksizea,...,\bksized} {
-%     \fill[gray] (\x, \y) circle(.25);
-%     \fill[gray] (\y, \x) circle(.25);
-%   }
 
-\fillblockgray{0}{0}
-\markpartition{0}{0}
+\only<1>{\fillblockgray{0}{0}
+\markpartition{0}{0}{0}
 \fillblockgray{0}{2}
+\markpartition{0}{2}{0}
 \fillblockgray{2}{0}
+\markpartition{2}{0}{0}
 \fillblockgray{2}{2}
+\markpartition{2}{2}{0}}
+
+\only<2>{\fillblockgray{0}{0}
+\markpartition{0}{0}{1}
+\fillblockgray{0}{2}
+\markpartition{0}{2}{1}
+\fillblockgray{2}{0}
+\markpartition{2}{0}{1}
+\fillblockgray{2}{2}
+\markpartition{2}{2}{1}}
+
+\only<3>{\fillblockgray{0}{0}
+\markpartition{0}{0}{2}
+\fillblockgray{0}{2}
+\markpartition{0}{2}{2}
+\fillblockgray{2}{0}
+\markpartition{2}{0}{2}
+\fillblockgray{2}{2}
+\markpartition{2}{2}{2}}
+
+\only<4>{
+\fillblockgray{1}{0}
+\markpartition{1}{0}{0}
+\fillblockgray{1}{2}
+\markpartition{1}{2}{0}
+\fillblockgray{3}{0}
+\markpartition{3}{0}{0}
+\fillblockgray{3}{2}
+\markpartition{3}{2}{0}}
+
+\only<5>{
+\fillblockgray{1}{0}
+\markpartition{1}{0}{1}
+\fillblockgray{1}{2}
+\markpartition{1}{2}{1}
+\fillblockgray{3}{0}
+\markpartition{3}{0}{1}
+\fillblockgray{3}{2}
+\markpartition{3}{2}{1}}
 
 
-}
+\only<6>{
+\fillblockgray{1}{0}
+\markpartition{1}{0}{2}
+\fillblockgray{1}{2}
+\markpartition{1}{2}{2}
+\fillblockgray{3}{0}
+\markpartition{3}{0}{2}
+\fillblockgray{3}{2}
+\markpartition{3}{2}{2}}
 
 
 \end{tikzpicture}
