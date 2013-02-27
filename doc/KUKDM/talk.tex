@@ -413,15 +413,31 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 \end{frame}
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}
-\frametitle{SSE}
-
-Adm: tutaj pare zdan na temat twojej implementacji class SSE
+\frametitle{AVX/SSE - Objective}
+\begin{itemize}
+\item Drop in vector replacement for scalar type variables
+\item Use compiler AVX/SSE codegen via
+  \texttt{\_\_attribute\_\_((vector\_size(ncomp*tsize)))}
+\item Extend operators for simple POD types in C/C++!?
+\end{itemize}
 \end{frame}
 
+\begin{frame}
+\frametitle{AVX/SSE - Solution}
+\begin{itemize}
+\item Custom class wrapping \texttt{vector\_size}
+\item Drop in vector replacement for scalar type
+\item Defines all operators available for scalar types
+\item Existing function just take vector arguments now
+\item Rest remains the same \\
+  \texttt{action -= phi2*(quadratic\_coef+gr*phi2)}
+\end{itemize}
+\end{frame}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame} 
 
