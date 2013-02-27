@@ -437,7 +437,7 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 \end{itemize}
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame} 
 
@@ -449,19 +449,17 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 \begin{center}
 \def\arraystretch{1.1}%
 \setlength{\tabcolsep}{1em}
-\large
-\begin{tabular}{ r r r | r }
-    Size   & GPU\footnotemark & CPU\footnotemark & Boost \\
+\begin{tabular}{ r r r r r | r }
+    Size   & GPU\footnotemark & GFlops & CPU\footnotemark &  & Boost \\
   \hline
-   $32^3$  &  $1.262 ns$  &  $3.875 ns$  &  $3.070 \times$ \\
-   $64^3$  &  $0.165 ns$  &  $3.094 ns$  & $18.751 \times$ \\
-  $128^3$  &  $0.125 ns$  &  $3.311 ns$  & $26.488 \times$ \\
-  $256^3$  &  $0.113 ns$  &  $3.332 ns$  & $29.486 \times$
+   $32^3$  &  $1.262 ns$  & 27.1  &   $3.875 ns$   & &  $3.070 \times$ \\
+   $64^3$  &  $0.165 ns$  & 206.8 & $3.094 ns$     & & $18.751 \times$ \\
+  $128^3$  &  $0.125 ns$  & 273.0 & $3.311 ns$     & & $26.488 \times$ \\
+  $256^3$  &  $0.113 ns$  & 302.0 & $3.332 ns$     & & $29.486 \times$
 \end{tabular}
 \end{center}
 \vfill
-\small
-$^1$\emph{GeForce GTX 470} 1.67 Ghz, 1.25GB, 448 CUDA cores, 2.0 capability\\
+$^1$\emph{GeForce GTX 470} 1.2 Ghz, 1.25GB, 448 CUDA cores, 2.0 capability\\
 $^2$\emph{Intel Core i5-2400S CPU} 2.50 GHz, 4 core, 6MB Cache, SSE4.x/AVX
 
 \end{frame}
