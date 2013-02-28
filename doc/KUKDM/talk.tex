@@ -127,6 +127,9 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 (\vphi(x_\vi+\a{\mu})-2\vphi(x_{\vi})+\vphi(x_\vi-\a\mu))\Bigr)^2\Biggr).
 \end{split}
 \end{equation*}
+\begin{equation*}
+P[\varphi]\propto \exp\left(-H[\varphi]\right)
+\end{equation*}
 \end{frame}
 
 
@@ -448,44 +451,23 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 
 \begin{center}
 \def\arraystretch{1.1}%
-\setlength{\tabcolsep}{1em}
-\begin{tabular}{ r r r r r | r }
-    Size   & GPU\footnotemark & GFlops & CPU\footnotemark &  & Boost \\
+\setlength{\tabcolsep}{0.25em}
+\begin{tabular}{ r| r r r | r r r| r }
+           & \multicolumn{3}{c|}{GPU}  & \multicolumn{2}{c}{CPU}   &  \\
+    Size   & time(ns) & Gflops & Gexps &time(ns) & Gflops & Glogs & Boost \\
   \hline
-   $32^3$  &  $1.262 ns$  & 27.1  &   $3.875 ns$   & &  $3.070 \times$ \\
-   $64^3$  &  $0.165 ns$  & 206.8 & $3.094 ns$     & & $18.751 \times$ \\
-  $128^3$  &  $0.125 ns$  & 273.0 & $3.311 ns$     & & $26.488 \times$ \\
-  $256^3$  &  $0.113 ns$  & 302.0 & $3.332 ns$     & & $29.486 \times$
+   $32^3$  &  $1.26$  & 27.1  & 0.8& $3.88$     &8.8  & 0.26 &  $3.1 \times$ \\
+   $64^3$  &  $0.17$  & 206.8 & 6.1& $3.09$     &11.0 & 0.32&$18.8 \times$ \\
+  $128^3$  &  $0.13$  & 273.0 & 8.0& $3.31$     &10.3 & 0.30&$26.5 \times$ \\
+  $256^3$  &  $0.11$  & 302.0 & 8.9& $3.33$     &10.3 & 0.30 &$29.5 \times$
 \end{tabular}
 \end{center}
 \vfill
-$^1$\emph{GeForce GTX 470} 1.2 Ghz, 1.25GB, 448 CUDA cores, 2.0 capability\\
-$^2$\emph{Intel Core i5-2400S CPU} 2.50 GHz, 4 core, 6MB Cache, SSE4.x/AVX
-
-\end{frame}
-
-
-
-
-\begin{frame} 
-\begin{center}
-\def\arraystretch{1.1}%
-\setlength{\tabcolsep}{1em}
-\large
-\begin{tabular}{ r r r }
-  Type      &     GPU      &  CPU \\
-  \hline
-  gather    &  $14.19 \%$  &  \multirow{2}{*}{$35.10 \%$} \\
-  corona    &  $22.84 \%$  &  \\
-  RNG       &  $ 6.66 \%$  &  $22.37 \%$ \\
-  exp/log   &  $23.86 \%$  &  $10.02 \%$ \\
-  update    &  $25.75 \%$  &  $32.51 \%$
-\end{tabular}
-\end{center}
-
-
-\definecolor{colorone}{HTML}{006633}
-\definecolor{colortwo}{HTML}{DDFF99}
+\small
+\emph{GeForce GTX 470} 1.2 Ghz, 1.25GB, 448 CUDA cores,\\
+ $\approx$1000Gflops\\
+\emph{Intel Core i5-2400S CPU} 2.50 GHz, 4 core, 6MB Cache, SSE4.x/AVX\\
+$\approx$160Gflops
 \end{frame}
 
 
@@ -505,7 +487,7 @@ $^2$\emph{Intel Core i5-2400S CPU} 2.50 GHz, 4 core, 6MB Cache, SSE4.x/AVX
 \item There is no shared memory only cache.
 \item There are no gather/scatter vector operations.
 \item Not all the  operators have vector counterparts (e.g.integer operations in AVX).
-\item All this is availble(?) on Xeon $\phi$. \\
+\item Some of this is available(?) on Xeon $\phi$. \\
 Is Cyfronet plannig to install some ? 
 \end{itemize}
 \end{itemize}
