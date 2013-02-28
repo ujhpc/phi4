@@ -416,80 +416,80 @@ P[\varphi]\propto \exp\left(-H[\varphi]\right)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}
-\frametitle{AVX/SSE - Objective}
-\begin{itemize}
-\item Drop in vector replacement for scalar type variables
-\item Use compiler AVX/SSE codegen via
-  \texttt{\_\_attribute\_\_((vector\_size(ncomp*tsize)))}
-\item Extend operators for simple POD types in C/C++!?
-\end{itemize}
+  \frametitle{AVX/SSE - Objective}
+  \begin{itemize}
+    \item Drop in vector replacement for scalar type variables
+    \item Use compiler AVX/SSE code-gen via
+    \texttt{\_\_attribute\_\_((vector\_size(ncomp*tsize)))}
+    \item Extend operators for simple POD types in C/C++!?
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
-\frametitle{AVX/SSE - Solution}
-\begin{itemize}
-\item Custom class wrapping \texttt{vector\_size}
-\item Drop in vector replacement for scalar type
-\item Defines all operators available for scalar types
-\item Existing function just take vector arguments now
-\item Rest remains the same \\
-  \texttt{action -= phi2*(quadratic\_coef+gr*phi2)}
-\end{itemize}
+  \frametitle{AVX/SSE - Solution}
+  \begin{itemize}
+    \item Custom class wrapping \texttt{vector\_size}
+    \item Drop in vector replacement for scalar type
+    \item Defines all operators available for scalar types
+    \item Existing function just take vector arguments now
+    \item Rest remains the same \\
+    \texttt{action -= phi2*(quadratic\_coef+gr*phi2)}
+  \end{itemize}
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame} 
 
 \frametitle{Performance}
-\definecolor{colorone}{HTML}{FFFFFF}
-\definecolor{colortwo}{HTML}{991111}
-
 
 \begin{center}
 \def\arraystretch{1.1}%
 \setlength{\tabcolsep}{0.25em}
 \begin{tabular}{ r| r r r | r r r| r }
-           & \multicolumn{3}{c|}{GPU}  & \multicolumn{2}{c}{CPU}   &  \\
-    Size   & time(ns) & Gflops & Gexps &time(ns) & Gflops & Glogs & Boost \\
+           & \multicolumn{3}{c|}{GPU\footnotemark} &
+             \multicolumn{3}{c|}{CPU\footnotemark}  &  \\
+    size   & time(ns) & Gflops & Gexps &time(ns) & Gflops & Glogs & boost \\
   \hline
-   $32^3$  &  $1.26$  & 27.1  & 0.8& $3.88$     &8.8  & 0.26 &  $3.1 \times$ \\
-   $64^3$  &  $0.17$  & 206.8 & 6.1& $3.09$     &11.0 & 0.32&$18.8 \times$ \\
-  $128^3$  &  $0.13$  & 273.0 & 8.0& $3.31$     &10.3 & 0.30&$26.5 \times$ \\
-  $256^3$  &  $0.11$  & 302.0 & 8.9& $3.33$     &10.3 & 0.30 &$29.5 \times$
+   $32^3$  & 1.26     &  27.1 & 0.8 & 3.88    &  8.8 & 0.26 &  $3.1 \times$ \\
+   $64^3$  & 0.17     & 206.8 & 6.1 & 3.09    & 11.0 & 0.32 & $18.8 \times$ \\
+  $128^3$  & 0.13     & 273.0 & 8.0 & 3.31    & 10.3 & 0.30 & $26.5 \times$ \\
+  $256^3$  & 0.11     & 302.0 & 8.9 & 3.33    & 10.3 & 0.30 & $29.5 \times$ \\
+  \hline
+                      & \footnotesize peak & $\approx 1000$ &
+                      & \footnotesize peak & $\approx 160$ &
 \end{tabular}
 \end{center}
 \vfill
 \small
-\emph{GeForce GTX 470} 1.2 Ghz, 1.25GB, 448 CUDA cores,\\
- $\approx$1000Gflops\\
-\emph{Intel Core i5-2400S CPU} 2.50 GHz, 4 core, 6MB Cache, SSE4.x/AVX\\
-$\approx$160Gflops
+$^1$\emph{GeForce GTX 470} \, 1.2 GHz, 1.25GB, 448 CUDA cores \\
+$^2$\emph{Intel Core i5-2400S} \, 2.5 GHz, 4 core, 6MB cache, SSE4.x/AVX
 \end{frame}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Conclusions}
 
 \begin{frame}
-\frametitle{Conclusions}
-\begin{itemize}
-\item GP is faster. 
-\item GPU is more efficient: runs closer to the peak.
-\begin{itemize}
-\item This is possible thanks to the use of shared memory. Just
-  counting on cache is not enough.
-\item This also takes care of indexing.
-\end{itemize}
-\item The CUDA execution model can be ported to CPU.
-\begin{itemize}
-\item There is no shared memory only cache.
-\item There are no gather/scatter vector operations.
-\item Not all the  operators have vector counterparts (e.g.integer operations in AVX).
-\item Some of this is available(?) on Xeon $\phi$. \\
-Is Cyfronet plannig to install some ? 
-\end{itemize}
-\end{itemize}
+  \frametitle{Conclusions}
+  \begin{itemize}
+    \item GPU has more computing power.
+    \item GPU is more efficient: easier to reach closer to the peak.
+    \begin{itemize}
+      \item Possible thanks to the use of fast shared memory
+      \item When counting on cache is just not enough
+      \item Shared memory simplifies indexing
+    \end{itemize}
+    \item The CUDA (SIMT) execution model can be ported to CPU:
+    \begin{itemize}
+      \item No shared memory, only cache, little control
+      \item No gather/scatter vector load operations
+      \item Vector assembly from memory is a bottleneck
+      \item Half-wide only (128-bit) vector integer operations
+      \vspace{1em}
+      \item \emph{Xeon $\phi$} \& unreleased \emph{Haswell} address these issues
+    \end{itemize}
+  \end{itemize}
 \end{frame}
-
 
 \end{document}
