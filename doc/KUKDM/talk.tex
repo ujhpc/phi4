@@ -20,8 +20,6 @@
    \fi
 }
 
-\definecolor{lightgray}{HTML}{EEAA66}
-
 \newcommand{\fillblockgray}[2]{
 \pgfmathtruncatemacro\llx{\bksize*(#1)-2}
 \pgfmathtruncatemacro\lly{\bksize*(#2)-2}
@@ -29,7 +27,7 @@
 \pgfmathtruncatemacro\ury{\bksize*(#2+1)+1}
 \foreach \x in {\llx, ..., \urx}
   \foreach \y in {\lly,...,\ury} {
-    \fill[lightgray] (\x, \y) circle(.25);
+    \fill[craneorange] (\x, \y) circle(.25);
   }
 }
 
