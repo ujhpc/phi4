@@ -224,12 +224,11 @@ P[\varphi]\propto \exp\left(-H[\varphi]\right)
 \begin{frame}
 \frametitle{CUDA architecture -- SIMT}
 \begin{itemize}
-\item Logically CUDA program is run as a collection of concurrent {\em threads}.
+\item GPUs are massively parallel ($cores >  500$). 
+\item Logically CUDA program is run as a collection of {\em lightweight} concurrent {\em threads}.
 \item Every thread is executing same program called {\em kernel}.
-\item Smallest execution unit is 32 threads that make up a warp.
 \item Threads are grouped in thread blocks.
-\item Threads are run on scalar processors (CUDA cores). 
-\item There should
+\item Usually there should
       be much more threads then cores.
 \end{itemize}
 \end{frame}
@@ -241,22 +240,20 @@ P[\varphi]\propto \exp\left(-H[\varphi]\right)
 \frametitle{Memory hierarchy}
 \begin{itemize}
 \item Registers. 
-\item Max throughput
 \begin{itemize}
-\item 32 FMAD per cycle
-\begin{itemize}
-\item 12 bytes in 4 bytes out
-\item 12x 32x15x1401MHz
-\item 8.07 TB/s in 2.67 TB/s out
+\item 8.07 TB/s 
 \end{itemize}
-\end{itemize}
-\item Shared memory
+\item Shared memory/L1cache
 \begin{itemize}
 \item 4 x 32 x 15 x 1401MHz/2 = 1.3TB/s
 \end{itemize}
 \item Global memory
 \begin{itemize}
 \item 156GB/s
+\end{itemize}
+\item CPU memory
+\begin{itemize}
+\item 5GB/s
 \end{itemize}
 \end{itemize}
 
@@ -351,7 +348,7 @@ P[\varphi]\propto \exp\left(-H[\varphi]\right)
 
 \end{tikzpicture}
 
-\tiny M.~Weigel, J.~Comput.~Phys. 231 (2012) 3064.
+\visible<1>{\tiny M.~Weigel, J.~Comput.~Phys. 231 (2012) 3064.}
 \end{frame}
 
 
