@@ -17,11 +17,86 @@
 \newcommand{\vj}{{\vec{j}}}
 \newcommand{\vmu}{\vec{\mu}}
 
+\newcommand{\redblack}[3]{ 
+\pgfmathtruncatemacro{\odd}{Mod(#1+#2,2)}
+   \ifnum \odd=0
+      \fill[fill=black] (#1,#2) circle[radius=#3];
+   \else
+      \fill[fill=red] (#1,#2) circle[radius=#3];
+   \fi
+}
+
+\newcommand{\fillblockgray}[2]{
+\pgfmathtruncatemacro\llx{\bksize*(#1)-2}
+\pgfmathtruncatemacro\lly{\bksize*(#2)-2}
+\pgfmathtruncatemacro\urx{\bksize*(#1+1)+1}
+\pgfmathtruncatemacro\ury{\bksize*(#2+1)+1}
+\foreach \x in {\llx, ..., \urx}
+  \foreach \y in {\lly,...,\ury} {
+    \fill[gray] (\x, \y) circle(.25);
+  }
+}
+
+\newcommand{\npartition}[3]{
+\pgfmathtruncatemacro\row{Mod(#2,4)}
+\ifnum \row = 0
+   \pgfmathtruncatemacro\num{Mod(#1,4)}
+\else \ifnum \row  = 1
+   \pgfmathtruncatemacro\num{Mod(#1,4)+4}
+\else \ifnum \row  = 2
+   \pgfmathtruncatemacro\num{Mod(Mod(#1,4)+2,4)}
+\else \ifnum \row  = 3
+   \pgfmathtruncatemacro\num{Mod(Mod(#1,4)+2,4)+4}
+\fi
+\fi
+\fi
+\fi
+\ifnum \num = #3
+\fill[black] (#1, #2) circle(0.35);
+\fi
+
+}
+
+\newcommand{\markpartition}[3]{
+\pgfmathtruncatemacro\llx{\bksize*(#1)}
+\pgfmathtruncatemacro\lly{\bksize*(#2)}
+\pgfmathtruncatemacro\urx{\bksize*(#1+1)-1}
+\pgfmathtruncatemacro\ury{\bksize*(#2+1)-1}
+\foreach \x in {\llx, ..., \urx}
+  \foreach \y in {\lly,...,\ury} {
+    \npartition{\x}{\y}{#3}
+  }
+}
+
+
+\newcommand{\partition}[3]{
+\pgfmathtruncatemacro\lchalf{\bksize / 2}
+      \pgfmathtruncatemacro\my{Mod(#1, 2)}
+      \ifnum \my = 0
+        \pgfmathtruncatemacro\ny{Mod(#1, 4)}
+        \ifnum \ny = 2
+          \pgfmathtruncatemacro\mx{Mod(#2+2, 4)}
+        \else
+          \pgfmathtruncatemacro\mx{Mod(#2, 4)}
+        \fi
+        \ifnum \mx = 0
+            \fill[red] (#2, #1) circle(#3);
+          \fi
+         \fi         
+       }
+
+
 \def\neighborhood{--
   ++(0,-0.5)-- ++(1,0)-- ++(0,-0.5)-- ++(0,-0.5)-- ++(1,0)--
   ++(0,-1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)--
   ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,-1)--
   ++(-1,0)-- ++(0,-1)-- ++(-1,0)-- ++(0,-0.6)}
+
+\definecolor{colorone}{HTML}{006633} % default 116699
+\definecolor{colortwo}{HTML}{DDFF99} % default CCCCCC
+\def\bksize{8}
+\def\bkcount{4}
+\def\lcsize{5}
 
 \title{ GPU-accelerated and CPU SIMD Optimized \\ Monte Carlo Simulation of $\phi^4$ Model}
 \author{Piotr Bialas \and Jakub Kowal \and Adam Strzelecki}
@@ -71,88 +146,137 @@ account a larger neighborhood means that a simple checkerboard
 decomposition pattern cannot be used and we have devised a new grid
 decomposition scheme.
 
-
-
 \begin{figure}
 \begin{center}
-\begin{tikzpicture}[scale=0.5]
-\begin{scope}[scale=0.66]
-\draw[very thin, gray] (-0.5,-0.5) grid (15.5,15.5);
+\begin{tikzpicture} 
+%\pgfmathtruncatemacro\lcsize{\bksize * \bkcount}
+\def\lcsize{8}
+\pgfmathtruncatemacro\lcsizem{\lcsize - 1}
+\pgfmathtruncatemacro\lcsizeb{\lcsize - \bksize}
+\pgfmathtruncatemacro\bksizea{\bksize - 2}
+\pgfmathtruncatemacro\bksizeb{\bksize - 1}
+\pgfmathtruncatemacro\bksizec{\bksize * 2}
+\pgfmathtruncatemacro\bksizem{\bksizec - 1}
+\pgfmathtruncatemacro\bksized{\bksizec + 1}
+\draw[very thin, gray] (-.5, -.5) grid (\bksize - .5, \bksize - .5);
+\foreach \x in {0,...,\lcsizem} 
+\foreach \y in {0, ...,\lcsizem}
+\draw[fill=white,draw=black]  (\x, \y) circle[radius=0.1];
 
-\foreach \x in {0,4,...,12}
-  \foreach \y in {0,4,...,12}
-    \draw[black,xshift=\x cm, yshift=\y cm, rounded corners = 2pt] (-.4,-0.4)
-      rectangle (3.4cm,3.4cm);
+\coordinate (c) at (4,4);
 
-\foreach \x in {0,...,15}
-  \foreach \y in {0,...,15}
-    \path[draw=black,fill=white] (\x, \y) circle(0.25);
+\node at (c)  [circle,fill=red,draw=black] {};
 
-\foreach \x in {0,8}
-  \foreach \y in {0,8}
-    \draw[xshift=\x cm, yshift=\y cm]
-      node[black,fill opacity=0.3,scale=4,font=\bfseries\sffamily] at (1.5cm,1.5) {1}
-      node[black,fill opacity=0.3,scale=4,font=\bfseries\sffamily] at (5.5cm,1.5) {2}
-      node[black,fill opacity=0.3,scale=4,font=\bfseries\sffamily] at (1.5cm,5.5) {3}
-      node[black,fill opacity=0.3,scale=4,font=\bfseries\sffamily] at (5.5cm,5.5) {4} ;
+\def\coronaa{(0,1), (0,-1), (1,0), (-1,0)}
+\def\coronab{(0,2), (0,-2), (2,0), (-2,0)}
+\def\coronac{(1,1), (1,-1), (-1,-1), (-1,1)}
 
-\foreach \x in {4,...,7}
-  \foreach \y in {4,...,7}
-    \fill[black] (\x, \y) circle(0.25);
+\foreach \p in \coronaa {
+\path (c) +\p node  [circle,fill=gray]    {};
+}
 
-\foreach \x in {4,...,7}
-  \foreach \y in {2,3,8,9} {
-    \fill[gray] (\x,\y) circle(0.25);
-    \fill[gray] (\y,\x) circle(0.25);
-  }
+\foreach \p in \coronab {
+\path (c) +\p node  [circle,fill=gray]    {};
+}
 
-\foreach \p in {(3,3),(3,8),(8,3),(8,8)}
-  \fill[gray] \p circle(0.25);
-
-\end{scope}
-
-\begin{scope}[xshift=14.5cm,yshift=3cm]
-\clip (-3,-3) rectangle (7,7);
-
-\draw[help lines] (-3.0,-3.0) grid (7.0,7.0);
-
-% lattice points
-\foreach \x in {-2,-1,0,1,2,3,4,5,6}
-  \foreach \y in {-2,-1,0,1,2,3,4,5,6}
-    \draw (\x,\y) + (0.0,0.0) circle (0.16);
-
-% neighborhood
-\foreach \p in {(-2.5,4.0),(1.5,4.0),
-                (-2.5,0.0),(1.5,0.0),
-                (-4.5,2.0),(3.5,2.0),
-                (-4.5,6.0),(-0.5,6.0),(3.5,6.0),
-                (-4.5,-2.0),(-0.5,-2.0),(3.5,-2.0)}
-  \path[draw=black,fill,fill opacity=0.2,rounded corners=0.1cm,shorten >=2pt] \p \neighborhood;
-
-% main center neighborhood
-
-\path[draw=black,fill,fill opacity=0.4,rounded corners=0.1cm,shorten >=2pt,line width=0.75mm,cap=round,join=round] (-0.5,2.0) \neighborhood;
-
-\foreach \p in {
-  (-2, 2),( 2, 2),( 6, 2),
-  ( 0, 4),( 0, 0),( 4, 0),( 4, 4),
-  (-2,-2),( 2,-2),( 6,-2),
-  (-2, 6),( 2, 6),( 6, 6)}
-  \fill[black] \p circle(0.16);
-
-\end{scope}
+\foreach \p in \coronac {
+\path (c) +\p node  [circle,fill=gray]    {};
+}
 
 \end{tikzpicture}
 \end{center}
-\caption{\label{fig:nn} (Left) The partition of the lattice into
-  blocks. The blocks with same number are processed in parallel by
-  different thread blocks.  (Right) Partitioning of the blocks into
-  disjoint sublattices.  Thick black line denotes the neighborhood  used in updating the center point. Black points are processes in parallel by
-  different threads of the same thread block.}
+\caption{}
+\end{figure}
+
+\begin{figure}
+\begin{center} 
+\begin{tikzpicture}[scale=0.95]
+
+% \clip[rounded corners=0cm] (-1, -1) rectangle (\bksize + 1, \bksize + 1);
+
+% \draw[help lines] (-1, -1) grid (\bksize + 1, \bksize + 1);
+
+\pgfmathtruncatemacro\bksizem{\bksize - 1}
+
+% % lattice points
+ \foreach \x in {0, ..., \bksizem}
+   \foreach \y in {0, ..., \bksizem} {
+     \pgfmathtruncatemacro\four{Mod(\y,4)}
+     \pgfmathtruncatemacro\eight{Mod(\x,4)+4*Mod(\y,2)}
+     \ifnum \four<2
+     \pgfmathtruncatemacro\eight{Mod(\x,4)+4*Mod(\y,2)}
+     \node[draw,rectangle,minimum size=0.6cm] at (\x,\y)  {\eight};
+     \else
+     \pgfmathtruncatemacro\eight{Mod(\x+2,4)+4*Mod(\y,2)}
+     \node[draw,rectangle,minimum size=0.6cm] at (\x,\y)  {\eight};
+     \fi
+}
+% neighborhood
+\def\neighborhood{--
+  ++( 0,  -.5)-- ++( 1,  0)-- ++( 0, -.5 )-- ++(0, -.5)-- ++( 1, 0  )--
+  ++( 0, -1.0)-- ++( 1,  0)-- ++( 0,  1.0)-- ++(1, 0  )-- ++( 0, 1.0)--
+  ++( 1,  0  )-- ++( 0,  1)-- ++(-1,  0  )-- ++(0, 1  )-- ++(-1, 0  )--
+  ++( 0,  1  )-- ++(-1,  0)-- ++( 0, -1  )--
+  ++(-1,  0  )-- ++( 0, -1)-- ++(-1,  0  )-- ++(0, -.6)}
+
+\pgfmathtruncatemacro\lchalf{\bksize / 2}
+
+
+% main center neighborhood
+\path[draw=red,  rounded corners=.1cm, shorten >=2pt, line width=.75mm]
+(\lchalf - 2.5, \lchalf) \neighborhood;
+
+\end{tikzpicture}
+
+
+
+\end{center}
+\caption{\label{fig:nn} }
 \end{figure}
 
 
 % GPU implementation
+
+\begin{figure} 
+\begin{center}
+
+\begin{tikzpicture}[scale=0.35]
+
+\pgfmathtruncatemacro\lcsize{\bksize * \bkcount}
+\pgfmathtruncatemacro\lcsizem{\lcsize - 1}
+\pgfmathtruncatemacro\lcsizeb{\lcsize - \bksize}
+
+
+\draw[very thin, gray] (-.5, -.5) grid (\lcsize - .5, \lcsize - .5);
+
+\foreach \x in {0, \bksize, ..., \lcsizeb}
+  \foreach \y in {0, \bksize, ..., \lcsizeb} {
+    \pgfmathtruncatemacro\n{Mod(\x/\bksize, 2)+2 * Mod(\y/\bksize, 2)+1}
+    \draw[colorone, xshift=\x cm, yshift=\y cm, rounded corners=2pt]
+      (-.4, -.4) rectangle
+      node[red, fill opacity=0, anchor=center, font=\Huge\bfseries\sffamily]
+      {\n} (\bksize - .6, \bksize - .6);
+  }
+
+\foreach \x in {0, ..., \lcsizem}
+  \foreach \y in {0, ..., \lcsizem}{
+ 
+    \path[draw=black, fill=white] (\x, \y) circle(.25);
+}
+
+
+\fillblockgray{0}{0}
+\markpartition{0}{0}{0}
+\fillblockgray{0}{2}
+\markpartition{0}{2}{0}
+\fillblockgray{2}{0}
+\markpartition{2}{0}{0}
+\fillblockgray{2}{2}
+\markpartition{2}{2}{0}
+\end{tikzpicture}
+\end{center}
+\caption{}
+\end{figure}
 On GPU we adopt the hierarchical scheme from ref.~\cite{weigel}
 suitably modified to account for bigger neighborhood.  We first divide
 the whole lattice in blocks of $32\times 32$ points. Then we start a
