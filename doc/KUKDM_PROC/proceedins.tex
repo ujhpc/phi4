@@ -99,18 +99,22 @@
 \def\lcsize{5}
 
 \title{ GPU-accelerated and CPU SIMD Optimized \\ Monte Carlo Simulation of $\phi^4$ Model}
-\author{Piotr Bialas \and Jakub Kowal \and Adam Strzelecki}
+\author{Piotr Bialas\inst{1}\inst{2} \and Jakub Kowal\inst{1} \and Adam Strzelecki\inst{1}}
 \institute{Faculty of Physics, Astronomy and Applied Computer Science\\
-Jagiellonian University\\
-ul. Reymonta 4, 30-059 Krakow, Poland }
+Jagiellonian University ul. Reymonta 4, 30-059 Krakow, Poland 
+\and Mark Kac Complex Systems Research Centre\\
+  Faculty of Physics, Astronomy and Applied Computer Science\\
+  Jagellonian University, Reymonta 4, 30--059 Krakow, Poland}
 \begin{document}
 
 
 \maketitle
 
+\section{Introduction}
 
+\section{Ginzburg--Landau model and Monte-Carlo simulations}
 This contribution is concerned with an efficient implementation of the
-Monte-Carlo simulations of the $\varphi^4$ model.
+Monte-Carlo simulations of the $\varphi^4$ or Ginzburg--Landau model.
 This model in its discretized form is defined by the hamiltonian\cite{parisi}: 
 \begin{equation*}\label{eq:hamiltonian}\begin{split}
 H[\varphi]&=\sum_{\vi}\Biggl(
@@ -150,8 +154,13 @@ The crucial feature of this algorithm is that the update is local {\em
   i.e.} $\Delta H$ depends only on the values of fields in the
 immediate neighborhood of the updated point 
 \begin{equation}
-\Delta H =(\widetilde{\vphi_i}-\vphi_i)
-\underbrace{\left(c^{01}_i-\frac{1}{\Lambda}(c^{02}_i-4 d c^{01}_i+2 c^{11}_i )\right)}_{c_i}+\ldots
+\begin{split}
+\Delta H & = -(\widetilde{\vphi_i}-\vphi_i)
+\underbrace{\left(c^{01}_i-\frac{1}{\Lambda}(c^{02}_i-4 d c^{01}_i+2 c^{11}_i )\right)}_{c_i}\\ 
+&\phantom{= -}
++(\widetilde{\vphi}^2_i-\vphi_i^2)\left(d+\frac{\mu^2}{2}+d (1+2d)\frac{1}{\Lambda}\right)\\
+&\phantom{= -}+\frac{g}{4!}\left(\widetilde{\vphi}^4_i-\vphi^4_i\right)
+\end{split}
 \end{equation}
 where
 \begin{equation}\begin{split} 
@@ -173,6 +182,7 @@ extended compared to usual nearest neighbors (see figure~\ref{fig:nn}
 numbers. We use the Tausworthe RNG\cite{howes_thomas07}.
 
 
+\section{GPU implementation}
 
 While model is inherently parallelizable, grid points that lie in
 the same neighborhood cannot be updated together. Taking into
@@ -206,20 +216,21 @@ decomposition scheme.
 \def\coronac{(1,1), (1,-1), (-1,-1), (-1,1)}
 
 \foreach \p in \coronaa {
-\path (c) +\p node  [circle,fill=gray]    {};
+\path (c) +\p node  [rectangle,fill=gray, draw=black]    {};
 }
 
 \foreach \p in \coronab {
-\path (c) +\p node  [circle,fill=gray]    {};
+\path (c) +\p node  [diamond,fill=gray,draw=black]    {};
 }
 
 \foreach \p in \coronac {
-\path (c) +\p node  [circle,fill=gray]    {};
+\path (c) +\p node  [circle,fill=gray, draw= black]    {};
 }
 
 \end{tikzpicture}
 \end{center}
-\caption{}
+\caption{\label{fig:nn}The neigborhood used to calculate the $\Delta H$:
+$c^{01}$ -- squares, $c^{11}$ -- circles and $c^{02}$ -- diamonds.}
 \end{figure}
 
 \begin{figure}
@@ -265,7 +276,8 @@ decomposition scheme.
 
 
 \end{center}
-\caption{\label{fig:nn} }
+\caption{\label{fig:part}Partition of the lattice into independent
+  sublattices. Squares with same number can be updated in parallel.}
 \end{figure}
 
 
@@ -309,23 +321,26 @@ decomposition scheme.
 \markpartition{2}{2}{0}
 \end{tikzpicture}
 \end{center}
-\caption{}
+\caption{\label{fig:blocks}Partition of the lattice into
+  blocks. Blocks with same number can be updated in parallel. Each
+  block is loaded first into shared memory.}
 \end{figure}
 On GPU we adopt the hierarchical scheme from ref.~\cite{weigel}
 suitably modified to account for bigger neighborhood.  We first divide
 the whole lattice in blocks of $32\times 32$ points. Then we start a
 kernel that process every forth block (see figure~\ref{fig:nn}).  Each
-block is assigned to a block of 128 threads. First we fetch the values of the fields from global to shared memory (including border points).  
-After that each thread updates
-one point from the first partition. Then after synchronization, next
-partition is updated and so on. After processing all eight(2D) or 16
-(3D) partitions the kernel writes the shared memory back into global
-and new kernel is started processing next batch of blocks. 
-Altogether in this
-way we managed to achieve $0.13$ nanoseconds for single lattice field
-update on \emph{NVIDIA GTX 470}, reaching around $430$ Gflops that is
-$40\%$ of $1088$ Gflops peak performance of this device.
+block is assigned to a block of 128 threads. First we fetch the values
+of the fields from global to shared memory (including border points).
+After that each thread updates one point from the first
+partition. Then after synchronization, next partition is updated and
+so on. After processing all eight(2D) or 16 (3D) partitions the kernel
+writes the shared memory back into global and new kernel is started
+processing next batch of blocks.  Altogether in this way we managed to
+achieve $0.13$ nanoseconds for single lattice field update on
+\emph{NVIDIA GTX 470}, reaching around $430$ Gflops that is $40\%$ of
+$1088$ Gflops peak performance of this device.
 
+\section{CPU implementation}
 % CPU implementation
 In order to provide unbiased CPU vs GPU speed up results we provide
 multithreaded vectorized CPU implementation. It uses OpenMP for
@@ -343,6 +358,7 @@ standard, these were postponed to AVX2 planned for 2013. As soon AVX2
 capable CPU devices appear on the market we plan to revise our
 evaluation.
 
+\section{Discussion}
 
 Our CPU \emph{OpenMP} and \emph{SSE/AVX} implementation compiled via
 GCC 4.4 or higher and running on \emph{Intel Core i5 2.5 Ghz} quad
