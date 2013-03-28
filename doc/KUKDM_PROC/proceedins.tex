@@ -131,7 +131,7 @@ $\exp(-H(\vphi))$.
 The actual generation is done by the mean of the Metropolis
 algorithm. This amounts to sequentially updating all the points of the
 lattice. During each update we change the value of the field $\vphi$
-in on a single lattice point
+in on a single lattice point ($\vphi_i$ is a shorthand for $\vphi(x_\vi)$).
 \begin{equation}
 \vphi_i\longrightarrow\widetilde{\vphi_i}=\vphi_i+\varepsilon.
 \end{equation}
@@ -148,7 +148,25 @@ P(\vphi_i\rightarrow\vphi_i+\varepsilon)=\min\left(1,\exp(-\Delta H)\right)
 \end{equation}
 The crucial feature of this algorithm is that the update is local {\em
   i.e.} $\Delta H$ depends only on the values of fields in the
-immediate neighborhood of the updated point. In our case, because of
+immediate neighborhood of the updated point 
+\begin{equation}
+\Delta H =(\widetilde{\vphi_i}-\vphi_i)
+\underbrace{\left(c^{01}_i-\frac{1}{\Lambda}(c^{02}_i-4 d c^{01}_i+2 c^{11}_i )\right)}_{c_i}+\ldots
+\end{equation}
+where
+\begin{equation}\begin{split} 
+c_i^{01}&=\sum_{\mu=1}^d\left(\vphi(x_\vi+\a\mu)+\vphi(x_\vi-\a\mu)\right)\\
+c_i^{02}&=\sum_{\mu=1}^d\left(\vphi(x_\vi+2\a\mu)+\vphi(x_\vi-2\a\mu)\right)\\
+c_i^{11}&=\sum_{\mu=}^d\sum_{\nu=1}^{\mu-1}
+\bigl(\vphi(x_\vi+\a\mu+\a\nu)+\vphi(x_\vi-\a\mu-\a\nu)\\
+&\phantom{+=\sum_{\mu=}^d\sum_{\nu=1}^{\mu-1}
+}
++ \vphi(x_\vi+\a\mu-\a\nu)+\vphi(x_\vi-\a\mu+\a\nu)
+\bigr)
+\end{split}
+\end{equation}
+The term $c_i$ is refered to as {\em corona}. 
+In our case, because of
 the laster term in \eqref{eq:hamiltonian}, this neighborhood is
 extended compared to usual nearest neighbors (see figure~\ref{fig:nn}
 ). The update is random and requires a good source of pseudo-random
