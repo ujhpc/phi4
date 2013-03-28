@@ -112,7 +112,7 @@ ul. Reymonta 4, 30-059 Krakow, Poland }
 This contribution is concerned with an efficient implementation of the
 Monte-Carlo simulations of the $\varphi^4$ model.
 This model in its discretized form is defined by the hamiltonian\cite{parisi}: 
-\begin{equation*}\label{eq:ham}\begin{split}
+\begin{equation*}\label{eq:hamiltonian}\begin{split}
 H[\varphi]&=\sum_{\vi}\Biggl(
 \frac{1}{2}\sum_{\mu=1}^d(\vphi(x_\vi+\a{\mu})-\vphi(x_\vi))^2\\
 &\phantom{=\sum_{\vi}\bigl(}+\frac{\mu^2}{2}|\vphi(x_{\vi})|^2+
@@ -130,13 +130,29 @@ $\exp(-H(\vphi))$.
 
 The actual generation is done by the mean of the Metropolis
 algorithm. This amounts to sequentially updating all the points of the
-lattice. The crucial feature of this algorithm is that the update is
-local {\em i.e.} the new value of the field in a given point depends
-only on the values of fields in the immediate neighborhood of the
-updated point. In our case this neighborhood is extended compared to
-usual nearest neighbors (see figure~\ref{fig:nn} (Right)). The update
-is random and requires a good source of pseudo-random numbers. We use
-the Tausworthe RNG\cite{howes_thomas07}.
+lattice. During each update we change the value of the field $\vphi$
+in on a single lattice point
+\begin{equation}
+\vphi_i\longrightarrow\widetilde{\vphi_i}=\vphi_i+\varepsilon.
+\end{equation}
+The we calculate the difference of the hamiltonians
+\begin{equation}
+\Delta H=H[\widetilde{\vphi_i}]-H[\vphi_i]
+\end{equation}
+If $\Delta H < 0$ we accept the change and substitute
+$\widetilde{\vphi_i}$ for $\vphi_i$, otherwise we accept the change
+with the probablity $\exp(-\Delta H)$. In other words we accept the
+change with the probability
+\begin{equation}
+P(\vphi_i\rightarrow\vphi_i+\varepsilon)=\min\left(1,\exp(-\Delta H)\right)
+\end{equation}
+The crucial feature of this algorithm is that the update is local {\em
+  i.e.} $\Delta H$ depends only on the values of fields in the
+immediate neighborhood of the updated point. In our case, because of
+the laster term in \eqref{eq:hamiltonian}, this neighborhood is
+extended compared to usual nearest neighbors (see figure~\ref{fig:nn}
+). The update is random and requires a good source of pseudo-random
+numbers. We use the Tausworthe RNG\cite{howes_thomas07}.
 
 
 
