@@ -1,4 +1,7 @@
 \documentclass[a4paper]{llncs}
+\usepackage[plain]{algorithm}
+%\usepackage{algorithmicx}
+\usepackage{algpseudocode}
 \usepackage{amsmath}
 
 \usepackage{tikz}
@@ -137,9 +140,12 @@ algorithm. This amounts to sequentially updating all the points of the
 lattice. During each update we change the value of the field $\vphi$
 in on a single lattice point ($\vphi_i$ is a shorthand for $\vphi(x_\vi)$).
 \begin{equation}
-\vphi_i\longrightarrow\widetilde{\vphi_i}=\vphi_i+\varepsilon.
+\vphi_i\longrightarrow\widetilde{\vphi_i}=\vphi_i+\eta.
 \end{equation}
-The we calculate the difference of the hamiltonians
+The $\eta$ is a pseudo--random number drawn from a distribution such
+that $P(\eta) = P(-\eta)$. In practice we draw the $\eta$ from the
+uniform distribution on interval $[-\varepsilon,\varepsilon)$.  The we
+calculate the difference of the hamiltonians
 \begin{equation}
 \Delta H=H[\widetilde{\vphi_i}]-H[\vphi_i]
 \end{equation}
@@ -178,18 +184,17 @@ The term $c_i$ is refered to as {\em corona}.
 In our case, because of
 the laster term in \eqref{eq:hamiltonian}, this neighborhood is
 extended compared to usual nearest neighbors (see figure~\ref{fig:nn}
-). The update is random and requires a good source of pseudo-random
-numbers. We use the Tausworthe RNG\cite{howes_thomas07}.
+). 
 
 
 \section{GPU implementation}
 
-While model is inherently parallelizable, grid points that lie in
-the same neighborhood cannot be updated together. Taking into
-account a larger neighborhood means that a simple checkerboard
-decomposition pattern cannot be used and we have devised a new grid
-decomposition scheme.
-
+While model is inherently parallelizable, grid points that lie in the
+same neighborhood cannot be updated together. Taking into account a
+larger neighborhood means that a simple checkerboard decomposition
+pattern cannot be used and we have devised a new grid decomposition
+scheme. We choose the decomposition depicted in the
+figure~\ref{fig:part}.
 \begin{figure}
 \begin{center}
 \begin{tikzpicture} 
@@ -270,11 +275,7 @@ $c^{01}$ -- squares, $c^{11}$ -- circles and $c^{02}$ -- diamonds.}
 % main center neighborhood
 \path[draw=red,  rounded corners=.1cm, shorten >=2pt, line width=.75mm]
 (\lchalf - 2.5, \lchalf) \neighborhood;
-
 \end{tikzpicture}
-
-
-
 \end{center}
 \caption{\label{fig:part}Partition of the lattice into independent
   sublattices. Squares with same number can be updated in parallel.}
@@ -325,6 +326,9 @@ $c^{01}$ -- squares, $c^{11}$ -- circles and $c^{02}$ -- diamonds.}
   blocks. Blocks with same number can be updated in parallel. Each
   block is loaded first into shared memory.}
 \end{figure}
+
+
+
 On GPU we adopt the hierarchical scheme from ref.~\cite{weigel}
 suitably modified to account for bigger neighborhood.  We first divide
 the whole lattice in blocks of $32\times 32$ points. Then we start a
@@ -339,6 +343,25 @@ processing next batch of blocks.  Altogether in this way we managed to
 achieve $0.13$ nanoseconds for single lattice field update on
 \emph{NVIDIA GTX 470}, reaching around $430$ Gflops that is $40\%$ of
 $1088$ Gflops peak performance of this device.
+We use the Tausworthe RNG\cite{howes_thomas07}.
+\begin{algorithm}
+\begin{algorithmic}[1]
+\For{every global sweep}
+\For{every block partition}
+\For{every block in partition}
+\State load block  into shared memory
+\For{every local partition}
+\For{every site $i$ in local partition}
+\State calculate corona $c_i$ 
+\State update  site  $N_hit$ times
+\EndFor 
+\EndFor
+\EndFor
+\EndFor
+\EndFor
+\end{algorithmic}
+\caption{\label{alg:gpu}}
+\end{algorithm}
 
 \section{CPU implementation}
 % CPU implementation
@@ -357,6 +380,13 @@ generator from 128-bit SSE to 256-bit AVX. Initially planned for AVX
 standard, these were postponed to AVX2 planned for 2013. As soon AVX2
 capable CPU devices appear on the market we plan to revise our
 evaluation.
+
+\section{Performance}
+
+\begin{equation}
+  t=a+ V \cdot b +
+N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right) 
+\end{equation}
 
 \section{Discussion}
 
