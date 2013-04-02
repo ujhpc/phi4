@@ -183,8 +183,7 @@ c_i^{11}&=\sum_{\mu=}^d\sum_{\nu=1}^{\mu-1}
 The term $c_i$ is refered to as {\em corona}. 
 In our case, because of
 the laster term in \eqref{eq:hamiltonian}, this neighborhood is
-extended compared to usual nearest neighbors (see figure~\ref{fig:nn}
-). 
+extended compared to usual nearest neighbors (see figure~\ref{fig:nn}). 
 
 
 \section{GPU implementation}
@@ -280,10 +279,25 @@ $c^{01}$ -- squares, $c^{11}$ -- circles and $c^{02}$ -- diamonds.}
 \caption{\label{fig:part}Partition of the lattice into independent
   sublattices. Squares with same number can be updated in parallel.}
 \end{figure}
-
+In 2D we need eight sublattices and 16 sublattices in 3D. 
 
 % GPU implementation
 
+
+The GPU is no exception as to what concerns the speed of the memeory
+access.  While very fast the throughput from global memory is still
+almost two orders of magnitude slower then needed to sustain the
+maximal flops output.  The NVidia card we use contains 14 {\em Scalar
+  Multiprocessors} (SM). Each SM is equiped with up 48KB shared memory
+and 32K of 32bit registers\cite{Fermi} which act as user managed
+cache. While starting from the compute capability 2.0 NVidia cards are
+also equiped with L1 and L2 caches the use of automatic cache is, as
+we will show later, no advantageous in terms of performance.
+
+To efficiently use the shared memory  we adopt the hierarchical scheme from
+ref.~\cite{weigel} suitably modified to account for bigger
+neighborhood.  We first divide the whole lattice in blocks of
+$B_x\times B_y$ points (see figure~\ref{fig:blocks}). 
 \begin{figure} 
 \begin{center}
 
@@ -326,35 +340,41 @@ $c^{01}$ -- squares, $c^{11}$ -- circles and $c^{02}$ -- diamonds.}
   blocks. Blocks with same number can be updated in parallel. Each
   block is loaded first into shared memory.}
 \end{figure}
+To process each point inside a block we also need the neighboring
+points.  We divide the grid of blocks into subgrids in such a way,
+that blocks together with the neigborhood in each subgrid do not
+overlap (see gray points in figure~\ref{fig:blocks}). In 2D we need
+four of such subgrids and eight in 3D case.
 
+We then start a kernel that process all blocks in one subgrid.  
+Each block is assigned to a block of
+$N_{th}$ threads (CTA -- Cooperative Threads Array). 
+First we fetch the values of the fields from global to
+shared memory (including border points).  
+After that each thread
+updates one point from the first sublattice. Then after
+synchronization, next sublattice is updated and so on. After processing
+all eight(2D) or 16 (3D) sublattices the kernel writes the shared
+memory back into global and new kernel is started processing next
+subgrid  of blocks.  
 
-
-On GPU we adopt the hierarchical scheme from ref.~\cite{weigel}
-suitably modified to account for bigger neighborhood.  We first divide
-the whole lattice in blocks of $32\times 32$ points. Then we start a
-kernel that process every forth block (see figure~\ref{fig:nn}).  Each
-block is assigned to a block of 128 threads. First we fetch the values
-of the fields from global to shared memory (including border points).
-After that each thread updates one point from the first
-partition. Then after synchronization, next partition is updated and
-so on. After processing all eight(2D) or 16 (3D) partitions the kernel
-writes the shared memory back into global and new kernel is started
-processing next batch of blocks.  Altogether in this way we managed to
-achieve $0.13$ nanoseconds for single lattice field update on
-\emph{NVIDIA GTX 470}, reaching around $430$ Gflops that is $40\%$ of
-$1088$ Gflops peak performance of this device.
-We use the Tausworthe RNG\cite{howes_thomas07}.
+Altogether in this way we managed to achieve $0.13$
+nanoseconds for single lattice field update on \emph{NVIDIA GTX 470},
+reaching around $430$ Gflops that is $40\%$ of $1088$ Gflops peak
+performance of this device.  We use the Tausworthe
+RNG\cite{howes_thomas07}.
 \begin{algorithm}
 \begin{algorithmic}[1]
 \For{every global sweep}
-\For{every block partition}
-\For{every block in partition}
+\For{every block subgrid}
+\For{every block in subgrid}
 \State load block  into shared memory
-\For{every local partition}
-\For{every site $i$ in local partition}
+\For{every local sublattice}
+\For{every site $i$ in local sublattice}
 \State calculate corona $c_i$ 
 \State update  site  $N_hit$ times
 \EndFor 
+\State {\tt \_\_syncthreads();}
 \EndFor
 \EndFor
 \EndFor
@@ -383,6 +403,19 @@ evaluation.
 
 \section{Performance}
 
+\begin{table}
+\begin{center}
+\begin{tabular}{|r|rr|rr|}
+\hline\hline
+\multicolumn{1}{|}{} & \multicolumn{2}{c|}{GPU} & \multicolumn{2}{c|}{CPU}\\\hline
+\multicolumn{1}{|c}{size} & \multicolumn{1}{|c|}{ns} & \multicolumn{1}{c|}{Gflops} & \multicolumn{1}{|c}{ns} & \multicolumn{1}{|c|}{Gflops}\\\hline\hline
+$32^3$ & & & & \\\hline
+$64^3$ & & & & \\\hline\hline
+\end{tabular}
+\end{center}
+\caption{\label{tab:comp} Performance}
+\end{table}
+
 \begin{equation}
   t=a+ V \cdot b +
 N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right) 
@@ -408,6 +441,7 @@ implementation and inefficient vector store and load operations
 
 \begin{thebibliography}{9}
 \bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus Books Publishing (1998).
+\bibitem{Fermi} Fermi architecture whitepaper. 
 \bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
 \bibitem{howes_thomas07}
 Lee Howes and David Thomas.
