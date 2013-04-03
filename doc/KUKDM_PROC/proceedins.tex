@@ -118,7 +118,7 @@ Jagiellonian University ul. Reymonta 4, 30-059 Krakow, Poland
 \section{Ginzburg--Landau model and Monte-Carlo simulations}
 This contribution is concerned with an efficient implementation of the
 Monte-Carlo simulations of the $\varphi^4$ or Ginzburg--Landau model.
-This model in its discretized form is defined by the hamiltonian\cite{parisi}: 
+This model in its discretized form is defined by the Hamiltonian\cite{parisi}: 
 \begin{equation*}\label{eq:hamiltonian}\begin{split}
 H[\varphi]&=\sum_{\vi}\Biggl(
 \frac{1}{2}\sum_{\mu=1}^d(\vphi(x_\vi+\a{\mu})-\vphi(x_\vi))^2\\
@@ -145,13 +145,13 @@ in on a single lattice point ($\vphi_i$ is a shorthand for $\vphi(x_\vi)$).
 The $\eta$ is a pseudo--random number drawn from a distribution such
 that $P(\eta) = P(-\eta)$. In practice we draw the $\eta$ from the
 uniform distribution on interval $[-\varepsilon,\varepsilon)$.  The we
-calculate the difference of the hamiltonians
+calculate the difference of the Hamiltonian's
 \begin{equation}
 \Delta H=H[\widetilde{\vphi_i}]-H[\vphi_i]
 \end{equation}
 If $\Delta H < 0$ we accept the change and substitute
 $\widetilde{\vphi_i}$ for $\vphi_i$, otherwise we accept the change
-with the probablity $\exp(-\Delta H)$. In other words we accept the
+with the probability $\exp(-\Delta H)$. In other words we accept the
 change with the probability
 \begin{equation}
 P(\vphi_i\rightarrow\vphi_i+\varepsilon)=\min\left(1,\exp(-\Delta H)\right)
@@ -180,9 +180,9 @@ c_i^{11}&=\sum_{\mu=}^d\sum_{\nu=1}^{\mu-1}
 \bigr)
 \end{split}
 \end{equation}
-The term $c_i$ is refered to as {\em corona}. 
+The term $c_i$ is referred to as {\em corona}. 
 In our case, because of
-the laster term in \eqref{eq:hamiltonian}, this neighborhood is
+the later term in \eqref{eq:hamiltonian}, this neighborhood is
 extended compared to usual nearest neighbors (see figure~\ref{fig:nn}). 
 
 
@@ -193,7 +193,8 @@ same neighborhood cannot be updated together. Taking into account a
 larger neighborhood means that a simple checkerboard decomposition
 pattern cannot be used and we have devised a new grid decomposition
 scheme. We choose the decomposition depicted in the
-figure~\ref{fig:part}.
+figure~\ref{fig:part}. In 2D we need eight sublattices and 16
+sublattices in 3D.
 \begin{figure}
 \begin{center}
 \begin{tikzpicture} 
@@ -233,7 +234,7 @@ figure~\ref{fig:part}.
 
 \end{tikzpicture}
 \end{center}
-\caption{\label{fig:nn}The neigborhood used to calculate the $\Delta H$:
+\caption{\label{fig:nn}The neighborhood used to calculate the $\Delta H$:
 $c^{01}$ -- squares, $c^{11}$ -- circles and $c^{02}$ -- diamonds.}
 \end{figure}
 
@@ -279,19 +280,17 @@ $c^{01}$ -- squares, $c^{11}$ -- circles and $c^{02}$ -- diamonds.}
 \caption{\label{fig:part}Partition of the lattice into independent
   sublattices. Squares with same number can be updated in parallel.}
 \end{figure}
-In 2D we need eight sublattices and 16 sublattices in 3D. 
-
-% GPU implementation
 
 
-The GPU is no exception as to what concerns the speed of the memeory
+
+The GPU is no exception as to what concerns the speed of the memory
 access.  While very fast the throughput from global memory is still
 almost two orders of magnitude slower then needed to sustain the
-maximal flops output.  The NVidia card we use contains 14 {\em Scalar
-  Multiprocessors} (SM). Each SM is equiped with up 48KB shared memory
+maximal flops output.  The NVidia card we use contains 14  { Scalar
+  Multiprocessors} (SM). Each SM is equipped with up 48KB shared memory
 and 32K of 32bit registers\cite{Fermi} which act as user managed
 cache. While starting from the compute capability 2.0 NVidia cards are
-also equiped with L1 and L2 caches the use of automatic cache is, as
+also equipped with L1 and L2 caches, the use of automatic cache is, as
 we will show later, no advantageous in terms of performance.
 
 To efficiently use the shared memory  we adopt the hierarchical scheme from
@@ -337,32 +336,45 @@ $B_x\times B_y$ points (see figure~\ref{fig:blocks}).
 \end{tikzpicture}
 \end{center}
 \caption{\label{fig:blocks}Partition of the lattice into
-  blocks. Blocks with same number can be updated in parallel. Each
-  block is loaded first into shared memory.}
+  blocks. Blocks with same number can be updated in parallel. The sites 
+marked in gray are loaded into shared memory.}
 \end{figure}
 To process each point inside a block we also need the neighboring
 points.  We divide the grid of blocks into subgrids in such a way,
-that blocks together with the neigborhood in each subgrid do not
+that blocks together with the neighborhood in each subgrid do not
 overlap (see gray points in figure~\ref{fig:blocks}). In 2D we need
 four of such subgrids and eight in 3D case.
 
-We then start a kernel that process all blocks in one subgrid.  
-Each block is assigned to a block of
-$N_{th}$ threads (CTA -- Cooperative Threads Array). 
-First we fetch the values of the fields from global to
-shared memory (including border points).  
-After that each thread
-updates one point from the first sublattice. Then after
-synchronization, next sublattice is updated and so on. After processing
-all eight(2D) or 16 (3D) sublattices the kernel writes the shared
-memory back into global and new kernel is started processing next
-subgrid  of blocks.  
+We then start a kernel that process all blocks in one subgrid.  Each
+block in this subgrid is assigned to a block of $N_{th}$ threads (CTA
+-- Cooperative Threads Array). First we fetch the values of the fields
+from global to shared memory (including border points see
+figure~\ref{fig:blocks}).  After that each thread updates one site
+from the first sublattice. This is done $N_{hit}$ times resulting in
+what is know as {\em multi-hit} metropolis algorithm. The advantage is
+that the corona $c_i$ does not need to be recalculated agin and most
+of the needed variables resides already in registers.  Then after
+synchronization, next sublattice is updated and so on. This whole
+procedure is repeated $N_{loc}$ times, again taking advantage of
+thefact that the field values are already in the shared memory.  After
+that the kernel writes the shared memory back into global and new
+kernel is started processing next subgrid of blocks (see
+algorithm~\ref{alg:gpu}).
 
+
+From this description Each threads in CTA is updating 8
+lattice sites in 2D, so one CTA is updating $8 N_{th}/(B_x B_y)$ grid
+blocks ($16 N_{th}/(B_x B_y B_z)$ in 3D). Taking into acount the number of
+subgrids one thread is updating $8*4=32$ lattice sites in 2D and
+$16*8=128$ in 3D.
+
+Monte-Carlo calculations require a good source of random numbers. We use the Tausworthe pseudo--random number generator\cite{howes_thomas07}.
+
+The performance of this algorithm is described in section~\ref{sec:performance}.
 Altogether in this way we managed to achieve $0.13$
 nanoseconds for single lattice field update on \emph{NVIDIA GTX 470},
 reaching around $430$ Gflops that is $40\%$ of $1088$ Gflops peak
-performance of this device.  We use the Tausworthe
-RNG\cite{howes_thomas07}.
+performance of this device.  
 \begin{algorithm}
 \begin{algorithmic}[1]
 \For{every global sweep}
@@ -372,7 +384,7 @@ RNG\cite{howes_thomas07}.
 \For{every local sublattice}
 \For{every site $i$ in local sublattice}
 \State calculate corona $c_i$ 
-\State update  site  $N_hit$ times
+\State update  site  $N_{hit}$ times
 \EndFor 
 \State {\tt \_\_syncthreads();}
 \EndFor
@@ -402,6 +414,7 @@ capable CPU devices appear on the market we plan to revise our
 evaluation.
 
 \section{Performance}
+\label{sec:performance}
 
 \begin{table}
 \begin{center}
@@ -409,17 +422,37 @@ evaluation.
 \hline\hline
 \multicolumn{1}{|}{} & \multicolumn{2}{c|}{GPU} & \multicolumn{2}{c|}{CPU}\\\hline
 \multicolumn{1}{|c}{size} & \multicolumn{1}{|c|}{ns} & \multicolumn{1}{c|}{Gflops} & \multicolumn{1}{|c}{ns} & \multicolumn{1}{|c|}{Gflops}\\\hline\hline
+$128^2$ & & & & \\\hline
+$256^2$ & & & & \\\hline
+$1024^2$ & & & & \\\hline\hline
 $32^3$ & & & & \\\hline
 $64^3$ & & & & \\\hline\hline
 \end{tabular}
 \end{center}
-\caption{\label{tab:comp} Performance}
+\caption{\label{tab:comp} Performance of the algorithm for various lattice sizes.}
 \end{table}
 
-\begin{equation}
+\begin{equation}\label{eq:model}
   t=a+ V \cdot b +
 N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right) 
 \end{equation}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{||r|r|r|r|r|r||}
+\hline\hline
+&\multicolumn{1}{|c}{$a$} 
+&\multicolumn{1}{|c}{$b$} 
+&\multicolumn{1}{|c}{$c$} 
+&\multicolumn{1}{|c}{$d$} 
+&\multicolumn{1}{|c|}{$e$}\\\hline\hline
+CPU & & & & &\\\hline
+GPU & & & & &\\\hline\hline
+\end{tabular}
+\end{center}
+\caption{\label{tab:fit}Results of the fit of the formula \eqref{eq:model}.}
+\end{table}
+
 
 \section{Discussion}
 
