@@ -368,7 +368,11 @@ blocks ($16 N_{th}/(B_x B_y B_z)$ in 3D). Taking into acount the number of
 subgrids one thread is updating $8*4=32$ lattice sites in 2D and
 $16*8=128$ in 3D.
 
-Monte-Carlo calculations require a good source of random numbers. We use the Tausworthe pseudo--random number generator\cite{howes_thomas07}.
+Monte-Carlo calculations require a good source of random numbers. We
+use the Tausworthe pseudo--random number
+generator\cite{howes_thomas07}. The performance could be increased by
+the use of simpler generator, but we have not attempted this in this
+work.
 
 The performance of this algorithm is described in section~\ref{sec:performance}.
 Altogether in this way we managed to achieve $0.13$
@@ -431,12 +435,14 @@ $64^3$ & & & & \\\hline\hline
 \end{center}
 \caption{\label{tab:comp} Performance of the algorithm for various lattice sizes.}
 \end{table}
-
+The number of updates is given by
+\begin{equation}
+N_{up}=V\cdot N_{glob.}\cdot N{loc.}\cdot N_{hit}
+\end{equation}
 \begin{equation}\label{eq:model}
   t=a+ V \cdot b +
 N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right) 
 \end{equation}
-
 \begin{table}
 \begin{center}
 \begin{tabular}{||r|r|r|r|r|r||}
@@ -452,6 +458,14 @@ GPU & & & & &\\\hline\hline
 \end{center}
 \caption{\label{tab:fit}Results of the fit of the formula \eqref{eq:model}.}
 \end{table}
+The time per update is
+
+\begin{equation}\begin{split}
+\frac{t}{N_{up}}=&\frac{a+ V \cdot b + N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right)}{V\cdot N_{glob.}\cdot N_{loc.}\cdot N_{hit}}\\
+\approx&
+\frac{ \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right)}{N_{loc.}\cdot N_{hit}}
+\end{split}
+\end{equation}
 
 
 \section{Discussion}
