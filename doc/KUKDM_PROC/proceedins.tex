@@ -118,12 +118,26 @@ Jagiellonian University ul. Reymonta 4, 30-059 Krakow, Poland
 The Graphical Processing Units (GPU) emerge this days as the most
 efficient device for numerical calculation. To ascertain this it is
 sufficient to look at the list of 500 supercomputers and count how
-many of them has GPU accelerators. 
+many of them has GPU accelerators and the trend is still
+increasing. This was made possible not only by the accessibility of
+the hardware but also by the realisation from the side of the vendors
+that those units can be used also for computations, and providing user
+with suitable software interface to do this. Technologies like CUDA
+and OpenCL make the GPU relatively easy accessible to C/C++
+programmers. In the meantime also most of the numerical packages
+vendors have added GPU support to their tools.
 
-\section{Ginzburg--Landau model and Monte-Carlo simulations}
+However like with most of the computer languages there is a gap
+between using them and using them efficiently. The GPU are not only
+{\em massively parallel} machines but essentially {\em vector
+  machines}. 
+
 This contribution is concerned with an efficient implementation of the
 Monte-Carlo simulations of the $\varphi^4$ or Ginzburg--Landau model.
-This model in its discretized form is defined by the Hamiltonian\cite{parisi}: 
+
+\section{Ginzburg--Landau model and Monte-Carlo simulations}
+
+Ginzburg--Landau model in its discretized form is defined by the Hamiltonian\cite{parisi}: 
 \begin{equation*}\label{eq:hamiltonian}\begin{split}
 H[\varphi]&=\sum_{\vi}\Biggl(
 \frac{1}{2}\sum_{\mu=1}^d(\vphi(x_\vi+\a{\mu})-\vphi(x_\vi))^2\\
