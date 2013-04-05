@@ -115,6 +115,11 @@ Jagiellonian University ul. Reymonta 4, 30-059 Krakow, Poland
 
 \section{Introduction}
 
+The Graphical Processing Units (GPU) emerge this days as the most
+efficient device for numerical calculation. To ascertain this it is
+sufficient to look at the list of 500 supercomputers and count how
+many of them has GPU accelerators. 
+
 \section{Ginzburg--Landau model and Monte-Carlo simulations}
 This contribution is concerned with an efficient implementation of the
 Monte-Carlo simulations of the $\varphi^4$ or Ginzburg--Landau model.
@@ -366,7 +371,7 @@ From this description Each threads in CTA is updating 8
 lattice sites in 2D, so one CTA is updating $8 N_{th}/(B_x B_y)$ grid
 blocks ($16 N_{th}/(B_x B_y B_z)$ in 3D). Taking into acount the number of
 subgrids one thread is updating $8*4=32$ lattice sites in 2D and
-$16*8=128$ in 3D.
+$16\times 8=128$ in 3D.
 
 Monte-Carlo calculations require a good source of random numbers. We
 use the Tausworthe pseudo--random number
@@ -467,6 +472,7 @@ The time per update is
 \end{split}
 \end{equation}
 
+\subsection{GPU cache}
 
 \section{Discussion}
 
