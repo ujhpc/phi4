@@ -3,6 +3,7 @@
 %\usepackage{algorithmicx}
 \usepackage{algpseudocode}
 \usepackage{amsmath}
+\usepackage{dcolumn}
 
 \usepackage{tikz}
 \usetikzlibrary{positioning}
@@ -441,30 +442,7 @@ evaluation.
 
 \begin{table}
 \begin{center}
-\begin{tabular}{|r|rr|rr|}
-\hline\hline
-\multicolumn{1}{|}{} & \multicolumn{2}{c|}{GPU} & \multicolumn{2}{c|}{CPU}\\\hline
-\multicolumn{1}{|c}{size} & \multicolumn{1}{|c|}{ns} & \multicolumn{1}{c|}{Gflops} & \multicolumn{1}{|c}{ns} & \multicolumn{1}{|c|}{Gflops}\\\hline\hline
-$128^2$ & & & & \\\hline
-$256^2$ & & & & \\\hline
-$1024^2$ & & & & \\\hline\hline
-$32^3$ & & & & \\\hline
-$64^3$ & & & & \\\hline\hline
-\end{tabular}
-\end{center}
-\caption{\label{tab:comp} Performance of the algorithm for various lattice sizes.}
-\end{table}
-The number of updates is given by
-\begin{equation}
-N_{up}=V\cdot N_{glob.}\cdot N{loc.}\cdot N_{hit}
-\end{equation}
-\begin{equation}\label{eq:model}
-  t=a+ V \cdot b +
-N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right) 
-\end{equation}
-\begin{table}
-\begin{center}
-\begin{tabular}{||r|r|r|r|r|r||}
+\begin{tabular}{||r|D{.}{.}{6}|D{.}{.}{8}|D{.}{.}{8}|D{.}{.}{8}|D{.}{.}{8}||}
 \hline\hline
 &\multicolumn{1}{|c}{$a$} 
 &\multicolumn{1}{|c}{$b$} 
@@ -479,14 +457,41 @@ $256^3$ & -0.000 &	-3.541e-12 &	7.651e-10	& 1.972e-10	& 1.092e-10\\\hline\hline
 \end{center}
 \caption{\label{tab:fit}Results of the fit of the formula \eqref{eq:model}.}
 \end{table}
-The time per update is
 
+
+The number of updates is given by
+\begin{equation}
+N_{up}=V\cdot N_{glob.}\cdot N_{loc.}\cdot N_{hit}
+\end{equation}
+\begin{equation}\label{eq:model}
+  t=a+ V \cdot b +
+N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right) 
+\end{equation}
+The time per update is
 \begin{equation}\begin{split}
 \frac{t}{N_{up}}=&\frac{a+ V \cdot b + N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right)}{V\cdot N_{glob.}\cdot N_{loc.}\cdot N_{hit}}\\
 \approx&
 \frac{ \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right)}{N_{loc.}\cdot N_{hit}}
 \end{split}
 \end{equation}
+
+
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|r|rr|rr|}
+\hline\hline
+\multicolumn{1}{|}{} & \multicolumn{2}{c|}{GPU} & \multicolumn{2}{c|}{CPU}\\\hline
+\multicolumn{1}{|c}{size} & \multicolumn{1}{|c|}{ns} & \multicolumn{1}{c|}{Gflops} & \multicolumn{1}{|c}{ns} & \multicolumn{1}{|c|}{Gflops}\\\hline\hline
+$128^2$ & & & & \\\hline
+$256^2$ & & & & \\\hline
+$1024^2$ & & & & \\\hline\hline
+$32^3$ & & & & \\\hline
+$64^3$ & & & & \\\hline\hline
+\end{tabular}
+\end{center}
+\caption{\label{tab:comp} Performance of the algorithm for various lattice sizes.}
+\end{table}
 
 \subsection{GPU cache}
 
