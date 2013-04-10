@@ -114,6 +114,10 @@ Jagiellonian University ul. Reymonta 4, 30-059 Krakow, Poland
 
 \maketitle
 
+\begin{abstract}
+In this ... 
+\end{abstract}
+
 \section{Introduction}
 
 The Graphical Processing Units (GPU) emerge this days as the most
@@ -394,11 +398,6 @@ generator\cite{howes_thomas07}. The performance could be increased by
 the use of simpler generator, but we have not attempted this in this
 work.
 
-The performance of this algorithm is described in section~\ref{sec:performance}.
-Altogether in this way we managed to achieve $0.13$
-nanoseconds for single lattice field update on \emph{NVIDIA GTX 470},
-reaching around $430$ Gflops that is $40\%$ of $1088$ Gflops peak
-performance of this device.  
 \begin{algorithm}
 \begin{algorithmic}[1]
 \For{every global sweep}
@@ -440,42 +439,65 @@ evaluation.
 \section{Performance}
 \label{sec:performance}
 
+
+The overall performance of the algorithm expressed in Gflops or
+updates per sec. will depend strongly on the values of the $N_{loc.}$
+and $N_{hit}$. The optimal values of those parameters will depends on
+the physics of the model in particular on the values of parameters
+$\mu^2$, $g$ and $\Lambda$. To describe the pereformance in a general
+way we have decided to fit the execution time $T$ to the following
+model:
+\begin{equation}\label{eq:model}
+T  = a+ V \cdot b +
+N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right) . 
+\end{equation}
+where $V$ is the volume of the lattice.  The interpretation of the
+parameters of the model is given in table~\ref{tab:pars-int}.
+
 \begin{table}
-\begin{center}
-\begin{tabular}{||r|D{.}{.}{6}|D{.}{.}{8}|D{.}{.}{8}|D{.}{.}{8}|D{.}{.}{8}||}
-\hline\hline
-&\multicolumn{1}{|c}{$a$} 
-&\multicolumn{1}{|c}{$b$} 
-&\multicolumn{1}{|c}{$c$} 
-&\multicolumn{1}{|c}{$d$} 
-&\multicolumn{1}{|c|}{$e$}\\\hline\hline
-GPU &\multicolumn{5}{c||}{} \\\hline
-$64^3$  & -0.194 &	-7.419e-7  & 2.949e-9 & 	3.412e-10	& 1.893e-10 \\
-$128^3$ & -0.669 &	-3.189e-7  &	1.490e-9 &	2.138e-10	& 1.179e-10 \\
-$256^3$ & -0.000 &	-3.541e-12 &	7.651e-10	& 1.972e-10	& 1.092e-10\\\hline\hline
+\begin{center} \begin{tabular}{lcp{8cm}p{2cm}}
+$c$ &--& time per spin needed to load it to shared memory and back.&\\
+$d$ &--& time per spin needed to calculate the corona.&\\
+$e$ &--& time per spin needed to for update including calculation of two random numbers and exponential. &
 \end{tabular}
 \end{center}
-\caption{\label{tab:fit}Results of the fit of the formula \eqref{eq:model}.}
+\caption{\label{tab:pars-int}}
 \end{table}
-
 
 The number of updates is given by
 \begin{equation}
 N_{up}=V\cdot N_{glob.}\cdot N_{loc.}\cdot N_{hit}
 \end{equation}
-\begin{equation}\label{eq:model}
-  t=a+ V \cdot b +
-N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right) 
-\end{equation}
-The time per update is
+so the time per update is given by
 \begin{equation}\begin{split}
-\frac{t}{N_{up}}=&\frac{a+ V \cdot b + N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right)}{V\cdot N_{glob.}\cdot N_{loc.}\cdot N_{hit}}\\
+\frac{T}{N_{up}}=&\frac{a+ V \cdot b + N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right)}{V\cdot N_{glob.}\cdot N_{loc.}\cdot N_{hit}}\\
 \approx&
 \frac{ \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right)}{N_{loc.}\cdot N_{hit}}
 \end{split}
 \end{equation}
 
+We have gather the data on the execution times of the 3D program for
+three different lattice sizes. First thing we noticed is that it is
+not possible to fit all the data simultaneously to the model
+\eqref{eq:model}. However when fitting data for each lattice size
+separately we obtain a very good fit accuracy better the $1\%$. 
 
+\begin{table}
+\begin{center}
+\begin{tabular}{||r|D{.}{.}{8}|D{.}{.}{8}|D{.}{.}{8}|D{.}{.}{8}||}
+\hline\hline
+&\multicolumn{1}{|c}{$a+ L^3b$} 
+&\multicolumn{1}{|c}{$c$} 
+&\multicolumn{1}{|c}{$d$} 
+&\multicolumn{1}{|c|}{$e$}\\\hline\hline
+GPU &\multicolumn{4}{c||}{} \\\hline
+$64^3$  & -0.39  & 2.949e-9 & 	3.412e-10	& 1.893e-10 \\
+$128^3$ & -1.34  & 1.490e-9 &	2.138e-10	& 1.179e-10 \\
+$256^3$ &  0.00  & 7.651e-10	& 1.972e-10	& 1.092e-10\\\hline\hline
+\end{tabular}
+\end{center}
+\caption{\label{tab:fit}Results of the fit of the formula \eqref{eq:model}.}
+\end{table}
 
 \begin{table}
 \begin{center}
