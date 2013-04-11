@@ -480,24 +480,37 @@ We have gather the data on the execution times of the 3D program for
 three different lattice sizes. First thing we noticed is that it is
 not possible to fit all the data simultaneously to the model
 \eqref{eq:model}. However when fitting data for each lattice size
-separately we obtain a very good fit accuracy better the $1\%$. 
+separately we obtain a very good fit accuracy better then $1\%$ on the
+average.
 
 \begin{table}
 \begin{center}
 \begin{tabular}{||r|D{.}{.}{8}|D{.}{.}{8}|D{.}{.}{8}|D{.}{.}{8}||}
 \hline\hline
+\multicolumn{1}{|c}{$L^3$} 
 &\multicolumn{1}{|c}{$a+ L^3b$} 
 &\multicolumn{1}{|c}{$c$} 
 &\multicolumn{1}{|c}{$d$} 
 &\multicolumn{1}{|c|}{$e$}\\\hline\hline
 GPU &\multicolumn{4}{c||}{} \\\hline
-$64^3$  & -0.39  & 2.949e-9 & 	3.412e-10	& 1.893e-10 \\
-$128^3$ & -1.34  & 1.490e-9 &	2.138e-10	& 1.179e-10 \\
-$256^3$ &  0.00  & 7.651e-10	& 1.972e-10	& 1.092e-10\\\hline\hline
+$64^3$  & 0.56  & 1.64e-9       & 	2.76e-10       & 1.78e-10 \\
+$128^3$ & 0.49  & 1.06e-9       &	2.06e-10       & 1.35e-10 \\
+$256^3$ & 0.41  & 9.01e-10	&       1.85e-10       & 1.22e-10\\
+$512^3$ & 0.86  & 6.61e-10	&       2.02e-10       & 1.10e-10\\\hline\hline
+CPU &\multicolumn{4}{c||}{} \\\hline
+$32^3$  &  0.017&       & 	1.80e-8 &	1.46e-9\\
+$64^3$  &  0.02 &       & 	1.25e-8 &	1.49e-9\\
+$128^3$ & -0.66 &       &	1.47e-8 & 	1.45e-9\\
+$256^3$ & 1.30  &       &	1.26e-8 & 1.41e-9\\\hline\hline
 \end{tabular}
 \end{center}
-\caption{\label{tab:fit}Results of the fit of the formula \eqref{eq:model}.}
+\caption{\label{tab:fit}Results of the fit of the formula \eqref{eq:model} GPU and \eqref{eq:model-cpu} CPU.}
 \end{table}
+In case of CPU as we do not have the shared memory the formula for the fit is
+\begin{equation}\label{eq:model-cpu}
+T  = a+ V \cdot b +
+N_{glob.} V \left(d + N_{hit}\cdot e\right) . 
+\end{equation}
 
 % \begin{table}
 % \begin{center}
