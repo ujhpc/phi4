@@ -1,10 +1,11 @@
 \documentclass[a4paper]{llncs}
 \usepackage[plain]{algorithm}
+\usepackage{listings}
 %\usepackage{algorithmicx}
 \usepackage{algpseudocode}
 \usepackage{amsmath}
 \usepackage{dcolumn}
-
+\lstset{language=C}
 \usepackage{tikz}
 \usetikzlibrary{positioning}
 \usetikzlibrary{calc}
@@ -308,14 +309,15 @@ $c^{01}$ -- squares, $c^{11}$ -- circles and $c^{02}$ -- diamonds.}
 
 
 The GPU is no exception as to what concerns the speed of the memory
-access.  While very fast the throughput from global memory is still
+access.  While very fast, the throughput from global memory is still
 almost two orders of magnitude slower then needed to sustain the
-maximal flops output.  The NVidia card we use contains 14  { Scalar
-  Multiprocessors} (SM). Each SM is equipped with up 48KB shared memory
-and 32K of 32bit registers\cite{Fermi} which act as user managed
-cache. While starting from the compute capability 2.0 NVidia cards are
-also equipped with L1 and L2 caches, the use of automatic cache is, as
-we will show later, no advantageous in terms of performance.
+maximal flops output.  The Nvidia cards contain so called { Scalar
+  Multiprocessors} (SM). On Fermi architecture each SM is equipped
+with up 48KB shared memory and 32K of 32bit registers\cite{Fermi}
+which act as user managed cache. While starting from the compute
+capability 2.0 Nvidia cards are also equipped with L1 and L2 caches,
+the use of automatic cache is, as we will show later, no advantageous
+in terms of performance.
 
 To efficiently use the shared memory  we adopt the hierarchical scheme from
 ref.~\cite{weigel} suitably modified to account for bigger
@@ -407,7 +409,13 @@ work.
 \For{every local sublattice}
 \For{every site $i$ in local sublattice}
 \State calculate corona $c_i$ 
-\State update  site  $N_{hit}$ times
+\For{ k = 1 ..  $N_{hit}$ }
+\State $\widetilde{\vphi}_i \gets \vphi_i+\eta$
+\State $\Delta H \gets H[\widetilde{\vphi}_i]-H[\vphi_i]$
+\If{$\exp(-\Delta H) > r$}
+\State $\vphi_i \gets \widetilde{\vphi}_i$
+\EndIf
+\EndFor
 \EndFor 
 \State {\tt \_\_syncthreads();}
 \EndFor
@@ -420,21 +428,55 @@ work.
 
 \section{CPU implementation}
 % CPU implementation
-In order to provide unbiased CPU vs GPU speed up results we provide
-multithreaded vectorized CPU implementation. It uses OpenMP for
-parallel execution,  SSE/AVX and compiler vector extensions for
-vectorization.  This implementation does mimic GPU SIMT execution
-model.  The SIMD instructions are used to process four (SSE) or eight
-(AVX) updates in parallel. We use partitions as on GPU but we use only
-one level {\em i.e.} we do not partition the lattice into blocks.
-However not all scalar \emph{x86} instructions have vector
-counterparts.  In particular direct \emph{XMM} registers gather and
-scatter and vectorized integer operations for full length AVX 256-bit
-registers are missing, which makes impossible to port random number
-generator from 128-bit SSE to 256-bit AVX. Initially planned for AVX
-standard, these were postponed to AVX2 planned for 2013. As soon AVX2
-capable CPU devices appear on the market we plan to revise our
-evaluation.
+To make a fiar comparison with the CPU we have to use both multicore
+as vector (SSE/AVX) programming.  The parallelisation on many cores
+relatively easy using the OpenMP. The same restriction apply as on
+GPU, so we partition the the lattice in the same way, but we use only
+one level {\em i.e.} we do not partition the lattice into blocks.  The
+SIMD instructions are used to process four (SSE) or eight (AVX)
+updates in parallel.  At present only portable way to use vector
+instructions is to use compiler intrinsics\cite{intr}. We have defined
+our own vector type that uses combination of the 
+ \lstinline! __attribute__ ((vector_size (N)))!  directive and intrinsics
+to provide a drop--in replacemnet for scalar types.
+
+However not all scalar \emph{x86} instructions
+have vector counterparts.  In particular direct \emph{XMM} registers
+gather and scatter and vectorized integer operations for full length
+AVX 256-bit registers are missing, which makes impossible to port
+random number generator from 128-bit SSE to 256-bit AVX.
+
+In our CPU implementation we use a small ``trick''. Instead of using the 
+\begin{lstlisting}
+if(exp(-DeltaH) > r )
+\end{lstlisting}
+condition for the Metropolis algorithm ($r$ is a pseudo--random number) we use an equivalent
+condition 
+\begin{lstlisting}
+if ( -DeltaH >  log(r) )
+\end{lstlisting}
+The advantage is now that the argument of $\log$ is independent of
+$\Delta H$ and can be calculated beforehand allowing to hide some of
+the latency. The calculations of the four or eight $\log$'s in
+parallel is done using the Intel's ??? library. This implementation is
+safe even in case when $r$ is equal zero as $\log$  then returns {\tt -Inf}. 
+
+
+\subsection{Indexing}
+
+As already mentioned in the previous section indexing the neighbours
+can be quite costly operation requiring expensive modulo
+operations. An alternative is to use the precalculated and stored
+indices: for every site we store it four or six nearest
+neighbours. This is also very flexible but requires a large amount of
+memory. This can have a negative impact on the performance. However if
+we restrict ourself to the lattice dimensions the are powers of two's
+the nearest neigbour calculations can be made using addition and {\tt
+  and} operations. This is quite a restrictive approach, not suitable
+for real applications but we have decided to use it for comparison
+with the GPU version. This is in some respect the ``upper bound'' of
+the CPU performace.
+
 
 \section{Performance}
 \label{sec:performance}
@@ -564,6 +606,7 @@ Lee Howes and David Thomas.
 ``{\em Efficient random number generation and application using {CUDA}.}''
 In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
   Wesley, August 2007.
+\bibitem{intr} Intel intrinsics. 
 \end{thebibliography}
 
 \end{document}
