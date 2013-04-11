@@ -457,8 +457,8 @@ parameters of the model is given in table~\ref{tab:pars-int}.
 \begin{table}
 \begin{center} \begin{tabular}{lcp{8cm}p{2cm}}
 $c$ &--& time per spin needed to load it to shared memory and back.&\\
-$d$ &--& time per spin needed to calculate the corona.&\\
-$e$ &--& time per spin needed to for update including calculation of two random numbers and exponential. &
+$d$ &--& time per spin needed to calculate the corona.& xx nops\\
+$e$ &--& time per spin needed to for update including calculation of two random numbers and exponential. & yy nops + exp
 \end{tabular}
 \end{center}
 \caption{\label{tab:pars-int}}
@@ -481,7 +481,7 @@ three different lattice sizes. First thing we noticed is that it is
 not possible to fit all the data simultaneously to the model
 \eqref{eq:model}. However when fitting data for each lattice size
 separately we obtain a very good fit accuracy better then $1\%$ on the
-average.
+average. The results of the fit are included on the table~\ref{tab:fit}.
 
 \begin{table}
 \begin{center}
@@ -511,7 +511,14 @@ In case of CPU as we do not have the shared memory the formula for the fit is
 T  = a+ V \cdot b +
 N_{glob.} V \left(d + N_{hit}\cdot e\right) . 
 \end{equation}
-
+The coefficient $d$ is the time per spin needed to load it from and to
+memory and the calculation of the corona. the time per update  in this case is given by:
+\begin{equation}\begin{split}
+\frac{T}{N_{up}}=&\frac{a+ V \cdot b + N_{glob.} V \left(d + N_{hit}\cdot e\right)}{V\cdot N_{glob.}\cdot N_{hit}}\\
+\approx&
+\frac{d + N_{hit}\cdot e}{\cdot N_{hit}}
+\end{split}
+\end{equation}
 % \begin{table}
 % \begin{center}
 % \begin{tabular}{|r|rr|rr|}
