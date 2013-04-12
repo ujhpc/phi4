@@ -100,23 +100,6 @@
 }
 
 
-\newcommand{\partition}[3]{
-\pgfmathtruncatemacro\lchalf{\bksize / 2}
-      \pgfmathtruncatemacro\my{Mod(#1, 2)}
-      \ifnum \my = 0
-        \pgfmathtruncatemacro\ny{Mod(#1, 4)}
-        \ifnum \ny = 2
-          \pgfmathtruncatemacro\mx{Mod(#2+2, 4)}
-        \else
-          \pgfmathtruncatemacro\mx{Mod(#2, 4)}
-        \fi
-        \ifnum \mx = 0
-            \fill[red] (#2, #1) circle(#3);
-          \fi
-         \fi         
-       }
-
-
 \def\neighborhood{--
   ++(0,-0.5)-- ++(1,0)-- ++(0,-0.5)-- ++(0,-0.5)-- ++(1,0)--
   ++(0,-1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)--
