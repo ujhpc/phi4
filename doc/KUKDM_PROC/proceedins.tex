@@ -527,11 +527,23 @@ parameters of the model is given in table~\ref{tab:pars-int}.
 \begin{table}
 \begin{center} \begin{tabular}{lcp{8cm}p{2cm}}
 $c$ &--& time per spin needed to load it to shared memory and back.&\\
-$d$ &--& time per spin needed to calculate the corona.& xx nops\\
-$e$ &--& time per spin needed to for update including calculation of two random numbers and exponential. & yy nops + exp
+$d$ &--& time per spin needed to calculate the corona.& 26 nops\\
+$e$ &--& time per spin needed to for update including calculation of two random numbers and exponential. & 64 nops + exp
 \end{tabular}
 \end{center}
-\caption{\label{tab:pars-int}}
+\caption{\label{tab:pars-int}Interpretation of the paremeters in the model~\ref{eq:model}. The last column gives the number of numerical operations performed by the corresposnding step of the algorith.}
+\end{table}
+
+\begin{table}
+\begin{center} 
+\begin{tabular}{|p{4cm}|l|l|l|}\hline\hline
+ & float & int  & bit \\\hline
+coronas & 26 & & \\\hline
+$\Delta H  $ & 13  & & \\\hline
+PRNG & 1 & 2  & 21  \\\hline\hline
+\end{tabular}
+\end{center}
+\caption{\label{tab:instr-count}}
 \end{table}
 
 The number of updates is given by
@@ -545,7 +557,13 @@ so the time per update is given by
 \frac{ \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right)}{N_{loc.}\cdot N_{hit}}
 \end{split}
 \end{equation}
-
+Using the data from the table~\ref{tab:pars-int} we obtain that the number of the operations performed is
+\begin{equation}
+N_{up}=V\cdot N_{glob.}\cdot N_{loc.}(26+\cdot N_{hit}(64+exp))
+\end{equation}
+\begin{equation}
+nops\approx \frac{\cdot N_{loc.}(26+\cdot N_{hit}(64+exp))}{ \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right)}
+\end{equation}
 We have gather the data on the execution times of the 3D program for
 three different lattice sizes. First thing we noticed is that it is
 not possible to fit all the data simultaneously to the model
@@ -588,6 +606,10 @@ memory and the calculation of the corona. the time per update  in this case is g
 \approx&
 \frac{d + N_{hit}\cdot e}{\cdot N_{hit}}
 \end{split}
+\end{equation}
+and
+\begin{equation}
+nops\approx \frac{ 26+N_{hit}(64+exp)}{ \left(d + N_{hit}\cdot e\right)}
 \end{equation}
 % \begin{table}
 % \begin{center}
