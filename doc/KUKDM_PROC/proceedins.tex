@@ -487,11 +487,13 @@ our own vector type that uses combination of the
  \lstinline!__attribute__((vector_size(N)))!  directive and intrinsics
 to provide a drop--in replacemnet for scalar types.
 
-However not all scalar \emph{x86} instructions
-have vector counterparts.  In particular direct \emph{XMM} registers
-gather and scatter and vectorized integer operations for full length
-AVX 256-bit registers are missing, which makes impossible to port
-random number generator from 128-bit SSE to 256-bit AVX.
+Unfortunately not all scalar \emph{x86} instructions have vector counterparts,
+which is crucial requirement for vectoring scalar code. In particular
+\emph{x86} misses direct vector \emph{XMM} gather and scatter instructions
+(load/save vector register data from/to memory indexed by other vector
+register), unlike GPU where gather and scatter is key feature. Another drawback
+in lack of AVX 256-bit integer operations, which makes random number generator
+utilize 128-bit SSE only, even on 256-bit AVX capable CPUs.
 
 In our CPU implementation we use a small ``trick''. Instead of using the
 \begin{lstlisting}
