@@ -478,10 +478,10 @@ if ( -DeltaH >  log(r) )
 \end{lstlisting}
 The advantage is now that the argument of $\log$ is independent of
 $\Delta H$ and can be calculated beforehand allowing to hide some of
-the latency. The calculations of the four or eight $\log$'s in
-parallel is done using the Intel's ??? library. This implementation is
-safe even in case when $r$ is equal zero as $\log$  then returns {\tt -Inf}. 
-
+the latency. This implementation is safe even in case when $r$ is
+equal zero as $\log$ then returns {\tt -Inf}.  The calculations of the
+four or eight $\log$'s in parallel is done using the Intel's svml
+library.
 
 As already mentioned in the previous section indexing the neighbours
 can be quite costly operation requiring expensive modulo
