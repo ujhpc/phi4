@@ -429,6 +429,24 @@ work.
 \caption{\label{alg:gpu}}
 \end{algorithm}
 
+
+One of the problems with lattice simulations is the treatment of the
+boundary conditions. The algorithm requires access to the site
+neighbors during each update. The index of neighbors can be calculated
+using simple arthmetics, except at the boundaries. The indexing of
+neighbors requires then checking for the boundary at each update or
+expensive modulo operations. Another technique is to use the
+precalculated and stored indices: for every site we store the index of
+four or six nearest neighbours. This is also very flexible but
+requires a large amount of memory. This can have a negative impact on
+the performance and is not well suitable for the GPU which usyally
+have less RAM then CPU's. In our algorithm the checking for boundary
+is needed only when loading to shared memory. Then we can use simple
+index arithmetics.
+
+
+
+
 \section{CPU implementation}
 % CPU implementation
 To make a fiar comparison with the CPU we have to use both multicore
@@ -465,15 +483,10 @@ parallel is done using the Intel's ??? library. This implementation is
 safe even in case when $r$ is equal zero as $\log$  then returns {\tt -Inf}. 
 
 
-\subsection{Indexing}
-
 As already mentioned in the previous section indexing the neighbours
 can be quite costly operation requiring expensive modulo
-operations. An alternative is to use the precalculated and stored
-indices: for every site we store it four or six nearest
-neighbours. This is also very flexible but requires a large amount of
-memory. This can have a negative impact on the performance. However if
-we restrict ourself to the lattice dimensions the are powers of two's
+operations or large amount of memory. However if
+we restrict ourself to the lattice dimensions the are powers of two
 the nearest neigbour calculations can be made using addition and {\tt
   and} operations. This is quite a restrictive approach, not suitable
 for real applications but we have decided to use it for comparison
@@ -581,6 +594,27 @@ memory and the calculation of the corona. the time per update  in this case is g
 % \end{table}
 
 \subsection{GPU cache}
+
+The good performance of the presented GPU algorithm comes from the
+effective use of the shared memory. We have also checked to which
+extend this could be achived by just using the automatic cache
+capabilities of modern GPU's. To this end we have implemented a
+version of the algorithm which did not use the shared memory, however
+the access pattern was the same. The idea was thnat the first
+iteration of the local sweep loop would fill the L1 cache and
+consecutive iterations would not need to access the global memory and the performance should be comparable to our orginal implementation. 
+
+This turned out not to be the case. The algorithm using the L1 cache
+was approximatelly six times slower then the one using shared
+memory. This detoriated performace could be traced back to large
+number of cache misses. Nominally the $20^3$ block should fit in L1
+cache as it did fit into the shared memory. However the cache line is
+32 words long and the blocks are not aligned on the cache lines
+boundaries (see gray points on the figure~\ref{fig:blocks}). On top of
+that the cache is probably not fully assiactive. All that together
+impplies that the cache size should be up to four or five times bigger
+to accomodate the block. 
+
 
 \section{Discussion}
 
