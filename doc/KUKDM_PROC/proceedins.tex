@@ -12,6 +12,32 @@
 \usetikzlibrary{arrows,shapes,backgrounds}
 \usetikzlibrary{shadows}
 
+\lstdefinelanguage
+  [GCC]{C++}
+  []{C++}
+{
+  morekeywords={[2]__attribute__},%
+  morekeywords={[3]vector_size,r,DeltaH}%
+}
+\lstset{
+  language={[GCC]C++},%
+  basicstyle=\small,%
+  keywordstyle=\bfseries,%
+  keywordstyle=[2]\bfseries,%
+  keywordstyle=[3]\itshape,%
+  commentstyle=\color{gray},%
+  stringstyle=\color{gray},%
+  stepnumber=1,%
+  numbersep=5pt,%
+  tabsize=2,%
+  captionpos=b,%
+  breaklines=true,%
+  breakatwhitespace=false,%
+  showspaces=false,%
+  showtabs=false,%
+  columns=flexible%
+}
+
 %\input {header.tex}
 \renewcommand{\a}[1]{\v{a}_{#1}}
 \renewcommand{\L}{\mathcal{L}}
@@ -458,7 +484,7 @@ SIMD instructions are used to process four (SSE) or eight (AVX)
 updates in parallel.  At present only portable way to use vector
 instructions is to use compiler intrinsics\cite{intr}. We have defined
 our own vector type that uses combination of the 
- \lstinline! __attribute__ ((vector_size (N)))!  directive and intrinsics
+ \lstinline!__attribute__((vector_size(N)))!  directive and intrinsics
 to provide a drop--in replacemnet for scalar types.
 
 However not all scalar \emph{x86} instructions
@@ -467,15 +493,16 @@ gather and scatter and vectorized integer operations for full length
 AVX 256-bit registers are missing, which makes impossible to port
 random number generator from 128-bit SSE to 256-bit AVX.
 
-In our CPU implementation we use a small ``trick''. Instead of using the 
+In our CPU implementation we use a small ``trick''. Instead of using the
 \begin{lstlisting}
-if(exp(-DeltaH) > r )
+        if ( exp(-DeltaH) > r )
 \end{lstlisting}
-condition for the Metropolis algorithm ($r$ is a pseudo--random number) we use an equivalent
-condition 
+condition for the Metropolis algorithm ($r$ is a pseudo--random number) we use
+an equivalent condition
 \begin{lstlisting}
-if ( -DeltaH >  log(r) )
+        if ( -DeltaH >  log(r) )
 \end{lstlisting}
+
 The advantage is now that the argument of $\log$ is independent of
 $\Delta H$ and can be calculated beforehand allowing to hide some of
 the latency. This implementation is safe even in case when $r$ is
