@@ -74,7 +74,7 @@
 \fi
 \fi
 \ifnum \num = #3
-\fill[black] (#1, #2) circle(0.35);
+\draw[draw=black,fill=red] (#1, #2) circle(0.4);
 \fi
 
 }
@@ -91,8 +91,8 @@
 }
 
 
-\definecolor{colorone}{HTML}{006633} % default 116699
-\definecolor{colortwo}{HTML}{DDFF99} % default CCCCCC
+\definecolor{colorone}{HTML}{777777} % default 116699
+\definecolor{colortwo}{HTML}{DDDDDD} % default CCCCCC
 \def\bksize{8}
 \def\bkcount{4}
 \def\lcsize{5}
@@ -346,7 +346,7 @@ $B_x\times B_y$ points (see figure~\ref{fig:blocks}).
 \foreach \x in {0, ..., \lcsizem}
   \foreach \y in {0, ..., \lcsizem}{
  
-    \path[draw=black, fill=white] (\x, \y) circle(.25);
+    \path[draw=colorone, fill=white] (\x, \y) circle(.25);
 }
 
 
