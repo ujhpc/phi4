@@ -25,7 +25,7 @@
   keywordstyle=\bfseries,%
   keywordstyle=[2]\bfseries,%
   keywordstyle=[3]\itshape,%
-  %commentstyle=\color{gray},%
+  commentstyle=\color{gray},%
   stringstyle=\color{gray},%
   stepnumber=1,%
   numbersep=5pt,%
@@ -144,7 +144,8 @@ Monte-Carlo simulations of the $\varphi^4$ or Ginzburg--Landau model.
 
 \section{Ginzburg--Landau model and Monte-Carlo simulations}
 
-Ginzburg--Landau model in its discretized form is defined by the Hamiltonian\cite{parisi}: 
+Ginzburg--Landau model in its discretized form is defined by the
+Hamiltonian\cite{parisi}:
 \begin{equation*}\label{eq:hamiltonian}\begin{split}
 H[\varphi]&=\sum_{\vi}\Biggl(
 \frac{1}{2}\sum_{\mu=1}^d(\vphi(x_\vi+\a{\mu})-\vphi(x_\vi))^2\\
@@ -498,6 +499,11 @@ the CPU performance.
 \section{Performance}
 \label{sec:performance}
 
+We have tested our implemtations on  the following hardware:
+\begin{itemize}
+\item[GPU]  Nvidia GTX 470: 14 Scalar Multiprocessor = 448 CUDa cores, 1.2GHz, CUDA 5.0 Ubuntu Linux 12.04, 1088Gflops.
+\item[CPU]  i5-2400S Sandy Bridge 4 core 2.5 GHz, 12 GB RAM, OSX 10.8.3, GCC 4.8.0 -O3 +OpenMP, 160 Gflops. 
+\end{itemize}
 
 The overall performance of the algorithm expressed in Gflops or
 updates per sec. will depend strongly on the values of the $N_{loc.}$
@@ -516,9 +522,9 @@ parameters of the model is given in table~\ref{tab:pars-int}.
 \begin{table}
 \begin{center} \begin{tabular}{lcp{8cm}p{2cm}}
 $c$ &--& time per spin needed to load it to shared memory and back.&\\
-$d$ &--& time per spin needed to calculate the corona.& 26 nops\\
+$d$ &--& time per spin needed to calculate the corona.& 26 ops\\
 $e$ &--& time per spin needed to for update including calculation of two
-random numbers and exponential. & 64 nops + exp
+random numbers and exponential. & 64 ops + 1 exp
 \end{tabular}
 \end{center}
 \caption{\label{tab:pars-int}Interpretation of the parameters in the
