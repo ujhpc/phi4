@@ -540,10 +540,11 @@ $e$ &--& time per spin needed to for update including calculation of two random 
  & float & int  & bit \\\hline
 coronas & 26 & & \\\hline
 $\Delta H  $ & 13  & & \\\hline
-PRNG & 1 & 2  & 21  \\\hline\hline
+PRNG & 1 & 2  & 21  \\\hline
+$\widetilde{\vphi}_i \gets \vphi_i+\eta$& 3 & &\\\hline\hline
 \end{tabular}
 \end{center}
-\caption{\label{tab:instr-count}}
+\caption{\label{tab:instr-count}}Number of instruction in different  steps of the algorithm. float -- floating point , int -- integer arithmetic , bit -- shifts and bitwise logical. In the last row we do not include the call to PRNG. 
 \end{table}
 
 The number of updates is given by
@@ -586,10 +587,10 @@ $128^3$ & 0.49  & 1.06e-9       &	2.06e-10       & 1.35e-10 \\
 $256^3$ & 0.41  & 9.01e-10	&       1.85e-10       & 1.22e-10\\
 $512^3$ & 0.86  & 6.61e-10	&       2.02e-10       & 1.10e-10\\\hline\hline
 CPU &\multicolumn{4}{c||}{} \\\hline
-$32^3$  &  0.017&       & 	1.80e-8 &	1.46e-9\\
-$64^3$  &  0.02 &       & 	1.25e-8 &	1.49e-9\\
-$128^3$ & -0.66 &       &	1.47e-8 & 	1.45e-9\\
-$256^3$ & 1.30  &       &	1.26e-8 & 1.41e-9\\\hline\hline
+$64^3$  &  0.12 &       & 	1.27e-8 &	1.51e-9\\
+$128^3$ & 1.17  &       &	1.34e-8 & 	1.45e-9\\
+$256^3$ & 0.93  &       &	1.26e-8 &       1.43e-9\\
+$512^3$ & 3.72  &       &       1.35e-8 &       1.44e-9\\\hline\hline
 \end{tabular}
 \end{center}
 \caption{\label{tab:fit}Results of the fit of the formula \eqref{eq:model} GPU and \eqref{eq:model-cpu} CPU.}
@@ -613,12 +614,15 @@ nops\approx \frac{ 26+N_{hit}(64+exp)}{ \left(d + N_{hit}\cdot e\right)}
 \end{equation}
 \begin{table}
 \begin{center}
-\begin{tabular}{|r|rr|rr|}
+\begin{tabular}{|r|rrrr|rrrr|}
 \hline\hline
-\multicolumn{1}{|}{} & \multicolumn{2}{c|}{GPU} & \multicolumn{2}{c|}{CPU}\\\hline
-\multicolumn{1}{|c}{size} & \multicolumn{1}{|c|}{ns} & \multicolumn{1}{c|}{Gflops} & \multicolumn{1}{|c}{ns} & \multicolumn{1}{|c|}{Gflops}\\\hline\hline
-$256^3$ & & & & \\\hline
-$512^3$ & & & & \\\hline\hline
+\multicolumn{1}{|}{} & \multicolumn{4}{c|}{GPU} & \multicolumn{4}{c|}{CPU}\\\hline
+\multicolumn{1}{|c}{size} & \multicolumn{1}{|c|}{ns} & \multicolumn{1}{c|}{Gnops} &
+\multicolumn{1}{|c|}{Gflops} & \multicolumn{1}{c|}{exp} & 
+\multicolumn{1}{|c|}{Gflops} & \multicolumn{1}{c|}{Gnops} &
+\multicolumn{1}{|c}{ns} & \multicolumn{1}{|c|}{Gnops}\\\hline\hline
+$256^3$ & 0.17 & 408 & & &&&& \\\hline
+$512^3$ & & & & &&&&\\\hline\hline
 \end{tabular}
 \end{center}
 \caption{\label{tab:comp} Performance of the algorithm.}
