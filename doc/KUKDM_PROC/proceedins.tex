@@ -112,15 +112,17 @@
 \def\bkcount{4}
 \def\lcsize{5}
 
-\title{ GPU-accelerated and CPU SIMD Optimized \\ Monte Carlo Simulation of $\phi^4$ Model}
-\author{Piotr Bialas\inst{1}\inst{2} \and Jakub Kowal\inst{1} \and Adam Strzelecki\inst{1}}
-\institute{Faculty of Physics, Astronomy and Applied Computer Science\\
-Jagiellonian University ul. Reymonta 4, 30-059 Krakow, Poland 
-\and Mark Kac Complex Systems Research Centre\\
-  Faculty of Physics, Astronomy and Applied Computer Science\\
-  Jagiellonian University, Reymonta 4, 30-059 Krakow, Poland}
-\begin{document}
+\title{ GPU-accelerated and CPU SIMD Optimized \\
+        Monte Carlo Simulation of $\phi^4$ Model }
+\author{ Piotr Bialas\inst{1}\inst{2} \and Jakub Kowal\inst{1}
+         \and Adam Strzelecki\inst{1} }
+\institute{ Faculty of Physics, Astronomy and Applied Computer Science \\
+            Jagiellonian University ul. Reymonta 4, 30-059 Krakow, Poland 
+            \and Mark Kac Complex Systems Research Centre \\
+            Faculty of Physics, Astronomy and Applied Computer Science \\
+            Jagiellonian University, Reymonta 4, 30-059 Krakow, Poland }
 
+\begin{document}
 
 \maketitle
 
@@ -528,10 +530,13 @@ parameters of the model is given in table~\ref{tab:pars-int}.
 \begin{center} \begin{tabular}{lcp{8cm}p{2cm}}
 $c$ &--& time per spin needed to load it to shared memory and back.&\\
 $d$ &--& time per spin needed to calculate the corona.& 26 nops\\
-$e$ &--& time per spin needed to for update including calculation of two random numbers and exponential. & 64 nops + exp
+$e$ &--& time per spin needed to for update including calculation of two
+random numbers and exponential. & 64 nops + exp
 \end{tabular}
 \end{center}
-\caption{\label{tab:pars-int}Interpretation of the parameters in the model~\ref{eq:model}. The last column gives the number of numerical operations performed by the corresponding step of the algorithm.}
+\caption{\label{tab:pars-int}Interpretation of the parameters in the
+model~\ref{eq:model}. The last column gives the number of numerical operations
+performed by the corresponding step of the algorithm.}
 \end{table}
 
 \begin{table}
@@ -544,7 +549,9 @@ PRNG & 1 & 2  & 21  \\\hline
 $\widetilde{\vphi}_i \gets \vphi_i+\eta$& 3 & &\\\hline\hline
 \end{tabular}
 \end{center}
-\caption{\label{tab:instr-count}}Number of instruction in different  steps of the algorithm. float -- floating point , int -- integer arithmetic , bit -- shifts and bitwise logical. In the last row we do not include the call to PRNG. 
+\caption{\label{tab:instr-count}}Number of instruction in different steps of the
+algorithm. float -- floating point, int -- integer arithmetic, bit -- shifts and
+bitwise logical. In the last row we do not include the call to PRNG. 
 \end{table}
 
 The number of updates is given by
@@ -593,15 +600,16 @@ $256^3$ & 0.93  &       &	1.26e-8 &       1.43e-9\\
 $512^3$ & 3.72  &       &       1.35e-8 &       1.44e-9\\\hline\hline
 \end{tabular}
 \end{center}
-\caption{\label{tab:fit}Results of the fit of the formula \eqref{eq:model} GPU and \eqref{eq:model-cpu} CPU.}
+\caption{\label{tab:fit}Results of the fit of the formula \eqref{eq:model} GPU
+and \eqref{eq:model-cpu} CPU.}
 \end{table}
 In case of CPU as we do not have the shared memory the formula for the fit is
 \begin{equation}\label{eq:model-cpu}
 T  = a+ V \cdot b +
 N_{glob.} V \left(d + N_{hit}\cdot e\right) . 
 \end{equation}
-The coefficient $d$ is the time per spin needed to load it from and to
-memory and the calculation of the corona. the time per update  in this case is given by:
+The coefficient $d$ is the time per spin needed to load it from and to memory
+and the calculation of the corona. the time per update in this case is given by:
 \begin{equation}\begin{split}
 \frac{T}{N_{up}}=&\frac{a+ V \cdot b + N_{glob.} V \left(d + N_{hit}\cdot e\right)}{V\cdot N_{glob.}\cdot N_{hit}}\\
 \approx&
@@ -616,7 +624,8 @@ nops\approx \frac{ 26+N_{hit}(64+exp)}{ \left(d + N_{hit}\cdot e\right)}
 \begin{center}
 \begin{tabular}{|r|rrr|rrr|c|}
 \hline\hline
-\multicolumn{1}{|}{} & \multicolumn{3}{c|}{GPU} & \multicolumn{3}{c|}{CPU}& GPU/CPU\\\hline
+\multicolumn{1}{|}{} & \multicolumn{3}{c|}{GPU}
+                     & \multicolumn{3}{c|}{CPU}& GPU/CPU\\\hline
 \multicolumn{1}{|c}{size} & 
 \multicolumn{1}{|c|}{ns} &
  \multicolumn{1}{c|}{Gops} &
@@ -632,14 +641,14 @@ $512^3$ & & & & && &\\\hline\hline
 
 \subsection{GPU cache}
 
-The good performance of the presented GPU algorithm comes from the
-effective use of the shared memory. We have also checked to which
-extend this could be achieved by just using the automatic cache
-capabilities of modern GPU's. To this end we have implemented a
-version of the algorithm which did not use the shared memory, however
-the access pattern was the same. The idea was that the first
-iteration of the local sweep loop would fill the L1 cache and
-consecutive iterations would not need to access the global memory and the performance should be comparable to our original implementation. 
+The good performance of the presented GPU algorithm comes from the effective
+use of the shared memory. We have also checked to which extend this could be
+achieved by just using the automatic cache capabilities of modern GPU's. To
+this end we have implemented a version of the algorithm which did not use the
+shared memory, however the access pattern was the same. The idea was that the
+first iteration of the local sweep loop would fill the L1 cache and consecutive
+iterations would not need to access the global memory and the performance
+should be comparable to our original implementation.
 
 This turned out not to be the case. The algorithm using the L1 cache
 was approximately six times slower then the one using shared
@@ -672,7 +681,8 @@ implementation and inefficient vector store and load operations
 (gather/scatter).
 
 \begin{thebibliography}{9}
-\bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus Books Publishing (1998).
+\bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus
+Books Publishing (1998).
 \bibitem{Fermi} Fermi Architecture White Paper. 
 \bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
 \bibitem{howes_thomas07}
