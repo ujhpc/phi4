@@ -25,7 +25,7 @@
   keywordstyle=\bfseries,%
   keywordstyle=[2]\bfseries,%
   keywordstyle=[3]\itshape,%
-  commentstyle=\color{gray},%
+  %commentstyle=\color{gray},%
   stringstyle=\color{gray},%
   stepnumber=1,%
   numbersep=5pt,%
@@ -122,7 +122,7 @@
 
 The Graphical Processing Units (GPU) emerge this days as the most
 efficient device for numerical calculation. To ascertain this it is
-sufficient to look at the list of 500 supercomputers and count how
+sufficient to look at the list of 500 supercomputers\cite{top500} and count how
 many of them has GPU accelerators and the trend is still
 increasing. This was made possible not only by the accessibility of
 the hardware but also by the realization from the side of the vendors
@@ -361,7 +361,7 @@ $B_x\times B_y$ points (see figure~\ref{fig:blocks}).
 \end{tikzpicture}
 \end{center}
 \caption{\label{fig:blocks}Partition of the lattice into
-  blocks. Blocks with same number can be updated in parallel. The sites 
+  blocks.  The sites 
 marked in gray are loaded into shared memory.}
 \end{figure}
 To process each point inside a block we also need the neighboring
@@ -666,16 +666,21 @@ implementation and inefficient vector store and load operations
 (gather/scatter).
 
 \begin{thebibliography}{9}
-\bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus
-Books Publishing (1998).
-\bibitem{Fermi} Fermi Architecture White Paper. 
+\bibitem{top500}{\tt http://www.top500.org/}
+\bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus Books Publishing (1998).
+\bibitem{Fermi} 
+``NVIDIA's Next Generation CUDA ComputeArchitecture: Fermi'' \\
+\verb!http://www.nvidia.com/content/PDF/fermi_white_papers/!\\
+\verb!NVIDIA_Fermi_Compute_Architecture_Whitepaper.pdf!
 \bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
 \bibitem{howes_thomas07}
 Lee Howes and David Thomas.
 ``{\em Efficient random number generation and application using {CUDA}.}''
 In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
   Wesley, August 2007.
-\bibitem{intr} Intel intrinsics. 
+\bibitem{intr} ``Intel C++ Intrinsic Reference.'' \verb!http://software.intel.com/sites/default!\\\verb!/files/m/9/4/c/8/e/18072-347603.pdf! \\
+Intel Intrinsics Guide\\ \verb!http://software.intel.com/en-us/articles/intel-intrinsics-guide!
+
 \end{thebibliography}
 
 \end{document}
