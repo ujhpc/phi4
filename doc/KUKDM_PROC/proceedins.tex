@@ -43,7 +43,7 @@
 \renewcommand{\L}{\mathcal{L}}
 \renewcommand{\v}[1]{\vec{#1}}
 \newcommand{\av}[1]{\langle#1\rangle}
-\newcommand{\vphi}{\vec{\varphi}}
+\newcommand{\vphi}{\varphi}
 \newcommand{\vi}{{\vec{i}}}
 \newcommand{\vj}{{\vec{j}}}
 \newcommand{\vmu}{\vec{\mu}}
@@ -135,7 +135,9 @@ vendors have added GPU support to their tools.
 However like with most of the computer languages there is a gap
 between using them and using them efficiently. The GPU are not only
 {\em massively parallel} machines but essentially {\em vector
-  machines}. 
+  machines}. This is a trend visible also in the CPU market: the SSE extensions
+introduced four floats wide vector (SIMD) instructions, AVX eight
+floats wide and Xeon $\phi$ 16 floats wide. 
 
 This contribution is concerned with an efficient implementation of the
 Monte-Carlo simulations of the $\varphi^4$ or Ginzburg--Landau model.
@@ -649,21 +651,29 @@ to accommodate the block.
 
 \section{Discussion}
 
-Our CPU \emph{OpenMP} and \emph{SSE/AVX} implementation compiled via
-GCC 4.4 or higher and running on \emph{Intel Core i5 2.5 Ghz} quad
-core CPU presented $15\times$ performance boost comparing to single
-threaded scalar code and $3.76$ nanoseconds for single lattice field
-update.  Which gives the $15$ Gflops that is $\sim10\%$ of the  $160$
-Gflops peak performance of tested i5 CPU. There is no significant
-increase in performance while switching from SSE to AVX instructions.
-
-This gives around $28\times$ advantage to GPU, which is noticeably
-less than promised by many publications, however much higher that
-comes from comparison of  tested i5
-CPU to \emph{GTX 470}. This can be
-traced back to 128-bit only \emph{Tausworthe} random number generator
-implementation and inefficient vector store and load operations
-(gather/scatter).
+Results prrsented in table~\ref{tab:comp} show clear advantage of the
+GPU over CPU. This is hardly suprising, but the $26\times$ difference
+is much higher that comes from comparison of theoretical performace of
+tested i5 CPU to \emph{GTX 470}. The GTX is thus more efficient in
+that sense that is capable of achieving performance much closer to the
+peak. This can be attributed two two main reasons:
+\begin{itemize}
+\item The shared memory that acts as an managed cache allows to use
+  the small cache size much more effectively. In particular it is
+  possible on the GPU to fit the whole $16^3$ grid block into the
+  shared memory. This is not possible using the conventional cache
+  both on GPU and CPU leading to large number of cache misses and
+  decrease of performance.
+\item Modern CPU are not full vector processors. Not every scalar
+  instruction has a vector counterpart. In particular the eight words
+  wide integer instructions are missing from the AVX instruction set.
+  This makes impossible to make a 256-bit pseudo-random number
+  generator.
+\item Efficient load and store vector (gather/scatter) instruction are
+  also missing from CPU.  When not loading/storing form the
+  consecutive memory location they are efectively serialised into
+  scalar loads/stores.
+\end{itemize}
 
 \begin{thebibliography}{9}
 \bibitem{top500}{\tt http://www.top500.org/}
