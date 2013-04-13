@@ -48,15 +48,6 @@
 \newcommand{\vj}{{\vec{j}}}
 \newcommand{\vmu}{\vec{\mu}}
 
-\newcommand{\redblack}[3]{ 
-\pgfmathtruncatemacro{\odd}{Mod(#1+#2,2)}
-   \ifnum \odd=0
-      \fill[fill=black] (#1,#2) circle[radius=#3];
-   \else
-      \fill[fill=red] (#1,#2) circle[radius=#3];
-   \fi
-}
-
 \newcommand{\fillblockgray}[2]{
 \pgfmathtruncatemacro\llx{\bksize*(#1)-2}
 \pgfmathtruncatemacro\lly{\bksize*(#2)-2}
@@ -99,12 +90,6 @@
   }
 }
 
-
-\def\neighborhood{--
-  ++(0,-0.5)-- ++(1,0)-- ++(0,-0.5)-- ++(0,-0.5)-- ++(1,0)--
-  ++(0,-1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)-- ++(0,1.0)-- ++(1,0)--
-  ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,1)-- ++(-1,0)-- ++(0,-1)--
-  ++(-1,0)-- ++(0,-1)-- ++(-1,0)-- ++(0,-0.6)}
 
 \definecolor{colorone}{HTML}{006633} % default 116699
 \definecolor{colortwo}{HTML}{DDFF99} % default CCCCCC
