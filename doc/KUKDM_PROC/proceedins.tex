@@ -118,7 +118,7 @@
 Jagiellonian University ul. Reymonta 4, 30-059 Krakow, Poland 
 \and Mark Kac Complex Systems Research Centre\\
   Faculty of Physics, Astronomy and Applied Computer Science\\
-  Jagellonian University, Reymonta 4, 30--059 Krakow, Poland}
+  Jagiellonian University, Reymonta 4, 30-059 Krakow, Poland}
 \begin{document}
 
 
@@ -127,7 +127,7 @@ Jagiellonian University ul. Reymonta 4, 30-059 Krakow, Poland
 \begin{abstract}
   In this contribution we describe an efficient GPU implementation of
   the Monte-Carlo simulation of the Ginzburg--Landau model. We compare
-  the performace with a parallelized and vectorized CPU code and
+  the performance with a parallelized and vectorized CPU code and
   discuss the observed differences. 
 \end{abstract}
 
@@ -138,7 +138,7 @@ efficient device for numerical calculation. To ascertain this it is
 sufficient to look at the list of 500 supercomputers and count how
 many of them has GPU accelerators and the trend is still
 increasing. This was made possible not only by the accessibility of
-the hardware but also by the realisation from the side of the vendors
+the hardware but also by the realization from the side of the vendors
 that those units can be used also for computations, and providing user
 with suitable software interface to do this. Technologies like CUDA
 and OpenCL make the GPU relatively easy accessible to C/C++
@@ -394,7 +394,7 @@ that the corona $c_i$ does not need to be recalculated agin and most
 of the needed variables resides already in registers.  Then after
 synchronization, next sublattice is updated and so on. This whole
 procedure is repeated $N_{loc}$ times, again taking advantage of
-thefact that the field values are already in the shared memory.  After
+the fact that the field values are already in the shared memory. After
 that the kernel writes the shared memory back into global and new
 kernel is started processing next subgrid of blocks (see
 algorithm~\ref{alg:gpu}).
@@ -402,7 +402,7 @@ algorithm~\ref{alg:gpu}).
 
 From this description Each threads in CTA is updating 8
 lattice sites in 2D, so one CTA is updating $8 N_{th}/(B_x B_y)$ grid
-blocks ($16 N_{th}/(B_x B_y B_z)$ in 3D). Taking into acount the number of
+blocks ($16 N_{th}/(B_x B_y B_z)$ in 3D). Taking into account the number of
 subgrids one thread is updating $8*4=32$ lattice sites in 2D and
 $16\times 8=128$ in 3D.
 
@@ -442,13 +442,13 @@ work.
 One of the problems with lattice simulations is the treatment of the
 boundary conditions. The algorithm requires access to the site
 neighbors during each update. The index of neighbors can be calculated
-using simple arthmetics, except at the boundaries. The indexing of
+using simple arithmetics, except at the boundaries. The indexing of
 neighbors requires then checking for the boundary at each update or
 expensive modulo operations. Another technique is to use the
 precalculated and stored indices: for every site we store the index of
-four or six nearest neighbours. This is also very flexible but
+four or six nearest neighbors. This is also very flexible but
 requires a large amount of memory. This can have a negative impact on
-the performance and is not well suitable for the GPU which usyally
+the performance and is not well suitable for the GPU which usually
 have less RAM then CPU's. In our algorithm the checking for boundary
 is needed only when loading to shared memory. Then we can use simple
 index arithmetics.
@@ -458,7 +458,7 @@ index arithmetics.
 
 \section{CPU implementation}
 % CPU implementation
-To make a fiar comparison with the CPU we have to use both multicore
+To make a fair comparison with the CPU we have to use both multicore
 as vector (SSE/AVX) programming.  The parallelisation on many cores
 relatively easy using the OpenMP. The same restriction apply as on
 GPU, so we partition the the lattice in the same way, but we use only
@@ -468,7 +468,7 @@ updates in parallel.  At present only portable way to use vector
 instructions is to use compiler intrinsics\cite{intr}. We have defined
 our own vector type that uses combination of the 
  \lstinline!__attribute__((vector_size(N)))!  directive and intrinsics
-to provide a drop--in replacemnet for scalar types.
+to provide a drop--in replacement for scalar types.
 
 Unfortunately not all scalar \emph{x86} instructions have vector counterparts,
 which is crucial requirement for vectoring scalar code. In particular
@@ -495,15 +495,15 @@ equal zero as $\log$ then returns {\tt -Inf}.  The calculations of the
 four or eight $\log$'s in parallel is done using the Intel's svml
 library.
 
-As already mentioned in the previous section indexing the neighbours
+As already mentioned in the previous section indexing the neighbors
 can be quite costly operation requiring expensive modulo
 operations or large amount of memory. However if
 we restrict ourself to the lattice dimensions the are powers of two
-the nearest neigbour calculations can be made using addition and {\tt
+the nearest neighbor calculations can be made using addition and {\tt
   and} operations. This is quite a restrictive approach, not suitable
 for real applications but we have decided to use it for comparison
 with the GPU version. This is in some respect the ``upper bound'' of
-the CPU performace.
+the CPU performance.
 
 
 \section{Performance}
@@ -514,7 +514,7 @@ The overall performance of the algorithm expressed in Gflops or
 updates per sec. will depend strongly on the values of the $N_{loc.}$
 and $N_{hit}$. The optimal values of those parameters will depends on
 the physics of the model in particular on the values of parameters
-$\mu^2$, $g$ and $\Lambda$. To describe the pereformance in a general
+$\mu^2$, $g$ and $\Lambda$. To describe the performance in a general
 way we have decided to fit the execution time $T$ to the following
 model:
 \begin{equation}\label{eq:model}
@@ -531,7 +531,7 @@ $d$ &--& time per spin needed to calculate the corona.& 26 nops\\
 $e$ &--& time per spin needed to for update including calculation of two random numbers and exponential. & 64 nops + exp
 \end{tabular}
 \end{center}
-\caption{\label{tab:pars-int}Interpretation of the paremeters in the model~\ref{eq:model}. The last column gives the number of numerical operations performed by the corresposnding step of the algorith.}
+\caption{\label{tab:pars-int}Interpretation of the parameters in the model~\ref{eq:model}. The last column gives the number of numerical operations performed by the corresponding step of the algorithm.}
 \end{table}
 
 \begin{table}
@@ -634,23 +634,23 @@ $512^3$ & & & & && &\\\hline\hline
 
 The good performance of the presented GPU algorithm comes from the
 effective use of the shared memory. We have also checked to which
-extend this could be achived by just using the automatic cache
+extend this could be achieved by just using the automatic cache
 capabilities of modern GPU's. To this end we have implemented a
 version of the algorithm which did not use the shared memory, however
-the access pattern was the same. The idea was thnat the first
+the access pattern was the same. The idea was that the first
 iteration of the local sweep loop would fill the L1 cache and
-consecutive iterations would not need to access the global memory and the performance should be comparable to our orginal implementation. 
+consecutive iterations would not need to access the global memory and the performance should be comparable to our original implementation. 
 
 This turned out not to be the case. The algorithm using the L1 cache
-was approximatelly six times slower then the one using shared
-memory. This detoriated performace could be traced back to large
+was approximately six times slower then the one using shared
+memory. This deteriorated performance could be traced back to large
 number of cache misses. Nominally the $20^3$ block should fit in L1
 cache as it did fit into the shared memory. However the cache line is
 32 words long and the blocks are not aligned on the cache lines
 boundaries (see gray points on the figure~\ref{fig:blocks}). On top of
-that the cache is probably not fully assiactive. All that together
-impplies that the cache size should be up to four or five times bigger
-to accomodate the block. 
+that the cache is probably not fully associative. All that together
+implies that the cache size should be up to four or five times bigger
+to accommodate the block. 
 
 
 \section{Discussion}
@@ -673,7 +673,7 @@ implementation and inefficient vector store and load operations
 
 \begin{thebibliography}{9}
 \bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus Books Publishing (1998).
-\bibitem{Fermi} Fermi architecture whitepaper. 
+\bibitem{Fermi} Fermi Architecture White Paper. 
 \bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
 \bibitem{howes_thomas07}
 Lee Howes and David Thomas.
