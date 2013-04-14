@@ -120,10 +120,10 @@
 
 \section{Introduction}
 
-The Graphical Processing Units (GPU) emerge this days as the most
-efficient device for numerical calculation. To ascertain this it is
+The Graphical Processing Units (GPU) emerge these days as the most
+efficient devices for numerical calculations. To ascertain this it is
 sufficient to look at the list of 500 supercomputers\cite{top500} and count how
-many of them has GPU accelerators and this trend is still
+many of them have GPU accelerators and this trend is still
 increasing. This was made possible not only by the accessibility of
 the hardware but also by the realization from the side of the vendors
 that those units can be used also for computations, and providing user
@@ -167,7 +167,7 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 \end{split}
 \end{equation*}
 where $\vphi$ is a scalar\footnote{In general this can be a vector,
-  but in this contribution we restrict ourselfs to scalar case} field
+  but in this contribution we restrict ourselves to scalar case} field
 defined on the sites of a two or three dimensional lattice. The $x_i$
 denote the sites of the lattice where $i$ is a multidimensional index
 and $\a\mu$ denotes the unit vector in the direction $\mu$. We use
@@ -449,7 +449,7 @@ work.
 
 One of the problems with lattice simulations is the treatment of the
 boundary conditions. The algorithm requires access to the site
-neighbors during each update. Inndex of neighbors can be calculated
+neighbors during each update. Index of neighbors can be calculated
 using simple arithmetics, except at the boundaries. Indexing of
 neighbors requires  checking for the boundary at each update or
 an expensive modulo operations. Another technique is to use the
@@ -508,8 +508,8 @@ As already mentioned in the previous section indexing the neighbors
 can be quite costly operation requiring expensive modulo
 operations or large amount of memory. However if
 we restrict ourself to the lattice dimensions the are powers of two
-the nearest neighbor calculations can be made using addition and {\tt
-  and} operations. This is quite a restrictive approach, not suitable
+the nearest neighbor calculations can be made using addition and bitwise
+operations. This is quite a restrictive approach, not suitable
 for real applications but we have decided to use it for comparison
 with the GPU version. This is in some respect the ``upper bound'' of
 the CPU performance.
@@ -520,8 +520,8 @@ the CPU performance.
 
 We have tested our implementations on  the following hardware:
 \begin{itemize}
-\item GPU Nvidia GTX 470: 14 Scalar Multiprocessor = 448 CUDa cores, 1.2GHz, CUDA 5.0 Ubuntu Linux 12.04, 1088Gflops.
-\item CPU  i5-2400S Sandy Bridge 4 core 2.5 GHz, 12 GB RAM, OSX 10.8.3, GCC 4.8.0 -O3 +OpenMP, 160 Gflops. 
+\item GPU \emph{Nvidia} GTX 470, 14 Scalar Multiprocessor = 448 CUDA cores, 1.2GHz, CUDA 5.0 Ubuntu Linux 12.04, 1088Gflops.
+\item CPU \emph{Intel} i5-2400S Sandy Bridge, 4 core, 2.5 GHz, 12 GB RAM, OSX 10.8.3, GCC 4.8.0 -O3 +OpenMP, 160 Gflops. 
 \end{itemize}
 
 The overall performance of the algorithm expressed in Gflops or
@@ -561,7 +561,7 @@ PRNG & 1 & 2  & 21  \\\hline
 $\widetilde{\vphi}_i \gets \vphi_i+\eta$& 3 & &\\\hline\hline
 \end{tabular}
 \end{center}
-\caption{\label{tab:instr-count}Number of instruction in different steps of the
+\caption{\label{tab:instr-count}Number of instructions in different steps of the
 algorithm. float -- floating point, int -- integer arithmetic, bit -- shifts and
 bitwise logical. In the last row we do not include the call to PRNG. We do not include the instruction needed for indexing.}
 \end{table}
@@ -593,7 +593,7 @@ average.  This understandable the execution time can depend non
 linearly on the lattice volume.  One reason is that for small lattice
 sizes not all SM on the GPU are used. For the $64^3$ lattice we need
 $64^3/128=2048$ threads. With $256$ threads per CTA we use only $8$
-thread blocks, which is much smaller thn 14 available SM. Even for
+thread blocks, which is much smaller than 14 available SM. Even for
 $128^3$ lattice the 64 needed blocks will not use the SM evenly. Also
 the L2 cache may introduce some non-linear dependence on the lattice
 size.
