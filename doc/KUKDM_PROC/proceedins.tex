@@ -24,7 +24,7 @@
   basicstyle=\small,%
   keywordstyle=\bfseries,%
   keywordstyle=[2]\bfseries,%
-  keywordstyle=[3]\itshape,%
+  %keywordstyle=[3]\itshape,%
   commentstyle=\color{gray},%
   stringstyle=\color{gray},%
   stepnumber=1,%
@@ -99,8 +99,8 @@
 
 \title{ GPU-accelerated and CPU SIMD Optimized \\
         Monte Carlo Simulation of $\phi^4$ Model }
-\author{ Piotr Bialas\inst{1}\inst{2} \and Jakub Kowal\inst{1}
-         \and Adam Strzelecki\inst{1} }
+\author{ Piotr Bialas\inst{1}\inst{2}\thanks{\email{pbialas@th.if.uj.edu.pl}} \and Jakub Kowal\inst{1}\thanks{\email{jakub.kowal@uj.edu.pl}}
+         \and Adam Strzelecki\inst{1}\thanks{\email{adam.strzelecki@uj.edu.pl}} }
 \institute{ Faculty of Physics, Astronomy and Applied Computer Science \\
             Jagiellonian University ul. Reymonta 4, 30-059 Krakow, Poland 
             \and Mark Kac Complex Systems Research Centre \\
@@ -113,10 +113,14 @@
 
 \begin{abstract}
   In this contribution we describe an efficient GPU implementation of
-  the Monte-Carlo simulation of the Ginzburg--Landau model. We compare
-  the performance with a parallelized and vectorized CPU code and
-  discuss the observed differences. 
+  the Monte-Carlo simulation of the Ginzburg--Landau model.  We
+  achieve the performance close to
+  50\% of the peak performance of the used GPU. We compare
+  this performance with a parallelized and vectorized CPU code and
+  discuss the observed differences.
 \end{abstract}
+
+Keywords: GPU computing, vectorisation. Monte-Carlo simulations. 
 
 \section{Introduction}
 
@@ -148,8 +152,12 @@ In this contribution we present an efficient, vectorized
 implementation of the Monte-Carlo simulations of the $\varphi^4$ or
 Ginzburg--Landau model both on GPU and CPU. Monte-Carlo simulations of
 this type play an important role in statistical physics and field
-theory. We use an extended version of the model that to our knowledge
-was not yet ported to the GPU. 
+theory. Those simulations are usually very time consuming so the speed
+of the algorithm is of a paramount importance. Similar model have been
+ported to GPU, however they were mainly discrete spin models with
+nearest neighbour interactions\cite{spin1,spin2,weigel}.  We use a continous field model
+with extended neighborhood that to our knowledge was not yet ported to
+the GPU.
 
 
 \section{Ginzburg--Landau model and Monte-Carlo simulations}
@@ -194,7 +202,7 @@ $\widetilde{\vphi_i}$ for $\vphi_i$, otherwise we accept the change
 with the probability $\exp(-\Delta H)$. In other words we accept the
 change with the probability
 \begin{equation}
-P(\vphi_i\rightarrow\vphi_i+\varepsilon)=\min\left(1,\exp(-\Delta H)\right)
+P(\vphi_i\rightarrow\vphi_i+\eta)=\min\left(1,\exp(-\Delta H)\right)
 \end{equation}
 The crucial feature of this algorithm is that the update is local {\em
   i.e.} $\Delta H$ depends only on the values of fields in the
@@ -326,13 +334,13 @@ $c^{01}$ -- squares, $c^{11}$ -- circles and $c^{02}$ -- diamonds.}
 The GPU is no exception as to what concerns the speed of the memory
 access.  While very fast, the throughput from global memory is still
 almost two orders of magnitude slower then needed to sustain the
-maximal instruction throughput.  The Nvidia cards contain so called { Scalar
-  Multiprocessors} (SM). On Fermi architecture each SM is equipped
-with up 48KB shared memory and 32K of 32bit registers\cite{Fermi}
-which act as user managed cache. While starting from the compute
-capability 2.0 Nvidia cards are also equipped with L1 and L2 caches,
-the use of automatic cache is, as we will show later, no advantageous
-in terms of performance.
+maximal instruction throughput.  The NVIDIA cards we use contain so
+called { Scalar Multiprocessors} (SM). On Fermi architecture each SM
+is equipped with up 48KB shared memory and 32K of 32bit
+registers\cite{Fermi} which act as user managed cache. While starting
+from the compute capability 2.0 Nvidia cards are also equipped with L1
+and L2 caches, the use of automatic cache is, as we will show later,
+no advantageous in terms of performance.
 
 To efficiently use the shared memory  we adopt the hierarchical scheme from
 ref.~\cite{weigel} suitably modified to account for bigger
@@ -391,7 +399,7 @@ block in this subgrid is assigned to a block of $N_{th}$ threads (CTA
 -- Cooperative Threads Array). First we fetch the values of the fields
 from global to shared memory (including border points see
 figure~\ref{fig:blocks}).  In 3D we use $B_x=B_y=B_z=16$ which gives
-altogether $20^3$ filed values to be loaded. This gives $32$KB which
+altogether $20^3$ field values to be loaded. This gives $32$KB which
 fits nicely into 48KB shared memory.
 
 
@@ -407,18 +415,11 @@ that the kernel writes the shared memory back into global and new
 kernel is started processing next subgrid of blocks (see
 algorithm~\ref{alg:gpu}).
 
-
-From this description it follows that each threads in CTA is updating 8
-lattice sites in 2D, so one CTA is updating $8 N_{th}/(B_x B_y)$ grid
-blocks ($16 N_{th}/(B_x B_y B_z)$ in 3D). Taking into account the number of
-subgrids one thread is updating $8*4=32$ lattice sites in 2D and
-$16\times 8=128$ in 3D.
-
 Monte-Carlo calculations require a good source of random numbers. We
 use the Tausworthe pseudo--random number
-generator\cite{howes_thomas07}. The performance could be increased by
-the use of simpler generator, but we have not attempted this in this
-work.
+generator\cite{howes_thomas07} with one copy of the generator per
+thread. The performance could be increased by the use of simpler
+generator, but we have not attempted this in this work.
 
 \begin{algorithm}
 \begin{algorithmic}[1]
@@ -468,7 +469,7 @@ index arithmetics.
 % CPU implementation
 To make a fair comparison with the CPU we have to use both multicore
 as vector (SSE/AVX) programming.  The parallelisation on many cores
-relatively easy using the OpenMP. The same restriction apply as on
+is relatively easy using the OpenMP. The same restriction apply as on
 GPU, so we partition the the lattice in the same way, but we use only
 one level {\em i.e.} we do not partition the lattice into blocks.  The
 SIMD instructions are used to process four (SSE) or eight (AVX)
@@ -584,12 +585,12 @@ N_{op}=V\cdot N_{glob.}\cdot N_{loc.}(26+\cdot N_{hit}(64+exp))
 \begin{equation}
   ops=\frac{N_op}{T}\approx \frac{N_{loc.}(26+\cdot N_{hit}(64+exp))}{ \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right)}
 \end{equation}
-We have gather the data on the execution times of the 3D program for
+We have gathered the data on the execution times of the 3D program for
 four different lattice sizes. First thing we noticed is that it is not
 possible to fit all the data simultaneously to the model
 \eqref{eq:model}. However when fitting data for each lattice size
 separately we obtain a very good fit accuracy better then $1\%$ on the
-average.  This understandable the execution time can depend non
+average.  This understandable: the execution time can depend non
 linearly on the lattice volume.  One reason is that for small lattice
 sizes not all SM on the GPU are used. For the $64^3$ lattice we need
 $64^3/128=2048$ threads. With $256$ threads per CTA we use only $8$
@@ -623,13 +624,13 @@ $512^3$ & 3.72  &       &       1.35e-8 &       1.44e-9\\\hline\hline
 \caption{\label{tab:fit}Results of the fit of the formula \eqref{eq:model} GPU
 and \eqref{eq:model-cpu} CPU.}
 \end{table}
-In case of CPU as we do not have the shared memory the formula for the fit is
+In case of CPU as we do not loop over the blocks the model is:
 \begin{equation}\label{eq:model-cpu}
 T  = a+ V \cdot b +
-N_{glob.} V \left(d + N_{hit}\cdot e\right) . 
+N_{glob.} V \left(d + N_{hit}\cdot e\right). 
 \end{equation}
 The coefficient $d$ is the time per spin needed to load it from and to memory
-and the calculation of the corona. the time per update in this case is given by:
+together with the calculation of the corona. The time per update in this case is given by:
 \begin{equation}\begin{split}
 \frac{T}{N_{up}}=&\frac{a+ V \cdot b + N_{glob.} V \left(d + N_{hit}\cdot e\right)}{V\cdot N_{glob.}\cdot N_{hit}}\\
 \approx&
@@ -638,7 +639,7 @@ and the calculation of the corona. the time per update in this case is given by:
 \end{equation}
 and
 \begin{equation}
-nops\approx \frac{ 26+N_{hit}(64+exp)}{ \left(d + N_{hit}\cdot e\right)}
+ops\approx \frac{ 26+N_{hit}(64+exp)}{ \left(d + N_{hit}\cdot e\right)}
 \end{equation}
 \begin{table}
 \begin{center}
@@ -676,7 +677,7 @@ was approximately six times slower then the one using shared
 memory. This deteriorated performance could be traced back to large
 number of cache misses. Nominally the $20^3$ block should fit in L1
 cache as it did fit into the shared memory. However the cache line is
-32 words long and the blocks are not aligned on the cache lines
+32 words long (128B) and the blocks are not aligned on the cache lines
 boundaries (see gray points on the figure~\ref{fig:blocks}). On top of
 that the cache is probably not fully associative. All that together
 implies that the cache size should be up to four or five times bigger
@@ -690,7 +691,7 @@ GPU over CPU. This is hardly surprising, but the $26\times$ difference
 is much higher that comes from comparison of theoretical performance of
 tested i5 CPU to \emph{GTX 470}. The GTX is thus more efficient in
 that sense that is capable of achieving performance much closer to the
-peak. This can be attributed two two main reasons:
+peak. This can be attributed to two main reasons:
 \begin{itemize}
 \item The shared memory that acts as an managed cache allows to use
   the small cache size much more effectively. In particular it is
@@ -698,7 +699,7 @@ peak. This can be attributed two two main reasons:
   shared memory. This is not possible using the conventional cache
   both on GPU and CPU leading to large number of cache misses and
   decrease of performance. 
-\item Modern CPU are not full vector processors. Not every scalar
+\item Modern CPU are not fully vector processors. Not every scalar
   instruction has a vector counterpart. In particular the eight words
   wide integer instructions are missing from the AVX instruction set.
   This makes impossible to make a 256-bit pseudo-random number
@@ -709,14 +710,25 @@ peak. This can be attributed two two main reasons:
   scalar loads/stores.
 \end{itemize}
 
+Undeniably the trend of vectorization of CPUs is continuing and the
+software that want to stay competitive must adapt to it.  However the
+current CPU make this more difficult then the GPU, due to the lack of
+some crucial vector features.  The CPU producers  are already
+addressing those isues. Intel Xeon $\phi$ has a extended vector
+instructions set and Haswell architecture CPU with AVX2 should be on
+sale in Autumn. As a future work we are planning to tests those
+architectures when they become available to us. 
+
 \begin{thebibliography}{9}
 \bibitem{top500}{\tt http://www.top500.org/}
+\bibitem{spin1}Benjamin Block , Peter Virnau , Tobias Preis, Computer Physics Communications, Volume 181, Issue 9, September 2010, Pages 1549–1556.
+\bibitem{spin2}Ezequiel E. Ferrero, Juan Pablo De Francesco, Nicolás Wolovick, Sergio A. Cannas. Computer Physics Communications, volume 183, issue 8, pages 1578–1587, 2012
+\bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
 \bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus Books Publishing (1998).
 \bibitem{Fermi} 
 ``NVIDIA's Next Generation CUDA ComputeArchitecture: Fermi'' \\
 \verb!http://www.nvidia.com/content/PDF/fermi_white_papers/!\\
 \verb!NVIDIA_Fermi_Compute_Architecture_Whitepaper.pdf!
-\bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
 \bibitem{howes_thomas07}
 Lee Howes and David Thomas.
 ``{\em Efficient random number generation and application using {CUDA}.}''
