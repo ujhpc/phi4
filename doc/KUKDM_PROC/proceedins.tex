@@ -120,7 +120,7 @@
   discuss the observed differences.
 \end{abstract}
 
-Keywords: GPU computing, vectorisation. Monte-Carlo simulations. 
+Keywords: GPU computing, vectorization. Monte-Carlo simulations. 
 
 \section{Introduction}
 
@@ -155,7 +155,7 @@ this type play an important role in statistical physics and field
 theory. Those simulations are usually very time consuming so the speed
 of the algorithm is of a paramount importance. Similar model have been
 ported to GPU, however they were mainly discrete spin models with
-nearest neighbour interactions\cite{spin1,spin2,weigel}.  We use a continous field model
+nearest neighbor interactions\cite{spin1,spin2,weigel}.  We use a continuous field model
 with extended neighborhood that to our knowledge was not yet ported to
 the GPU.
 
@@ -713,11 +713,11 @@ peak. This can be attributed to two main reasons:
 
 Undeniably the trend of vectorization of CPUs is continuing and the
 software that wants to stay competitive must adapt to it.  However the
-current CPU make this more difficult then the GPU, due to the lack of
+current CPU make this more difficult than the GPU, due to the lack of
 some crucial vector features.  The CPU producers are already
-addressing those isues. Intel Xeon $\phi$ has a extended vector
-instructions set and Haswell architecture CPU with AVX2 should be on
-sale in Autumn. As a future work we are planning to tests those
+addressing those issues. Intel Xeon $\phi$ has a extended vector
+instructions set and Haswell CPU architecture with AVX2 should be on
+sale this Autumn. As a future work we are planning to tests those
 architectures.
 
 \begin{thebibliography}{9}
