@@ -175,7 +175,7 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 \end{split}
 \end{equation*}
 where $\vphi$ is a scalar\footnote{In general this can be a vector,
-  but in this contribution we restrict ourselves to scalar case} field
+  but in this contribution we restrict ourselves to scalar case.} field
 defined on the sites of a two or three dimensional lattice. The $x_i$
 denote the sites of the lattice where $i$ is a multidimensional index
 and $\a\mu$ denotes the unit vector in the direction $\mu$. We use
@@ -195,7 +195,7 @@ that $P(\eta) = P(-\eta)$. In practice we draw  $\eta$ from the
 uniform distribution on interval $[-\varepsilon,\varepsilon)$.  Then we
 calculate the difference of the Hamiltonian's
 \begin{equation}
-\Delta H=H[\widetilde{\vphi_i}]-H[\vphi_i]
+\Delta H=H[\widetilde{\vphi_i}]-H[\vphi_i].
 \end{equation}
 If $\Delta H < 0$ we accept the change and substitute
 $\widetilde{\vphi_i}$ for $\vphi_i$, otherwise we accept the change
@@ -508,7 +508,7 @@ library.
 As already mentioned in the previous section indexing the neighbors
 can be quite costly operation requiring expensive modulo
 operations or large amount of memory. However if
-we restrict ourself to the lattice dimensions the are powers of two
+we restrict ourself to the lattice dimensions that are powers of two
 the nearest neighbor calculations can be made using addition and bitwise
 operations. This is quite a restrictive approach, not suitable
 for real applications but we have decided to use it for comparison
@@ -585,6 +585,7 @@ N_{op}=V\cdot N_{glob.}\cdot N_{loc.}(26+\cdot N_{hit}(64+exp))
 \begin{equation}
   ops=\frac{N_op}{T}\approx \frac{N_{loc.}(26+\cdot N_{hit}(64+exp))}{ \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right)}
 \end{equation}
+
 We have gathered the data on the execution times of the 3D program for
 four different lattice sizes. First thing we noticed is that it is not
 possible to fit all the data simultaneously to the model
@@ -711,18 +712,18 @@ peak. This can be attributed to two main reasons:
 \end{itemize}
 
 Undeniably the trend of vectorization of CPUs is continuing and the
-software that want to stay competitive must adapt to it.  However the
+software that wants to stay competitive must adapt to it.  However the
 current CPU make this more difficult then the GPU, due to the lack of
-some crucial vector features.  The CPU producers  are already
+some crucial vector features.  The CPU producers are already
 addressing those isues. Intel Xeon $\phi$ has a extended vector
 instructions set and Haswell architecture CPU with AVX2 should be on
 sale in Autumn. As a future work we are planning to tests those
-architectures when they become available to us. 
+architectures.
 
 \begin{thebibliography}{9}
 \bibitem{top500}{\tt http://www.top500.org/}
-\bibitem{spin1}Benjamin Block , Peter Virnau , Tobias Preis, Computer Physics Communications, Volume 181, Issue 9, September 2010, Pages 1549–1556.
-\bibitem{spin2}Ezequiel E. Ferrero, Juan Pablo De Francesco, Nicolás Wolovick, Sergio A. Cannas. Computer Physics Communications, volume 183, issue 8, pages 1578–1587, 2012
+\bibitem{spin1}Benjamin Block , Peter Virnau , Tobias Preis, Computer Physics Communications, Volume 181 2010 1549–1556.
+\bibitem{spin2}Ezequiel E. Ferrero, Juan Pablo De Francesco, Nicolás Wolovick, Sergio A. Cannas. Computer Physics Communications, volume 183, 1578--1587, 2012
 \bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
 \bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus Books Publishing (1998).
 \bibitem{Fermi} 
