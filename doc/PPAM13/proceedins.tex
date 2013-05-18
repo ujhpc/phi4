@@ -97,15 +97,17 @@
 \def\bkcount{4}
 \def\lcsize{5}
 
-\title{ GPU-accelerated and CPU SIMD Optimized \\
-        Monte Carlo Simulation of $\phi^4$ Model }
-\author{ Piotr Bialas\inst{1}\inst{2}\thanks{\email{pbialas@th.if.uj.edu.pl}} \and Jakub Kowal\inst{1}\thanks{\email{jakub.kowal@uj.edu.pl}}
-         \and Adam Strzelecki\inst{1}\thanks{\email{adam.strzelecki@uj.edu.pl}} }
+\title{GPU implementation of the Monte-Cralo simulations of the
+  extended Ginzburg--Landau model}  
+\author{ Piotr
+  Bialas\inst{1}\inst{2}\thanks{\email{pbialas@th.if.uj.edu.pl}} \and
+  Jakub Kowal\inst{1}\thanks{\email{jakub.kowal@uj.edu.pl}} \and Adam
+  Strzelecki\inst{1}\thanks{\email{adam.strzelecki@uj.edu.pl}} }
 \institute{ Faculty of Physics, Astronomy and Applied Computer Science \\
-            Jagiellonian University ul. Reymonta 4, 30-059 Krakow, Poland 
-            \and Mark Kac Complex Systems Research Centre \\
-            Faculty of Physics, Astronomy and Applied Computer Science \\
-            Jagiellonian University, Reymonta 4, 30-059 Krakow, Poland }
+  Jagiellonian University ul. Reymonta 4, 30-059 Krakow, Poland
+  \and Mark Kac Complex Systems Research Centre \\
+  Faculty of Physics, Astronomy and Applied Computer Science \\
+  Jagiellonian University, Reymonta 4, 30-059 Krakow, Poland }
 
 \begin{document}
 
@@ -412,8 +414,7 @@ synchronization, next sublattice is updated and so on. This whole
 procedure is repeated $N_{loc}$ times, again taking advantage of
 the fact that the field values are already in the shared memory. After
 that the kernel writes the shared memory back into global and new
-kernel is started processing next subgrid of blocks (see
-algorithm~\ref{alg:gpu}).
+kernel is started processing next subgrid of blocks.
 
 Monte-Carlo calculations require a good source of random numbers. We
 use the Tausworthe pseudo--random number
@@ -421,31 +422,6 @@ generator\cite{howes_thomas07} with one copy of the generator per
 thread. The performance could be increased by the use of simpler
 generator, but we have not attempted this in this work.
 
-\begin{algorithm}
-\begin{algorithmic}[1]
-\For{every global sweep}
-\For{every block subgrid}
-\For{every block in subgrid}
-\State load block  into shared memory
-\For{every local sublattice}
-\For{every site $i$ in local sublattice}
-\State calculate corona $c_i$ 
-\For{ k = 1 ..  $N_{hit}$ }
-\State $\widetilde{\vphi}_i \gets \vphi_i+\eta$
-\State $\Delta H \gets H[\widetilde{\vphi}_i]-H[\vphi_i]$
-\If{$\exp(-\Delta H) > r$}
-\State $\vphi_i \gets \widetilde{\vphi}_i$
-\EndIf
-\EndFor
-\EndFor 
-\State {\tt \_\_syncthreads();}
-\EndFor
-\EndFor
-\EndFor
-\EndFor
-\end{algorithmic}
-\caption{\label{alg:gpu} The GPU algorithm. The CPU algorithm differs by the absence of the loops over the blocks: lines 2-4.}
-\end{algorithm}
 
 
 One of the problems with lattice simulations is the treatment of the
@@ -488,22 +464,7 @@ register), unlike GPU where gather and scatter is key feature. Another drawback
 in lack of AVX 256-bit integer operations, which makes random number generator
 utilize 128-bit SSE only, even on 256-bit AVX capable CPUs.
 
-In our CPU implementation we use a small ``trick''. Instead of using the
-\begin{lstlisting}
-        if ( exp(-DeltaH) > r )
-\end{lstlisting}
-condition for the Metropolis algorithm ($r$ is a pseudo--random number) we use
-an equivalent condition
-\begin{lstlisting}
-        if ( -DeltaH >  log(r) )
-\end{lstlisting}
 
-The advantage is now that the argument of $\log$ is independent of
-$\Delta H$ and can be calculated beforehand allowing to hide some of
-the latency. This implementation is safe even in case when $r$ is
-equal zero as $\log$ then returns {\tt -Inf}.  The calculations of the
-four or eight $\log$'s in parallel is done using the Intel's svml
-library.
 
 As already mentioned in the previous section indexing the neighbors
 can be quite costly operation requiring expensive modulo
@@ -536,21 +497,7 @@ model:
 T  = a+ V \cdot b +
 N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right) . 
 \end{equation}
-where $V$ is the volume of the lattice.  The interpretation of the
-parameters of the model is given in table~\ref{tab:pars-int}.
-
-\begin{table}
-\begin{center} \begin{tabular}{lcp{8cm}p{2cm}}
-$c$ &--& time per spin needed to load it to shared memory and back.&\\
-$d$ &--& time per spin needed to calculate the corona.& 26 ops\\
-$e$ &--& time per spin needed to for update including calculation of two
-random numbers and exponential. & 64 ops + 1 exp
-\end{tabular}
-\end{center}
-\caption{\label{tab:pars-int}Interpretation of the parameters in the
-model~\ref{eq:model}. The last column gives the number of numerical operations
-performed by the corresponding step of the algorithm.}
-\end{table}
+where $V$ is the volume of the lattice.  
 
 \begin{table}
 \begin{center} 
@@ -578,7 +525,7 @@ so the time per update is given by
 \frac{ \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right)}{N_{loc.}\cdot N_{hit}}
 \end{split}
 \end{equation}
-Using the data from the table~\ref{tab:pars-int} we obtain that the number of the operations performed is
+Using the data from the table~\ref{tab:instr-count} we obtain that the number of the operations performed is
 \begin{equation}
 N_{op}=V\cdot N_{glob.}\cdot N_{loc.}(26+\cdot N_{hit}(64+exp))
 \end{equation}
