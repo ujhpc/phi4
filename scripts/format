@@ -1,0 +1,5 @@
+#!/bin/bash
+find . \( -iname '*.c' -or -iname '*.cpp' -or -iname '*.h' \) \
+	\! -ipath './lib/*' \
+	\! -ipath './doc/*' \
+	-exec clang-format -style=file -i {} +
