@@ -50,6 +50,11 @@ typedef cell_partition<DIM, octal_cell<DIM>, Ind> Partition;
 typedef single_partition<Ind> Partition;
 #endif
 
+#if CACHE
+#include "cache_block.h"
+typedef Block<DIM, Ind, octal_cell<DIM> > BlockType;
+#endif
+
 #if USE_RAND48
 inline Float RAND(int i) { return rand48_array::generator()->rand(i); }
 inline Float RAND_SYM(int i) {
