@@ -6,6 +6,10 @@ using namespace std;
 #include <cmath>
 #include <popt.h>
 
+#include <time.h>
+
+#include "linux_time.h"
+
 template <typename T> int poptType();
 template <> int poptType<float>() { return POPT_ARG_FLOAT; }
 template <> int poptType<double>() { return POPT_ARG_DOUBLE; }
@@ -37,8 +41,6 @@ int main(int argc, const char* argv[]) {
   int n_term = 0;
   int n_prod = 0;
   int seed = 7675643;
-
-  //  int sweep;
 
   int ix, iy;
   int n_x = 128;
@@ -154,9 +156,22 @@ int main(int argc, const char* argv[]) {
    */
   long int accepted = 0;
   Partition partition;
+
+  LinuxTimer timer(CLOCK_MONOTONIC);
+  if (timer)
+    timer.print_res();
+
+  timer.start();
   for (int sweep = 0; sweep < n_term; sweep++) {
     accepted += make_sweep(phi_field, pars, block_sweeps);
   }
+  timer.stop();
+
+  fprintf(stdout, "termalisation took %lld ns\n", timer.ellapsed_time());
+  double fnano_sec = (double)timer.ellapsed_time();
+  fprintf(stderr,
+          "that makes %lf ns per update\n",
+          fnano_sec / (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term));
 
   if (n_term > 0)
     fprintf(stderr,
@@ -164,11 +179,13 @@ int main(int argc, const char* argv[]) {
             ((double)accepted) /
                 (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term));
 
+  MagnetisationMeasurer<Field::n_components> magnetisation;
+  accepted = 0;
+
   /*
    * main  simulation loop
    */
-  MagnetisationMeasurer<Field::n_components> magnetisation;
-  accepted = 0;
+
   FILE* fmag;
   if (NULL == (fmag = fopen(mag_file_name.c_str(), "w"))) {
     std::cerr << "cannot open file `" << mag_file_name << "' for  writing"

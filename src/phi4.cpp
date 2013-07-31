@@ -37,8 +37,6 @@ int main(int argc, const char* argv[]) {
   int n_prod = 0;
   int seed = 7675643;
 
-  int sweep;
-
   int ix, iy;
   int n_x = 128;
   int n_y = 128;
@@ -50,7 +48,7 @@ int main(int argc, const char* argv[]) {
 #ifdef _OPENMP
   int threads = 0;
 #endif
-  char* tag = "txt";
+  const char* tag = "txt";
 
   struct parameters<Float> pars = {
     /* g        */(Float)0.0,
@@ -91,6 +89,7 @@ int main(int argc, const char* argv[]) {
     exit(-1);
   }
 
+  std::cerr << "# Dim " << DIM << "\n";
   print_parameters(std::cerr, options);
   std::cerr << "# n-components " << Field::n_components << "\n";
   std::cerr << "# Float " << numericType<Float>::name << "\n";
@@ -137,14 +136,14 @@ int main(int argc, const char* argv[]) {
 
   Partition partition;
 
-  for (sweep = 0; sweep < n_term; sweep++) {
+  for (int sweep = 0; sweep < n_term; sweep++) {
     accepted += make_sweep(phi_field, pars, partition);
   }
 
   if (n_term > 0)
     fprintf(stderr,
             "acceptance %f\n",
-            ((Float)accepted) / (N_HIT * Ind::n_sites() * n_term));
+            ((double)accepted) / (N_HIT * (double)Ind::n_sites() * n_term));
 
   MagnetisationMeasurer<Field::n_components> magnetisation;
   accepted = 0;
@@ -160,7 +159,7 @@ int main(int argc, const char* argv[]) {
     exit(2);
   }
   int n_meas = 0;
-  for (sweep = 0; sweep < n_prod; sweep++) {
+  for (int sweep = 0; sweep < n_prod; sweep++) {
 
     accepted += make_sweep(phi_field, pars, partition);
 
