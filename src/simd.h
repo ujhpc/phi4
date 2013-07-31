@@ -365,12 +365,14 @@ static inline VEC4D log(const VEC4D& v) { return VEC4D(__svml_logd4(v.v)); }
 #undef ARRAY
 #undef SCALAR
 
+#ifndef __SIMD_H__REP
 #undef REPn
 #undef REP
 #undef REP1
 #undef REP2
 #undef REP4
 #undef REP8
+#endif
 
 #undef TPL
 #undef TPL1

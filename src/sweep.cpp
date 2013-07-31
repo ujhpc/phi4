@@ -7,6 +7,8 @@
 #include "typedefs.h"
 #include "sweep.h"
 
+#include "updater.h"
+
 #ifdef STRIPS
 template <typename F, typename P>
 long int make_sweep(F& field,

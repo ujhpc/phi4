@@ -7,7 +7,9 @@
 #include "typedefs.h"
 #include "sweep.h"
 
-#if CACHE /////////////////////////////////////////////////////////////////////
+#include "updater_simd.h"
+
+#ifdef CACHE  /////////////////////////////////////////////////////////////////
 
 template <typename F>
 long int make_sweep(F& field, const parameters<Float>& pars, int block_sweeps) {
@@ -29,7 +31,7 @@ long int make_sweep(F& field, const parameters<Float>& pars, int block_sweeps) {
 
 template long int make_sweep<Field>(Field&, const parameters<Float>&, int);
 
-#else /////////////////////////////////////////////////////////////////////////
+#else  ////////////////////////////////////////////////////////////////////////
 
 template <typename F, typename P>
 long int make_sweep(F& field,

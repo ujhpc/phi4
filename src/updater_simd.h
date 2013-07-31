@@ -156,7 +156,7 @@ template <typename F> class Updater {
 #endif
   }
 
-#if CACHE
+#ifdef CACHE
   int update_block(const BlockType& block, int n = 1) {
     int indices[SIMD] __attribute__((aligned(16)));
     long int accepted = 0;
