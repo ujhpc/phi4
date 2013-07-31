@@ -17,7 +17,15 @@ template <typename F> struct parameters {
   F i_Lambda;
 };
 
+#if CACHE && SIMD /////////////////////////////////////////////////////////////
+
+template <typename F>
+long int make_sweep(F& field, const parameters<Float>& pars, int block_sweeps);
+
+#else /////////////////////////////////////////////////////////////////////////
+
 template <typename F, typename P>
 long int make_sweep(F& field,
                     const parameters<Float>& pars,
                     const P& part = single_partition<typename F::indexer_t>());
+#endif

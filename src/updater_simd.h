@@ -94,6 +94,7 @@ template <typename F> class Updater {
     for (int h = 0; h < N_HIT; h++)
       for (int k = 0; k < F::n_components; k++)
         randsym[h][k] = RAND_SYM(tid);
+
     for (int h = 0; h < N_HIT; h++)
       randlog[h] = RAND(tid);
     for (int h = 0; h < N_HIT; h++)
@@ -101,13 +102,13 @@ template <typename F> class Updater {
 
     for (int h = 0; h < N_HIT; h++) {
       FVec new_phi[F::n_components];
-      new_phi[0] = phi[0] + randsym[h][0];
+      new_phi[0] = phi[0] + FVec(epsilon_) * randsym[h][0];
 
       FVec new_phi2 = new_phi[0] * new_phi[0];
       FVec new_action = corona[0] * new_phi[0];
 
       for (int k = 1; k < F::n_components; k++) {
-        new_phi[k] = phi[k] + randsym[h][k];
+        new_phi[k] = phi[k] + FVec(epsilon_) * randsym[h][k];
         new_phi2 += new_phi[k] * new_phi[k];
         new_action += corona[k] * new_phi[k];
       }
@@ -154,6 +155,24 @@ template <typename F> class Updater {
     return ret;
 #endif
   }
+
+#if CACHE
+  int update_block(const BlockType& block, int n = 1) {
+    int indices[SIMD] __attribute__((aligned(16)));
+    long int accepted = 0;
+    for (int i = 0; i < n; ++i) {
+      for (int p = 0; p < block.n_partitions(); ++p) {
+        for (int s = 0; s < block.partition_size(); s += SIMD) {
+          for (int si = 0; si < SIMD; ++si) {
+            indices[si] = block.corner_offset() + block.partition(p, s + si);
+          }
+          accepted += operator()(indices);
+        }
+      }
+    }
+    return accepted;
+  }
+#endif
 
   Float epsilon_;
   F& field;
