@@ -50,6 +50,7 @@ typedef cell_partition<DIM, octal_cell<DIM>, Ind> Partition;
 typedef single_partition<Ind> Partition;
 #endif
 
+#include "block.h"
 typedef Block<DIM, Ind, octal_cell<DIM> > BlockType;
 
 #if USE_RAND48

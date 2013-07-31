@@ -6,7 +6,6 @@ template <typename indexer_t> class single_partition {
  public:
   int n_partitions() const { return 1; }
   int partition_size() const { return indexer_t::n_sites(); }
-
   int partition(int i, int j) const { return j; }
 };
 
@@ -27,7 +26,6 @@ template <> class octal_cell<2> {
   octal_cell() {
     int sp[n_start_points][D] = { { 0, 0 }, { 1, 0 }, { 2, 0 }, { 3, 0 },
                                   { 0, 1 }, { 1, 1 }, { 2, 1 }, { 3, 1 } };
-
     int cp[n_points][D] = { { 0, 0 }, { 2, 2 } };
 
     for (int p = 0; p < n_start_points; ++p)
@@ -67,7 +65,6 @@ template <> class octal_cell<3> {
                                   { 1, 0, 1 }, { 2, 0, 1 }, { 3, 0, 1 },
                                   { 0, 1, 1 }, { 1, 1, 1 }, { 2, 1, 1 },
                                   { 3, 1, 1 } };
-
     int cp[n_points][D] = { { 0, 0, 0 }, { 1, 1, 2 }, { 2, 2, 0 },
                             { 3, 3, 2 } };
 
@@ -84,12 +81,16 @@ template <> class octal_cell<3> {
     cell_dims[2] = 4;
   }
 
- protected:
   int cell_dims[D];
   int start_points[n_start_points][D];
   int cell_points[n_points][D];
 };
 
+/**
+   Defines a division of the lattice into disjoint partitions.
+   All the sites belonging to one partition an be updated in
+   parallel.
+ */
 template <int D, typename Cell, typename indexer_t>
 class cell_partition : public Cell {
  public:
@@ -105,22 +106,18 @@ class cell_partition : public Cell {
 
   int n_partitions() const { return n_partitions_; }
   int partition_size() const { return partition_size_; }
-
+  // returns the j-th site of the i-th partition
   int partition(int i, int j) const {
     return partitions_[i * partition_size_ + j];
   }
 
  private:
-
   void gen_partitions() {
-
     for (int sp = 0; sp < Cell::n_start_points; ++sp) {
       int index = 0;
-
       for (int cp = 0; cp < Cell::n_points; ++cp) {
         LatticeIterator<D> grid(grid_dims_);
         LatticeIterator<D> grid_end;
-
         while (grid != grid_end) {
           int coords[Cell::D];
           for (int i = 0; i < Cell::D; ++i) {
