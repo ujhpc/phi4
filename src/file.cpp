@@ -36,7 +36,7 @@ std::ostream& print_option(std::ostream& out, const struct poptOption& opt) {
 
   if (opt.longName != NULL)
     out << opt.longName << "\t";
-  else if (opt.shortName != NULL)
+  else if (opt.shortName)
     out << opt.shortName << "\t";
   else
     return out;
