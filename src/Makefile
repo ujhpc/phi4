@@ -88,7 +88,6 @@ $(EXEC): $(MAIN) $(OBJECTS)
 dsym: $(EXEC)
 	dsymutil $(EXEC)
 
-$(info $(DEPEND))
 -include $(DEPEND)
 
 %$(SUFFIX).o: %.cpp Makefile
