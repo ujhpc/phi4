@@ -18,9 +18,9 @@ template <typename F> class Updater {
                          pars.i_Lambda),
         quadratic_coef(quadratic_coef_1 + quadratic_coef_2),
         gr(pars.g / 24.0) {
+
     set_epsilon(1.0);
   }
-  ;
 
   void set_epsilon(Float epsilon) {
     epsilon_ = epsilon / std::sqrt(F::n_components);

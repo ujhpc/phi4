@@ -7,8 +7,6 @@
 #include "typedefs.h"
 #include "sweep.h"
 
-const Float l2_e = 1.442695040888963;
-
 template <typename F, typename P> class Updater {
  public:
   typedef typename F::indexer_t indexer_t;
@@ -21,9 +19,9 @@ template <typename F, typename P> class Updater {
                          pars.i_Lambda),
         quadratic_coef(quadratic_coef_1 + quadratic_coef_2),
         gr(pars.g / 24.0) {
+
     set_epsilon(1.0);
   }
-  ;
 
   void set_epsilon(Float epsilon) {
     epsilon_ = epsilon / std::sqrt(F::n_components);
