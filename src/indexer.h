@@ -1,146 +1,133 @@
 #ifndef __INDEXER_H__
 #define __INDEXER_H__
 
-#include<iostream>
-
+#include <iostream>
 
 #include"iterator.h"
 
-template<int Dim>  
-class Indexer {
+template <int Dim> class Indexer {
 
   typedef int coordinate_t;
-public:
+
+ public:
   typedef LatticeIterator<Dim> iterator;
-  enum {D=Dim};
+  enum {
+    D = Dim
+  };
 
-  
+  static coordinate_t site(const coordinate_t* coord) {
+    int s = 0;
 
-  static coordinate_t site(const coordinate_t *coord) {
-    int s=0;
-
-    for(int i=0;i<Dim;i++)
-      s += vol(i)*coord[i];
+    for (int i = 0; i < Dim; i++)
+      s += vol(i) * coord[i];
 
     return s;
   }
 
-  static coordinate_t site_safe(const coordinate_t *coord) {
+  static coordinate_t site_safe(const coordinate_t* coord) {
     int c[D];
-    for(int i=0;i<D;++i) {
-      c[i]=coord[i];
-      if(c[i]>=dim(i))
-	c[i]-=dim(i);
-      if(c[i]<0)
-	c[i]+=dim(i);
+    for (int i = 0; i < D; ++i) {
+      c[i] = coord[i];
+      if (c[i] >= dim(i))
+        c[i] -= dim(i);
+      if (c[i] < 0)
+        c[i] += dim(i);
     }
     return site(c);
   }
 
   static coordinate_t index(coordinate_t site, coordinate_t dir) {
-    return dir*vols_[Dim]+site;
+    return dir * vols_[Dim] + site;
   }
 
-  static coordinate_t index(const coordinate_t *coord, coordinate_t dir) {
-    return dir*vols_[Dim]+site(coord);;
+  static coordinate_t index(const coordinate_t* coord, coordinate_t dir) {
+    return dir * vols_[Dim] + site(coord);
+    ;
   }
 
-  static void init(const coordinate_t *dim) {
-    vols_[0]=1;
-    
-    for(int i=0;i<Dim;i++) {
-      dims_[i]=dim[i];
-      vols_[i+1]=dims_[i]*vols_[i];
+  static void init(const coordinate_t* dim) {
+    vols_[0] = 1;
+
+    for (int i = 0; i < Dim; i++) {
+      dims_[i] = dim[i];
+      vols_[i + 1] = dims_[i] * vols_[i];
     }
 
-    n_links_=vols_[Dim]*Dim;
+    n_links_ = vols_[Dim] * Dim;
 
     init_arrays();
-
   }
 
-  static int dim(int i)  {return dims_[i];}
-  static int dim()  {return Dim;}
-  static const int *dims()  {return &dims_[0];}
-  static int vol(int i)  {return vols_[i];}
-  static int n_sites()  {return vol(Dim);}
-  static int n_links()  {return n_links_;}
+  static int dim(int i) { return dims_[i]; }
+  static int dim() { return Dim; }
+  static const int* dims() { return &dims_[0]; }
+  static int vol(int i) { return vols_[i]; }
+  static int n_sites() { return vol(Dim); }
+  static int n_links() { return n_links_; }
 
-  static LatticeIterator<Dim> begin() {return LatticeIterator<Dim>(dims_);}
-  static LatticeIterator<Dim> end() {return LatticeIterator<Dim>();}
-  
+  static LatticeIterator<Dim> begin() { return LatticeIterator<Dim>(dims_); }
+  static LatticeIterator<Dim> end() { return LatticeIterator<Dim>(); }
+
   static coordinate_t up(coordinate_t site, coordinate_t dir) {
-    return up_[index(site,dir)];
+    return up_[index(site, dir)];
   }
 
   static coordinate_t dn(coordinate_t site, coordinate_t dir) {
-    return dn_[index(site,dir)];
+    return dn_[index(site, dir)];
   }
 
   static void init_arrays() {
 
-    up_  = new coordinate_t[n_links_];
-    dn_  = new coordinate_t[n_links_];
-     
-    
-    for(iterator it=begin();it!=end();++it) {
-      
-      for(int mu=0;mu<Dim;++mu) {
-	
-	int coord[Dim];
-	for(int i=0;i<Dim;++i) {
+    up_ = new coordinate_t[n_links_];
+    dn_ = new coordinate_t[n_links_];
 
-	  coord[i]=(*it)[i];
-	}
+    for (iterator it = begin(); it != end(); ++it) {
 
+      for (int mu = 0; mu < Dim; ++mu) {
 
-	coord[mu]=(*it)[mu]+1;
-	if(coord[mu]>= dim(mu))
-	  coord[mu] -= dim(mu);
-	
+        int coord[Dim];
+        for (int i = 0; i < Dim; ++i) {
 
-	up_[index( *it,mu)] = site(coord); 
-	  
-	  
-	coord[mu]=(*it)[mu]-1;
-	if(coord[mu]<0)
-	  coord[mu]+=dims_[mu];
-	
-	dn_[index( *it,mu)] = site(coord); 
-	  
+          coord[i] = (*it)[i];
+        }
+
+        coord[mu] = (*it)[mu] + 1;
+        if (coord[mu] >= dim(mu))
+          coord[mu] -= dim(mu);
+
+        up_[index(*it, mu)] = site(coord);
+
+        coord[mu] = (*it)[mu] - 1;
+        if (coord[mu] < 0)
+          coord[mu] += dims_[mu];
+
+        dn_[index(*it, mu)] = site(coord);
       }
     }
-    
   }
-
-
 
   static void clean() {
-    delete [] up_;
-    delete [] dn_;
+    delete[] up_;
+    delete[] dn_;
   }
- 
-private:
+
+ private:
   static coordinate_t n_links_;
 
   static coordinate_t dims_[Dim];
-  static coordinate_t vols_[Dim+1];
-  
-  static coordinate_t *up_;
-  static coordinate_t *dn_;
- 
+  static coordinate_t vols_[Dim + 1];
+
+  static coordinate_t* up_;
+  static coordinate_t* dn_;
 };
 
+template <int Dim> typename Indexer<Dim>::coordinate_t Indexer<Dim>::n_links_;
 
-template<int Dim>  typename Indexer<Dim>::coordinate_t Indexer<Dim>::n_links_;
+template <int Dim> typename Indexer<Dim>::coordinate_t Indexer<Dim>::dims_[Dim];
+template <int Dim>
+typename Indexer<Dim>::coordinate_t Indexer<Dim>::vols_[Dim + 1];
 
-template<int Dim> typename Indexer<Dim>::coordinate_t Indexer<Dim>::dims_[Dim];
-template<int Dim> typename Indexer<Dim>::coordinate_t Indexer<Dim>::vols_[Dim+1];
-
-template<int Dim> typename Indexer<Dim>::coordinate_t *Indexer<Dim>::up_;
-template<int Dim> typename Indexer<Dim>::coordinate_t *Indexer<Dim>::dn_;
-
+template <int Dim> typename Indexer<Dim>::coordinate_t* Indexer<Dim>::up_;
+template <int Dim> typename Indexer<Dim>::coordinate_t* Indexer<Dim>::dn_;
 
 #endif
-
-

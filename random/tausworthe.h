@@ -1,7 +1,6 @@
 #ifndef _tausworthe_
 #define _tausworthe_
 
-
 #if 0
 inline __TARGET__  unsigned taus_step(unsigned &z, int S1,int S2,int S3,unsigned M) {
     unsigned b=(((z<<S1)^z)>>S2);
@@ -24,31 +23,25 @@ inline __TARGET__  FLOAT rnd(unsigned *z) {
 
 #endif
 
-inline __TARGET__  FLOAT rnd_nbc(unsigned *z1,
-				 unsigned *z2,
-				 unsigned *z3,
-				 unsigned *z4) {
+inline __TARGET__ FLOAT
+rnd_nbc(unsigned* z1, unsigned* z2, unsigned* z3, unsigned* z4) {
 
-    return 2.3283064e-10*(
-				  taus_step(*z1,13,19,12,4294967294u)^
-				  taus_step(*z2, 2,25, 4,4294967288u)^
-				  taus_step(*z3, 3,11,17,4294967280u)^
-				  LCG_step(*z4,1664525,1013904223u) );
-    }
+  return 2.3283064e-10 * (taus_step(*z1, 13, 19, 12, 4294967294u) ^
+                          taus_step(*z2, 2, 25, 4, 4294967288u) ^
+                          taus_step(*z3, 3, 11, 17, 4294967280u) ^
+                          LCG_step(*z4, 1664525, 1013904223u));
+}
 
 //    return 2.328306436538696e-10*(
 
-inline __TARGET__  FLOAT rnd_np(unsigned  &z1,
-				 unsigned &z2,
-				 unsigned &z3,
-				 unsigned &z4) {
+inline __TARGET__ FLOAT
+rnd_np(unsigned& z1, unsigned& z2, unsigned& z3, unsigned& z4) {
 
-  return 2.328306436538696e-10*(FLOAT)(
-				  taus_step(z1,13,19,12,4294967294ul)^
-				  taus_step(z2, 2,25, 4,4294967288ul)^
-				  taus_step(z3, 3,11,17,4294967280ul)^
-				  LCG_step(z4,1664525,1013904223ul) );
-    }
-
+  return 2.328306436538696e-10 *
+         (FLOAT)(taus_step(z1, 13, 19, 12, 4294967294ul) ^
+                 taus_step(z2, 2, 25, 4, 4294967288ul) ^
+                 taus_step(z3, 3, 11, 17, 4294967280ul) ^
+                 LCG_step(z4, 1664525, 1013904223ul));
+}
 
 #endif

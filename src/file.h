@@ -1,1 +1,1 @@
-void print_parameters(std::ostream &out, struct poptOption *opts);
+void print_parameters(std::ostream& out, struct poptOption* opts);

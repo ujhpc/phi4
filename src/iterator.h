@@ -1,49 +1,45 @@
 #ifndef __ITERATOR_H__
 #define __ITERATOR_H__
 
-
-
-template<int D> class LatticeIterator {
+template <int D> class LatticeIterator {
  public:
 
-  LatticeIterator( const int *dims,const int *coords) {
-    for(int i=0;i<D;++i) {
-      dims_[i]=dims[i];
-      coords_[i]=coords[i];
+  LatticeIterator(const int* dims, const int* coords) {
+    for (int i = 0; i < D; ++i) {
+      dims_[i] = dims[i];
+      coords_[i] = coords[i];
     }
-    coords_[D]=0;
+    coords_[D] = 0;
   }
 
-  LatticeIterator( const int *dims) {
-    for(int i=0;i<D;++i) {
-      dims_[i]=dims[i];
-      coords_[i]=0;
+  LatticeIterator(const int* dims) {
+    for (int i = 0; i < D; ++i) {
+      dims_[i] = dims[i];
+      coords_[i] = 0;
     }
-    coords_[D]=0;
+    coords_[D] = 0;
   }
 
   LatticeIterator() {
-    for(int i=0;i<D;++i) {
-      coords_[i]=0;
+    for (int i = 0; i < D; ++i) {
+      coords_[i] = 0;
     }
-    coords_[D]=1;
-  };
+    coords_[D] = 1;
+  }
+  ;
 
   bool operator==(const LatticeIterator& rhs) {
-    for(int i=0;i<=D;++i) {
-      if( coords_[i]!=rhs.coords_[i])
-	return false;
+    for (int i = 0; i <= D; ++i) {
+      if (coords_[i] != rhs.coords_[i])
+        return false;
     }
-      return true;
+    return true;
   }
 
+  bool operator!=(const LatticeIterator& rhs) { return !operator==(rhs); }
 
-  bool operator!=(const LatticeIterator& rhs) {
-    return !operator==(rhs);
-  }
-    
-  LatticeIterator &operator++() {
-    
+  LatticeIterator& operator++() {
+
     inc();
     return *this;
   }
@@ -54,26 +50,21 @@ template<int D> class LatticeIterator {
     return it;
   }
 
-
-  int *operator*() {
-    return &coords_[0];
-  }
+  int* operator*() { return &coords_[0]; }
 
  protected:
   int dims_[D];
-  int coords_[D+1];
-
+  int coords_[D + 1];
 
   void inc() {
     coords_[0]++;
-    int i=0;
-    while(i<D && coords_[i]>=dims_[i]) {
-      coords_[i]-=dims_[i];
+    int i = 0;
+    while (i < D && coords_[i] >= dims_[i]) {
+      coords_[i] -= dims_[i];
       i++;
       coords_[i]++;
     }
   }
-
 };
 
 #endif
