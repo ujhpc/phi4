@@ -1,8 +1,8 @@
 CC       := cc
 DIM      := 3
 NCOMP    := 1
-FLOAT    := float
-SIMD     := 4
+FLOAT    := double
+SIMD     := 1
 
 ifeq ($(CC),icc)
 # ICC
@@ -54,7 +54,10 @@ VPATH         = $(HOME)/downloads/gtest-1.6.0/src
 
 EXEC          = phi4$(SUFFIX)
 MAIN          = phi4$(SUFFIX).o
-OBJECTS       = sweep$(SUFFIX).o random$(SUFFIX).o file$(CC_SUFFIX).o simd$(CC_SUFFIX).o
+OBJECTS       = sweep$(SUFFIX).o random$(SUFFIX).o file$(CC_SUFFIX).o
+ifneq ($(SIMD),1)
+OBJECTS      += simd$(CC_SUFFIX).o
+endif
 TESTS_OBJECTS = $(subst .cpp,.o,$(wildcard *_test.cpp)) gtest-all.o
 DEPEND        = $(subst .o,.d,$(MAIN)) $(subst .o,.d,$(OBJECTS)) $(subst .o,.d,$(TESTS_OBJECTS))
 
