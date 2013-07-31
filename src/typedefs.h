@@ -1,5 +1,4 @@
-#ifndef __TYPEDEFS_H__
-#define __TYPEDEFS_H__
+#pragma once
 
 #ifndef DIM
 #define DIM 2
@@ -34,6 +33,4 @@ typedef rand48_array rand_array_t;
 #else
 inline Float RAND(int i) { return taus_array::generator()->rand(i); }
 typedef taus_array rand_array_t;
-#endif
-
 #endif

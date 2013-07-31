@@ -1,9 +1,8 @@
-#ifndef __INDEXER_H__
-#define __INDEXER_H__
+#pragma once
 
 #include <iostream>
 
-#include"iterator.h"
+#include "iterator.h"
 
 template <int Dim> class Indexer {
 
@@ -129,5 +128,3 @@ typename Indexer<Dim>::coordinate_t Indexer<Dim>::vols_[Dim + 1];
 
 template <int Dim> typename Indexer<Dim>::coordinate_t* Indexer<Dim>::up_;
 template <int Dim> typename Indexer<Dim>::coordinate_t* Indexer<Dim>::dn_;
-
-#endif

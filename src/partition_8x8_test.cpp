@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include"indexer.h"
-#include"partition.h"
+#include "indexer.h"
+#include "partition.h"
 
 typedef Indexer<2> Ind2;
 typedef cell_partition<2, octal_cell<2>, Indexer<2> > partition_t;

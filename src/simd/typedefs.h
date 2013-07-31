@@ -1,5 +1,4 @@
-#ifndef __TYPEDEFS_H__
-#define __TYPEDEFS_H__
+#pragma once
 
 #ifndef DIM
 #define DIM 2
@@ -73,5 +72,3 @@ typedef taus_array rand_array_t;
   f(0, __VA_ARGS__), f(1, __VA_ARGS__), f(2, __VA_ARGS__), f(3, __VA_ARGS__), \
       f(4, __VA_ARGS__), f(5, __VA_ARGS__), f(6, __VA_ARGS__),                \
       f(7, __VA_ARGS__)
-
-#endif

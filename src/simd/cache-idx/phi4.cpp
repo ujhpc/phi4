@@ -8,7 +8,7 @@ using namespace std;
 
 #include <time.h>
 
-#include"linux_time.h"
+#include "linux_time.h"
 
 template <typename T> int poptType();
 template <> int poptType<float>() { return POPT_ARG_FLOAT; }

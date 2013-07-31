@@ -1,7 +1,6 @@
-#ifndef __PARTITION_H__
-#define __PARTITION_H__
+#pragma once
 
-#include"iterator.h"
+#include "iterator.h"
 
 template <typename indexer_t> class single_partition {
  public:
@@ -142,5 +141,3 @@ class cell_partition : public Cell {
   int grid_dims_[D];
   int* partitions_;
 };
-
-#endif

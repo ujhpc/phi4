@@ -1,8 +1,8 @@
-#ifndef __TAUS_SSE_H__
-#define __TAUS_SSE_H__
+#pragma once
+
 #include <iostream>
 
-#include"emmintrin.h"
+#include "emmintrin.h"
 
 static inline __m128i muly(const __m128i& a, const __m128i& b) {
 #ifdef __SSE4_1__  // modern CPU - use SSE 4.1
@@ -125,5 +125,3 @@ class taus_sse_array {
 
   int cursor_;
 };
-
-#endif

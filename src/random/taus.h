@@ -1,5 +1,4 @@
-#ifndef __TAUS_H__
-#define __TAUS_H__
+#pragma once
 
 #include <cstdlib>
 
@@ -69,4 +68,3 @@ void taus_array::get_seeds(unsigned* seed) const {
     seed[i] = seeds_[i];
   }
 }
-#endif

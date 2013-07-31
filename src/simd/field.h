@@ -1,5 +1,4 @@
-#ifndef __FIELD_H__
-#define __FIELD_H__
+#pragma once
 
 #include <vector>
 
@@ -141,5 +140,3 @@ template <typename A, typename Indexer> class VectorField {
   A field_;
   accessor_t accessor_;
 };
-
-#endif

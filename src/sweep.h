@@ -1,5 +1,4 @@
-#ifndef __SWEEP_H__
-#define __SWEEP_H__
+#pragma once
 
 #include "partition.h"
 #include "typedefs.h"
@@ -17,5 +16,3 @@ template <typename F, typename P>
 long int make_sweep(F& field,
                     const parameters<Float>& pars,
                     const P& part = single_partition<typename F::indexer_t>());
-
-#endif

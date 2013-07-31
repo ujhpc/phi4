@@ -1,5 +1,4 @@
-#ifndef _MEASURMENTS_H__
-#define _MEASURMENTS_H__
+#pragma once
 
 #include "typedefs.h"
 
@@ -58,5 +57,3 @@ template <int N_COMP = 1> class MagnetisationMeasurer {
   Float mag_[N_COMP];
   Float xi_;
 };
-
-#endif

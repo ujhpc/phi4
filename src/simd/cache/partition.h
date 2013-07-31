@@ -1,7 +1,6 @@
-#ifndef __PARTITION_H__
-#define __PARTITION_H__
+#pragma once
 
-#include"iterator.h"
+#include "iterator.h"
 
 template <typename indexer_t> class single_partition {
  public:
@@ -248,20 +247,27 @@ template <int Dim, typename IndexerType, typename Cell> class Block {
 
 template <int Dim, typename IndexerType, typename Cell>
 int Block<Dim, IndexerType, Cell>::block_size_;
+
 template <int Dim, typename IndexerType, typename Cell>
 int Block<Dim, IndexerType, Cell>::n_partitions_;
+
 template <int Dim, typename IndexerType, typename Cell>
 int Block<Dim, IndexerType, Cell>::partition_size_;
+
 template <int Dim, typename IndexerType, typename Cell>
 int Block<Dim, IndexerType, Cell>::dims_[Dim];
+
 template <int Dim, typename IndexerType, typename Cell>
 int* Block<Dim, IndexerType, Cell>::partitions_;
+
 template <int Dim, typename IndexerType, typename Cell>
 int Block<Dim, IndexerType, Cell>::n_grids_;
+
 template <int Dim, typename IndexerType, typename Cell>
 int Block<Dim, IndexerType, Cell>::grid_size_;
+
 template <int Dim, typename IndexerType, typename Cell>
 int* Block<Dim, IndexerType, Cell>::grid_;
+
 template <int Dim, typename IndexerType, typename Cell>
 Cell Block<Dim, IndexerType, Cell>::cell_;
-#endif

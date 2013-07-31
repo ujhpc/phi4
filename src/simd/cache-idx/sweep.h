@@ -1,5 +1,4 @@
-#ifndef __SWEEP_H__
-#define __SWEEP_H__
+#pragma once
 
 #include "partition.h"
 #include "typedefs.h"
@@ -14,5 +13,3 @@ template <typename F> struct parameters {
 
 template <typename F>
 long int make_sweep(F& field, const parameters<Float>& pars, int block_sweeps);
-
-#endif

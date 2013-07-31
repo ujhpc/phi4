@@ -1,8 +1,8 @@
 #include <cstdio>
 
-#include"../src/random.h"
+#include "../random.h"
 
-#include"taus_sse.h"
+#include "taus_sse.h"
 
 void taus_step(unsigned& z, int S1, int S2, int S3, unsigned M) {
   unsigned b = (((z << S1) ^ z) >> S2);

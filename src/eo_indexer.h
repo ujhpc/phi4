@@ -1,9 +1,8 @@
-#ifndef __EO_INDEXER_H__
-#define __EO_INDEXER_H__
+#pragma once
 
 #include <cstdlib>
 
-#include"iterator.h"
+#include "iterator.h"
 
 template <int Dim> class EOIndexer {
 
@@ -242,5 +241,3 @@ template <int Dim> class EOIndexer {
   int n_sizeh_;
   int n_links_;
 };
-
-#endif

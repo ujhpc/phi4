@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include"taus.h"
+#include "taus.h"
 
 inline unsigned taus_step(unsigned& z, int S1, int S2, int S3, unsigned M) {
   unsigned b = (((z << S1) ^ z) >> S2);

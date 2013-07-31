@@ -5,7 +5,7 @@
 #include <cmath>
 #include <fvec.h>
 
-#include"emmintrin.h"
+#include "emmintrin.h"
 
 const int n_max = 32;
 const int n_coeffs = 8;

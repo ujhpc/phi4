@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
-#include"indexer.h"
-#include"partition.h"
+#include "indexer.h"
+#include "partition.h"
 
 typedef Indexer<2> Ind2;
 typedef cell_partition<2, octal_cell<2>, Indexer<2> > partition_t;
@@ -28,8 +28,6 @@ class partitionTest : public ::testing::Test {
   2 3 0 1
   4 5 6 7
   0 1 2 3
-
-
 */
 
 TEST_F(partitionTest, two_dim_4x4_test) {

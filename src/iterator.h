@@ -1,5 +1,4 @@
-#ifndef __ITERATOR_H__
-#define __ITERATOR_H__
+#pragma once
 
 template <int D> class LatticeIterator {
  public:
@@ -66,5 +65,3 @@ template <int D> class LatticeIterator {
     }
   }
 };
-
-#endif

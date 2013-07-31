@@ -1,9 +1,7 @@
-#ifndef __RANDOM_H__
-#define __RANDOM_H__
+#pragma once
 
 #include <cstdlib>
 #include <cstdio>
-
 #include <limits>
 #include <iostream>
 
@@ -168,5 +166,3 @@ class taus_array : public random_array_state<unsigned int, 4, 256> {
 
   static taus_array* generator_;
 };
-
-#endif

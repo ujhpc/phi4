@@ -1,8 +1,8 @@
-#ifndef __RANDOM_H__
-#define __RANDOM_H__
-#include <iostream>
+#pragma once
 
+#include <iostream>
 #include <cstdlib>
+
 #include "typedefs.h"
 
 class rand48_array {
@@ -107,5 +107,3 @@ class taus_array {
 
   static taus_array* generator_;
 };
-
-#endif
