@@ -11,6 +11,14 @@ using namespace std;
 #include "linux_time.h"
 #endif
 
+#ifndef NAME
+#define FILE_NAME "phi4"
+#else
+#define STRINGIZE(x) #x
+#define STRINGIZE_VALUE_OF(x) STRINGIZE(x)
+#define FILE_NAME STRINGIZE_VALUE_OF(NAME)
+#endif
+
 template <typename T> int poptType();
 template <> int poptType<float>() { return POPT_ARG_FLOAT; }
 template <> int poptType<double>() { return POPT_ARG_DOUBLE; }
@@ -56,12 +64,12 @@ int main(int argc, const char* argv[]) {
   int block_sweeps = 8;
   int b_x = 16;
   int b_y = 16;
-#endif
 #if DIM >= 3
   b_x = 8;
   b_y = 8;
 #ifdef CACHE
   int b_z = 8;
+#endif
 #endif
 #else
   const int block_sweeps = 1;
@@ -138,7 +146,7 @@ int main(int argc, const char* argv[]) {
 #endif
 #endif
 
-  std::string mag_file_name("mag.");
+  std::string mag_file_name(FILE_NAME ".");
   mag_file_name += std::string(tag);
 
   Ind::init(dim);
@@ -187,9 +195,9 @@ int main(int argc, const char* argv[]) {
     accepted += make_sweep(phi_field, pars, partition);
 #endif
   }
-  timer.stop();
 
 #ifdef __LINUX__
+  timer.stop();
   fprintf(stdout, "termalisation took %lld ns\n", timer.ellapsed_time());
   double fnano_sec = (double)timer.ellapsed_time();
   fprintf(stderr,

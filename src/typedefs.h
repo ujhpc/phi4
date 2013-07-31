@@ -40,7 +40,11 @@ typedef simd<FVec::mask_scalar, SSIMD> SIVec;
 
 // COMMON HEADERS /////////////////////////////////////////////////////////////
 
+#ifdef SIMD
+#include "random_simd.h"
+#else
 #include "random.h"
+#endif
 #ifdef FAST_INDEXER
 #include "fast_indexer.h"
 #else

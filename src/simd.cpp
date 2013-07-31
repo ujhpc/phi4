@@ -3,7 +3,7 @@
 // linking to SVML Intel library.
 
 extern "C" {
-#if !__INTEL_COMPILER&& __linux__
+#if !defined(__INTEL_COMPILER) && defined(__linux__)
 // We relay on Intel's svml library,
 // unfortunatelly on older ICC it is crippled
 // and requires some built-in function generated
