@@ -21,10 +21,8 @@ template <int Dim> class EOIndexer {
 
   EOIndexer(int lx, int ly) {
     int dims[Dim];
-    if (Dim != 2) {
-      std::cerr << "You have picked a wrong constructor" << std::endl;
-      exit(-1);
-    }
+    if (Dim != 2)
+      throw("picked a wrong constructor");
 
     dims[0] = lx;
     dims[1] = ly;
@@ -35,10 +33,8 @@ template <int Dim> class EOIndexer {
 
   EOIndexer(int lx, int ly, int lz) {
     int dims[Dim];
-    if (Dim != 3) {
-      std::cerr << "You have picked a wrong constructor" << std::endl;
-      exit(-1);
-    }
+    if (Dim != 3)
+      throw("picked a wrong constructor");
 
     dims[0] = lx;
     dims[1] = ly;
@@ -50,10 +46,8 @@ template <int Dim> class EOIndexer {
 
   EOIndexer(int lx, int ly, int lz, int lt) {
     int dims[Dim];
-    if (Dim != 4) {
-      std::cerr << "You have picked a wrong constructor" << std::endl;
-      exit(-1);
-    }
+    if (Dim != 4)
+      throw("picked a wrong constructor");
 
     dims[0] = lx;
     dims[1] = ly;

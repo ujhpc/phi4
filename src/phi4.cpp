@@ -179,9 +179,7 @@ int main(int argc, char* argv[]) {
 
   FILE* fmag;
   if (NULL == (fmag = fopen(mag_file_name.c_str(), "w"))) {
-    std::cerr << "cannot open file `" << mag_file_name << "' for  writing"
-              << std::endl;
-    exit(2);
+    throw("cannot open file `" + mag_file_name + "' for  writing");
   }
 
   // Main simulation loop /////////////////////////////////////////////////////

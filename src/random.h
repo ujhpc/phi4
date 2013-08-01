@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <limits>
 #include <iostream>
+#include <sstream>
 
 #include "typedefs.h"
 
@@ -70,19 +71,22 @@ class random_array_state {
     int params[n_params];
     int bytes = std::fread(params, sizeof(int), n_params, fin);
     if (params[0] != n_gen_) {
-      std::cerr << "number of generators differ : program " << n_gen_
-                << " read  " << params[0] << std::endl;
-      exit(7);
+      std::ostringstream msg;
+      msg << "number of generators differ : program " << n_gen_ << " read "
+          << params[0];
+      throw(msg);
     }
     if (params[1] != SEEDS_PER_GEN) {
-      std::cerr << "SEES_PER_GEN differ : program " << SEEDS_PER_GEN
-                << " read  " << params[1] << std::endl;
-      exit(7);
+      std::ostringstream msg;
+      msg << "SEES_PER_GEN differ : program " << SEEDS_PER_GEN << " read "
+          << params[1];
+      throw(msg);
     }
     if (params[2] != sizeof(S)) {
-      std::cerr << "sizeof seeds differ : program " << sizeof(S) << " read  "
-                << params[2] << std::endl;
-      exit(7);
+      std::ostringstream msg;
+      std::cerr << "sizeof seeds differ : program " << sizeof(S) << " read "
+                << params[2];
+      throw(msg);
     }
     S* seeds = new S[SEEDS_PER_GEN * n_gen_];
     bytes += std::fread(seeds, sizeof(S), n_gen_ * SEEDS_PER_GEN, fin);
