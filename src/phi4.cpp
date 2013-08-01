@@ -115,11 +115,18 @@ int main(int argc, char* argv[]) {
     omp_set_num_threads(cl.get<int>("threads"));
   }
   const int n_threads = omp_get_max_threads();
-  std::cerr << "# OpenMP " << n_threads << " threads\n";
+  std::cerr << "# OpenMP " << n_threads << " threads" << std::endl;
 #else
   const int n_threads = 1;
-  std::cerr << "# No OpenMP\n";
+  std::cerr << "# No OpenMP" << std::endl;
 #endif
+#ifdef SIMD
+  std::cerr << "# SIMD " << SIMD << " elements" << std::endl;
+#else
+  std::cerr << "# No SIMD" << std::endl;
+#endif
+
+  // Dump command line parameters
   std::cerr << cl;
 
   std::string mag_file_name(FILE_NAME ".");
