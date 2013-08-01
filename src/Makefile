@@ -101,7 +101,7 @@ CPPFLAGS += -DFAST_INDEX=1
 SUFFIX   += -fidx
 endif
 
-EXEC      = phi4$(SUFFIX)
+EXEC      = ../phi4$(SUFFIX)
 MAIN      = phi4$(SUFFIX).o
 OBJECTS   = sweep$(SIMD_SUFFIX)$(SUFFIX).o \
             random$(SIMD_SUFFIX)$(SUFFIX).o
@@ -112,6 +112,8 @@ TOBJECTS  = $(subst .cpp,.o,$(wildcard *_test.cpp)) gtest-all.o
 DEPEND    = $(subst .o,.d,$(MAIN)) \
             $(subst .o,.d,$(OBJECTS)) \
             $(subst .o,.d,$(TESTS_OBJECTS))
+
+all: $(EXEC)
 
 $(EXEC): $(MAIN) $(OBJECTS)
 	$(CXX) -o $(EXEC) $^ $(LDFLAGS)
@@ -137,4 +139,5 @@ clean:
 	rm -f $(MAIN) $(OBJECTS) $(TOBJECTS) $(DEPEND)
 
 clean-all:
-	rm -rf *.o *.d *.s phi4-*
+	rm -rf *.o *.d *.s
+	find .. -perm +ugo=x -name 'phi4-*' -delete
