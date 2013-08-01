@@ -15,7 +15,6 @@ class LinuxTimer {
     if (clock_getres(id_, &res_) == 0)
       supported_ = true;
   }
-  ;
 
   operator bool() const { return supported_; }
 
@@ -34,7 +33,6 @@ class LinuxTimer {
     std::cout << "resolution of timer " << id_ << " is  " << res_.tv_sec
               << "s and " << res_.tv_nsec << "ns\n";
   }
-  ;
 
  private:
   int id_;

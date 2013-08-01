@@ -52,7 +52,6 @@ void taus_array::gen_seeds(long seed) {
     unsigned r;
     while ((r = lrand48()) < 128) {
     }
-    ;
     seeds_[i] = r;
   }
 }

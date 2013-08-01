@@ -64,7 +64,6 @@ class random_array_state {
     delete[] seeds;
     return bytes;
   }
-  ;
 
   int fread_state(FILE* fin) {
     const int n_params = 3;
@@ -106,10 +105,8 @@ class rand48_array : public random_array_state<unsigned short, 3, 256> {
   rand48_array(int n) : random_array_state<unsigned short, 3, 256>(n) {};
 
   Float rand(int i) { return erand48(seeds_ + SEEDS_BLOCK * i); }
-  ;
 
   long int irand(int i) { return nrand48(seeds_ + SEEDS_BLOCK * i); }
-  ;
 
   static rand48_array* generator() { return generator_; }
   static void init(int n, long int seed) {

@@ -110,7 +110,6 @@ template <typename F> class Updater {
       accepted++;
 
     next:
-      ;
     }  // MULTI_HIT LOOP
 
     return accepted;

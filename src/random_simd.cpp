@@ -27,14 +27,14 @@ void taus_array::gen_seeds(long seed) {
   for (int i = 0; i < pitch * n_generators_; ++i) {
 #if SIMD <= 1
     unsigned r;
-    while ((r = lrand48()) < 128)
-      ;
+    while ((r = lrand48()) < 128) {
+    }
     seeds_[i] = r;
 #else
     for (int s = 0; s < SIMD; ++s) {
       unsigned r;
-      while ((r = lrand48()) < 128)
-        ;
+      while ((r = lrand48()) < 128) {
+      }
       seeds_[i][s] = r;
     }
 #endif

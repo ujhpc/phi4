@@ -41,7 +41,6 @@ template <int Dim> class Indexer {
 
   static coordinate_t index(const coordinate_t* coord, coordinate_t dir) {
     return dir * vols_[Dim] + site(coord);
-    ;
   }
 
   static void init(const coordinate_t* dim) {

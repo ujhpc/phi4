@@ -25,7 +25,6 @@ template <int D> class LatticeIterator {
     }
     coords_[D] = 1;
   }
-  ;
 
   bool operator==(const LatticeIterator& rhs) {
     for (int i = 0; i <= D; ++i) {

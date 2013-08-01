@@ -117,8 +117,9 @@ int main(int argc, const char* argv[]) {
 
   optCon = poptGetContext(NULL, argc, argv, options, 0);
 
-  while ((rc = poptGetNextOpt(optCon)) > 0)
-    ;
+  while ((rc = poptGetNextOpt(optCon)) > 0) {
+  }
+
   if (rc < -1) {
     fprintf(stderr,
             "%s: %s\n",

@@ -77,7 +77,6 @@ class taus_sse_array {
       unsigned r;
       while ((r = lrand48()) < 128) {
       }
-      ;
       u_seeds[i] = r;
     }
   }

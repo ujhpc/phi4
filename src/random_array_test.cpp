@@ -85,7 +85,6 @@ TYPED_TEST_P(rand_array_test, save_restore_n_test) {
   for (int i = 0; i < n; ++i) {
     test_gen(&r_array, i, i * 13 + 17);
   }
-  ;
 
   FILE* fout = fopen("test.rng", "w");
   r_array.fwrite_state(fout);
@@ -94,14 +93,12 @@ TYPED_TEST_P(rand_array_test, save_restore_n_test) {
   for (int i = 0; i < n; ++i) {
     check1[i] = r_array.rand(i);
   }
-  ;
 
   fclose(fout);
 
   for (int i = 0; i < n; ++i) {
     test_gen(&r_array, i, (n - i) * 7 + 213);
   }
-  ;
 
   FILE* fin = fopen("test.rng", "r");
   r_array.fread_state(fin);
@@ -110,7 +107,6 @@ TYPED_TEST_P(rand_array_test, save_restore_n_test) {
   for (int i = 0; i < n; ++i) {
     ASSERT_EQ(check1[i], r_array.rand(i));
   }
-  ;
 }
 
 TYPED_TEST_P(rand_array_test, save_restore_n_two_rng_test) {
@@ -121,7 +117,6 @@ TYPED_TEST_P(rand_array_test, save_restore_n_two_rng_test) {
   for (int i = 0; i < n; ++i) {
     test_gen(&r_array1, i, i * 17 + 13);
   }
-  ;
 
   FILE* fout = fopen("test.rng", "w");
   r_array1.fwrite_state(fout);
@@ -135,7 +130,6 @@ TYPED_TEST_P(rand_array_test, save_restore_n_two_rng_test) {
   for (int i = 0; i < n; ++i) {
     ASSERT_EQ(r_array1.rand(i), r_array2.rand(i));
   }
-  ;
 }
 
 REGISTER_TYPED_TEST_CASE_P(rand_array_test,

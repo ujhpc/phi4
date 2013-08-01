@@ -18,10 +18,8 @@ class rand48_array {
   void get_seeds(unsigned short* seed) const;
 
   Float rand(int i) { return erand48(seeds_ + pitch * i); }
-  ;
 
   long int irand(int i) { return nrand48(seeds_ + pitch * i); }
-  ;
 
   static rand48_array* generator() { return generator_; }
   static void init(int n, long int seed) {
