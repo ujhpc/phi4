@@ -115,10 +115,10 @@ int main(int argc, char* argv[]) {
     omp_set_num_threads(cl.get<int>("threads"));
   }
   const int n_threads = omp_get_max_threads();
-  std::cerr << "# OpenMP Yes  " << n_threads << " threads\n";
+  std::cerr << "# OpenMP " << n_threads << " threads\n";
 #else
   const int n_threads = 1;
-  std::cerr << "# OpenMP No\n";
+  std::cerr << "# No OpenMP\n";
 #endif
   std::cerr << cl;
 
