@@ -72,7 +72,7 @@ class taus_array {
   }
 
   inline SFVec srand_sym(int i) {
-    return SFVec((Float)2.328306436538696e-10) * (SFVec)irand(i);
+    return SFVec(Float(2.328306436538696e-10)) * (SFVec)irand(i);
   }
 
   inline FVec rand_sym(int i) {
@@ -88,7 +88,7 @@ class taus_array {
 #endif
   }
 
-  inline FVec rand(int i) { return rand_sym(i) + FVec((Float)0.5); }
+  inline FVec rand(int i) { return rand_sym(i) + FVec(Float(0.5)); }
 
   void gen_seeds(long int);
   void set_seeds(const unsigned* seed);

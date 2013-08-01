@@ -83,7 +83,7 @@ typedef Block<DIM, Ind, octal_cell<DIM> > BlockType;
 
 inline Float RAND(int i) { return rand48_array::generator()->rand(i); }
 inline Float RAND_SYM(int i) {
-  return rand48_array::generator()->rand(i) - (Float)0.5;
+  return rand48_array::generator()->rand(i) - Float(0.5);
 }
 typedef rand48_array rand_array_t;
 
@@ -97,7 +97,7 @@ typedef taus_array rand_array_t;
 
 inline Float RAND(int i) { return taus_array::generator()->rand(i); }
 inline Float RAND_SYM(int i) {
-  return taus_array::generator()->rand(i) - (Float)0.5;
+  return taus_array::generator()->rand(i) - Float(0.5);
 }
 typedef taus_array rand_array_t;
 

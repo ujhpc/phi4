@@ -26,16 +26,16 @@ template <typename F> class Updater {
 
     FVec corona[F::n_components];
     FVec phi[F::n_components];
-    FVec phi2((Float)0.0);
-    FVec action((Float)0.0);
+    FVec phi2(Float(0));
+    FVec action(Float(0));
 
     for (int k = 0; k < F::n_components; ++k) {
-      FVec small_corona((Float)0.0);
+      FVec small_corona(Float(0));
       // NOTE: big_corona_01 comes from exactly same values as small_corona,
       // so there is no sense to count it again
       FVec& big_corona_01 = small_corona;
-      FVec big_corona_02((Float)0.0);
-      FVec big_corona_11((Float)0.0);
+      FVec big_corona_02(Float(0));
+      FVec big_corona_11(Float(0));
 
       // NOTE: This code doesn't look nice as it could, however due lack of
       // gatter on SSE/AVX,
@@ -67,8 +67,8 @@ template <typename F> class Updater {
 
       FVec big_corona = FVec(-pars_.i_Lambda) *
                         (big_corona_02 -
-                         FVec((Float)4.0) * FVec(indexer_t::D) * big_corona_01 +
-                         FVec((Float)2.0) * big_corona_11);
+                         FVec(Float(4.0)) * FVec(indexer_t::D) * big_corona_01 +
+                         FVec(Float(2.0)) * big_corona_11);
       corona[k] = small_corona + big_corona;
 
 #define indexed_field(n, p, i) p.get(i[n], k)
@@ -88,7 +88,7 @@ template <typename F> class Updater {
 #if SIMD <= 1
     int accepted = 0;
 #else
-    FVec accepted((Float)0.0);
+    FVec accepted(Float(0));
 #endif
 
     for (int h = 0; h < N_HIT; h++)
@@ -118,20 +118,20 @@ template <typename F> class Updater {
       FVec delta_action = new_action - action;
 
 #if SIMD <= 1
-      if (delta_action >= (Float)0.0 || delta_action >= randlog[h]) {
+      if (delta_action >= Float(0) || delta_action >= randlog[h]) {
         for (int k = 0; k < F::n_components; k++)
           phi[k] = new_phi[k];
         action = new_action;
         accepted++;
       }
 #else
-      IVec action_cond = delta_action >= min((Float)0.0, randlog[h]);
+      IVec action_cond = delta_action >= min(Float(0), randlog[h]);
 
       for (int k = 0; k < F::n_components; k++)
         phi[k] = action_cond(new_phi[k], phi[k]);
 
       action = action_cond(new_action, action);
-      accepted += action_cond((Float)1.0);
+      accepted += action_cond(Float(1));
 #endif
     }
 

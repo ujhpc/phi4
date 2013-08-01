@@ -81,9 +81,9 @@ int main(int argc, const char* argv[]) {
   const char* tag = "txt";
 
   struct parameters<Float> pars = {
-    /* g        */(Float)0.0,
-        /* m_2      */(Float)0.25,
-        /* i_Lambda */(Float)2.0
+    Float(0),         // g
+        Float(0.25),  // m_2
+        Float(2),     // i_Lambda
   };
 
   poptContext optCon;
@@ -173,7 +173,7 @@ int main(int argc, const char* argv[]) {
   rand_array_t::init(n_threads, seed);
 
   for (int i = 0; i < Ind::n_sites(); i++) {
-    phi_field.set(i, (Float)(2.0 * drand48() - 1.0));
+    phi_field.set(i, Float(2.0 * drand48() - 1.0));
   }
 
   /*

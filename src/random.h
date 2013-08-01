@@ -142,8 +142,8 @@ class taus_array : public random_array_state<unsigned int, 4, 256> {
     taus_step(seeds_[i * SEEDS_BLOCK + 2], 3, 11, 17, 4294967280u);
     LCG_step(seeds_[i * SEEDS_BLOCK + 3], 1664525u, 1013904223u);
     return 2.328306436538696e-10 *
-           (Float)(seeds_[i * SEEDS_BLOCK] ^ seeds_[i * SEEDS_BLOCK + 1] ^
-                   seeds_[i * SEEDS_BLOCK + 2] ^ seeds_[i * SEEDS_BLOCK + 3]);
+           Float(seeds_[i * SEEDS_BLOCK] ^ seeds_[i * SEEDS_BLOCK + 1] ^
+                 seeds_[i * SEEDS_BLOCK + 2] ^ seeds_[i * SEEDS_BLOCK + 3]);
   }
 
   static taus_array* generator() { return generator_; }
