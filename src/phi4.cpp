@@ -89,13 +89,12 @@ int main(int argc, char* argv[]) {
   };
 
 #ifdef CACHE
-  int block_dim[DIM] {
-    cl.get<int>("b-x"), cl.get<int>("b-y"),
+  int block_dim[DIM] = { cl.get<int>("b-x"), cl.get<int>("b-y"),
 #if DIM >= 3
-        cl.get<int>("b-z"),
+                         cl.get<int>("b-z"),
 #endif
-  }
-  ;
+  };
+
   int block_sweeps = cl.get<int>("block-sweeps");
 #else
   const int block_sweeps = 1;
