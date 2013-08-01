@@ -1,6 +1,16 @@
+binaries              = "test,phi4-*"
+excludeFiles          = "{*.d,$binaries}"
+excludeDirectories    = 'lib'
+excludeInFolderSearch = "{$excludeInFolderSearch,lib}"
+
+[ *.{cpp,h,c}; attr.untitled ]
+fileType         = 'source.c++'
+
 [ *.{cpp,h,c}; *.{tex,bib,bbl,sty} ]
-softTabs = true
-tabSize  = 2
+softTabs         = true
+tabSize          = 2
+wrapColumn       = 80
+softWrap         = false
 
 [ source.markdown; *.{tex,bib,bbl,sty} ]
 wrapColumn       = 80
