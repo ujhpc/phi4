@@ -176,7 +176,7 @@ int main(int argc, char* argv[]) {
 #endif
 
   if (n_term > 0)
-    std::cerr << "acceptance"
+    std::cerr << "acceptance "
               << (double)accepted /
                      (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term)
               << std::endl;
@@ -216,7 +216,7 @@ int main(int argc, char* argv[]) {
   }
 
   if (n_prod > 0)
-    std::cerr << "acceptance"
+    std::cerr << "acceptance "
               << (double)accepted /
                      (block_sweeps * N_HIT * (double)Ind::n_sites() * n_prod)
               << std::endl;
