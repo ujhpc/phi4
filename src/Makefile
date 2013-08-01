@@ -73,13 +73,8 @@ CC_SUFFIX := -$(CC)
 endif
 
 ifdef OPENMP
-ifeq ($(CC),icc)
 CXXFLAGS += -fopenmp
 LDFLAGS  += -fopenmp
-else
-CXXFLAGS += -openmp
-LDFLAGS  += -openmp
-endif
 endif
 
 LDFLAGS  += -g
