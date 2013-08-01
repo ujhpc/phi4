@@ -55,6 +55,12 @@ endif
 
 CXX := $(subst cc,c++,$(subst gcc,g++,$(subst icc,icpc,$(CC))))
 
+ifdef OMP
+ifndef OPENMP
+OPENMP := $(OMP)
+endif
+endif
+
 # define executable suffix
 SUFFIX := -$(NCOMP)nc-$(DIM)d-$(FLOAT)
 ifdef SIMD
