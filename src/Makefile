@@ -1,29 +1,51 @@
+#
+# phi4 build definition
+#
+# Author: Adam Strzelecki <adam.strzelecki@uj.edu.pl>
+#
+# You may control build settings using: make VAR=value ...
+#
+#   CC=compiler name i.e. CC=icc, CC=gcc, CC=clang (automatically sets CXX)
+#   DIM=dimensions (2 or 3)
+#   NCOMP=number_of_components (>=1)
+#   FLOAT=float_type (double or float) (defaults to double, float on SIMD)
+#   SIMD=(4 or 8) size of SIMD vector (enabled SIMD computing)
+#
+# Note: output executable will have suffix indicating current settings.
+
 CC    := cc
 DIM   := 3
 NCOMP := 1
+ifdef SIMD
+FLOAT := float
+else
 FLOAT := double
-
+endif
 SED   := sed
 MV    := mv
 
-ifeq ($(CC),icc)
 # ICC
-CXX      := icpc
-CFLAGS   += -DGTEST_HAS_TR1_TUPLE=1
-CXXFLAGS += -DGTEST_HAS_TR1_TUPLE=0
+ifeq ($(CC),icc)
 CPPFLAGS += -fast -fno-alias -g \
-	-vec-report \
-	-fp-model fast=2 \
-	-opt-ra-region-strategy=block
+            -vec-report \
+            -fp-model fast=2 \
+            -opt-ra-region-strategy=block
 else
-ifneq ($(findstring clang,$(CC)),)
 # Clang
+ifneq ($(findstring clang,$(CC)),)
 CXX      := $(subst clang,clang++,$(CC))
-CPPFLAGS += -g -mavx -O3 -funsafe-math-optimizations -ffast-math
+CPPFLAGS += -g \
+            -mavx \
+            -O3 \
+            -funsafe-math-optimizations \
+            -ffast-math
 else
 # generic GCC compatible compiler
-CXX      := $(subst cc,c++,$(subst gcc,g++,$(CC)))
-CPPFLAGS += -g -march=native -O3 -funsafe-math-optimizations -ffast-math
+CPPFLAGS += -g \
+            -march=native \
+            -O3 \
+            -funsafe-math-optimizations \
+            -ffast-math
 endif
 # non-ICC use ICC svml on SIMD
 ifdef SIMD
@@ -31,10 +53,13 @@ LDFLAGS  += -lsvml
 endif
 endif
 
+CXX := $(subst cc,c++,$(subst gcc,g++,$(subst icc,icpc,$(CC))))
+
 # define executable suffix
 SUFFIX := -$(NCOMP)nc-$(DIM)d-$(FLOAT)
 ifdef SIMD
 SUFFIX := $(SUFFIX)-vec$(SIMD)
+SIMD_SUFFIX := _simd
 endif
 ifdef CACHE
 SUFFIX := $(SUFFIX)-cache
@@ -58,7 +83,11 @@ endif
 endif
 
 LDFLAGS  += -g -lpopt
-CPPFLAGS += -MMD -DDIM=$(DIM) -DFLOAT=$(FLOAT) -DNCOMP=$(NCOMP) -DNAME=phi4$(SUFFIX)
+CPPFLAGS += -MMD \
+            -DDIM=$(DIM) \
+            -DFLOAT=$(FLOAT) \
+            -DNCOMP=$(NCOMP) \
+            -DNAME=phi4$(SUFFIX)
 ifdef SIMD
 CPPFLAGS += -DSIMD=$(SIMD)
 ifdef CACHE
@@ -73,14 +102,16 @@ endif
 
 EXEC      = phi4$(SUFFIX)
 MAIN      = phi4$(SUFFIX).o
-OBJECTS   = sweep$(SUFFIX).o file$(CC_SUFFIX).o
+OBJECTS   = sweep$(SIMD_SUFFIX)$(SUFFIX).o \
+            file$(CC_SUFFIX).o \
+            random$(SIMD_SUFFIX)$(SUFFIX).o
 ifdef SIMD
-OBJECTS  += simd$(CC_SUFFIX).o random_simd$(SUFFIX).o
-else
-OBJECTS  += random$(SUFFIX).o
+OBJECTS  += simd$(CC_SUFFIX).o
 endif
 TOBJECTS  = $(subst .cpp,.o,$(wildcard *_test.cpp)) gtest-all.o
-DEPEND    = $(subst .o,.d,$(MAIN)) $(subst .o,.d,$(OBJECTS)) $(subst .o,.d,$(TESTS_OBJECTS))
+DEPEND    = $(subst .o,.d,$(MAIN)) \
+            $(subst .o,.d,$(OBJECTS)) \
+            $(subst .o,.d,$(TESTS_OBJECTS))
 
 $(EXEC): $(MAIN) $(OBJECTS)
 	$(CXX) -o $(EXEC) $^ $(LDFLAGS)
@@ -106,4 +137,4 @@ clean:
 	rm -f $(MAIN) $(OBJECTS) $(TOBJECTS) $(DEPEND)
 
 clean-all:
-	rm -rf *.trace *.odcpp *.dSYM *.o *.d *.s phi4-*
+	rm -rf *.o *.d *.s phi4-*
