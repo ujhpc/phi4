@@ -1,5 +1,11 @@
-# run make in all subdirectories
-# with Makefile inside
+#
+# Runs make in all subdirectories containing Makefile file
+#
+# Author: Adam Strzelecki <adam.strzelecki@uj.edu.pl>
+#
+# @see src/Makefile for main source build settings
+#
+
 subdirs := $(patsubst %/,%,$(dir $(wildcard **/Makefile)))
 # use terminal colors if in terminal
 bold := \033[1m
