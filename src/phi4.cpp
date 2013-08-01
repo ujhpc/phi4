@@ -4,7 +4,7 @@ using namespace std;
 #include <stdlib.h>
 #include <stdio.h>
 #include <cmath>
-#include <popt.h>
+#include "cmdline.h"
 
 #ifdef __LINUX__
 #include <time.h>
@@ -19,17 +19,6 @@ using namespace std;
 #define FILE_NAME STRINGIZE_VALUE_OF(NAME)
 #endif
 
-template <typename T> int poptType();
-template <> int poptType<float>() { return POPT_ARG_FLOAT; }
-template <> int poptType<double>() { return POPT_ARG_DOUBLE; }
-
-template <typename T> struct numericType {
-  static const char name[8];
-};
-
-template <> const char numericType<float>::name[8] = "float";
-template <> const char numericType<double>::name[8] = "double";
-
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -37,118 +26,96 @@ template <> const char numericType<double>::name[8] = "double";
 #include "typedefs.h"
 #include "sweep.h"
 #include "measurments.h"
-#include "file.h"
 
 const int meas_freq = 25;
 const int write_out = 1;
-
-int main(int argc, const char* argv[]) {
-
-  int dim[DIM];
-
-  int n_term = 0;
-  int n_prod = 0;
-  int seed = 7675643;
-
-  int ix, iy;
-  int n_x = 128;
-  int n_y = 128;
 #if DIM >= 3
-  n_x = 32;
-  n_y = 32;
-  int n_z = 32;
+const int default_n = 32;
+const int default_b = 8;
+#else
+const int default_n = 128;
+const int default_b = 16;
+#endif
+
+int main(int argc, char* argv[]) {
+
+  cmdline::parser cl;
+  cl.footer(FILE_NAME " ...");
+
+#ifdef _OPENMP
+  cl.add<int>("threads", 0, "number of OpenMP threads", false, 0);
+#endif
+
+  cl.add<int>("n-x", 0, "x size", false, default_n);
+  cl.add<int>("n-y", 0, "y size", false, default_n);
+#if DIM >= 3
+  cl.add<int>("n-z", 0, "z size", false, default_n);
 #endif
 
 #ifdef CACHE
-  int block_dim[DIM];
-  int block_sweeps = 8;
-  int b_x = 16;
-  int b_y = 16;
+  cl.add<int>("b-x", 0, "block x size", false, default_b);
+  cl.add<int>("b-y", 0, "block y size", false, default_b);
 #if DIM >= 3
-  b_x = 8;
-  b_y = 8;
+  cl.add<int>("b-z", 0, "block z size", false, default_b);
+#endif
+  cl.add<int>("block-sweeps", 0, "block z size", false, 8);
+#endif
+
+  cl.add<int>("term", 't', "number of termalisation sweeps", false, 0);
+  cl.add<int>("sweep", 'n', "number of measurments sweeps", false, 0);
+  cl.add<int>("seed", 's', "rng seed", false, 7675643);
+  cl.add<Float>("g", 'g', "g value", false, Float(0));
+  cl.add<Float>("mass-squared", 'm', "m^2 value", false, Float(0.25));
+  cl.add<Float>("i-Lambda", 'L', "inverse Lambda value", false, Float(2));
+  cl.add<std::string>("tag", 0, "tag", false, "txt");
+
+  try {
+    cl.parse_check(argc, argv);
+  }
+  catch (std::string error) {
+    std::cerr << error << std::endl;
+    return 2;
+  }
+  catch (const char * error) {
+    std::cerr << error << std::endl;
+    return 2;
+  }
+
+  int n_term = cl.get<int>("term");
+  int n_prod = cl.get<int>("sweep");
+  int seed = cl.get<int>("seed");
+
+  int dim[DIM] = { cl.get<int>("n-x"), cl.get<int>("n-y"),
+#if DIM >= 3
+                   cl.get<int>("n-z"),
+#endif
+  };
+
 #ifdef CACHE
-  int b_z = 8;
+  int block_dim[DIM] {
+    cl.get<int>("b-x"), cl.get<int>("b-y"),
+#if DIM >= 3
+        cl.get<int>("b-z"),
 #endif
-#endif
+  }
+  ;
+  int block_sweeps = cl.get<int>("block-sweeps");
 #else
   const int block_sweeps = 1;
 #endif
 
-#ifdef _OPENMP
-  int threads = 0;
-#endif
-  const char* tag = "txt";
-
   struct parameters<Float> pars = {
-    Float(0),         // g
-        Float(0.25),  // m_2
-        Float(2),     // i_Lambda
+    cl.get<Float>("g"), cl.get<Float>("mass-squared"),
+        cl.get<Float>("i-Lambda"),
   };
 
-  poptContext optCon;
-  int rc;
-  struct poptOption options[] = {
-#ifdef _OPENMP
-    { "threads", 0, POPT_ARG_INT, &threads, 0, "set number of OpenMP threads" },
-#endif
-    { "n-x", 0, POPT_ARG_INT, &n_x, 0, "x size" },
-    { "n-y", 0, POPT_ARG_INT, &n_y, 0, "y size" },
-#if DIM >= 3
-    { "n-z", 0, POPT_ARG_INT, &n_z, 0, "z size" },
-#endif
-#ifdef CACHE
-    { "b-x", 0, POPT_ARG_INT, &b_x, 0, "block x size" },
-    { "b-y", 0, POPT_ARG_INT, &b_y, 0, "block y size" },
-#if DIM >= 3
-    { "b-z", 0, POPT_ARG_INT, &b_z, 0, "block z size" },
-#endif
-    { "block-sweeps", 0, POPT_ARG_INT, &block_sweeps, 0 },
-#endif
-    { "term", 't', POPT_ARG_INT, &n_term, 0, "number of termalisation sweeps" },
-    { "sweep", 'n', POPT_ARG_INT, &n_prod, 0, "number of measurments sweeps" },
-    { "seed", 's', POPT_ARG_INT, &seed, 0, "rng seed" },
-    { "mass-squared", 'm', poptType<Float>(), &pars.m_2, 0, "m^2 value" },
-    { NULL, 'g', poptType<Float>(), &pars.g, 0, "g value" },
-    { "i-Lambda", 'L', poptType<Float>(), &pars.i_Lambda, 0,
-      "inverse Lambda value" },
-    { "tag", 0, POPT_ARG_STRING, &tag, 0, "tag" }, POPT_AUTOHELP POPT_TABLEEND
-  };
-
-  optCon = poptGetContext(NULL, argc, argv, options, 0);
-
-  while ((rc = poptGetNextOpt(optCon)) > 0) {
-  }
-
-  if (rc < -1) {
-    fprintf(stderr,
-            "%s: %s\n",
-            poptBadOption(optCon, POPT_BADOPTION_NOALIAS),
-            poptStrerror(rc));
-    exit(-1);
-  }
-
-  std::cerr << "# Dim " << DIM << "\n";
-  print_parameters(std::cerr, options);
-  std::cerr << "# n-components " << Field::n_components << "\n";
-  std::cerr << "# Float " << numericType<Float>::name << "\n";
-
-  dim[0] = n_x;
-  dim[1] = n_y;
-#if DIM >= 3
-  dim[2] = n_z;
-#endif
-
-#ifdef CACHE
-  block_dim[0] = b_x;
-  block_dim[1] = b_y;
-#if DIM >= 3
-  block_dim[2] = b_z;
-#endif
-#endif
+  // print_parameters(std::cerr, options);
+  std::cerr << "# Dim " << DIM << std::endl;
+  std::cerr << "# n-components " << Field::n_components << std::endl;
+  // std::cerr << "# Float " << numericType<Float>::name << std::endl;
 
   std::string mag_file_name(FILE_NAME ".");
-  mag_file_name += std::string(tag);
+  mag_file_name += cl.get<std::string>("tag");
 
   Ind::init(dim);
 #ifdef CACHE
@@ -159,26 +126,22 @@ int main(int argc, const char* argv[]) {
   srand48(seed);
 
 #ifdef _OPENMP
-  if (threads > 0) {
-    omp_set_num_threads(threads);
+  if (cl.exist("threads")) {
+    omp_set_num_threads(cl.get<int>("threads"));
   }
-  int n_threads = omp_get_max_threads();
-
+  const int n_threads = omp_get_max_threads();
   std::cerr << "# OpenMP Yes  " << n_threads << " threads\n";
-
 #else
-  int n_threads = 1;
+  const int n_threads = 1;
   std::cerr << "# OpenMP No\n";
 #endif
+
   rand_array_t::init(n_threads, seed);
 
   for (int i = 0; i < Ind::n_sites(); i++) {
     phi_field.set(i, Float(2.0 * drand48() - 1.0));
   }
 
-  /*
-   * termalisation loop
-   */
   long int accepted = 0;
   Partition partition;
 
@@ -188,6 +151,8 @@ int main(int argc, const char* argv[]) {
     timer.print_res();
   timer.start();
 #endif
+
+  // Termalisation loop ///////////////////////////////////////////////////////
 
   for (int sweep = 0; sweep < n_term; sweep++) {
 #ifdef CACHE
@@ -215,16 +180,15 @@ int main(int argc, const char* argv[]) {
   MagnetisationMeasurer<Field::n_components> magnetisation;
   accepted = 0;
 
-  /*
-   * main  simulation loop
-   */
-
   FILE* fmag;
   if (NULL == (fmag = fopen(mag_file_name.c_str(), "w"))) {
     std::cerr << "cannot open file `" << mag_file_name << "' for  writing"
               << std::endl;
     exit(2);
   }
+
+  // Main simulation loop /////////////////////////////////////////////////////
+
   int n_meas = 0;
   for (int sweep = 0; sweep < n_prod; sweep++) {
 #ifdef CACHE

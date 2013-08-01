@@ -82,7 +82,7 @@ LDFLAGS  += -openmp
 endif
 endif
 
-LDFLAGS  += -g -lpopt
+LDFLAGS  += -g
 CPPFLAGS += -MMD \
             -DDIM=$(DIM) \
             -DFLOAT=$(FLOAT) \
@@ -103,7 +103,6 @@ endif
 EXEC      = phi4$(SUFFIX)
 MAIN      = phi4$(SUFFIX).o
 OBJECTS   = sweep$(SIMD_SUFFIX)$(SUFFIX).o \
-            file$(CC_SUFFIX).o \
             random$(SIMD_SUFFIX)$(SUFFIX).o
 ifdef SIMD
 OBJECTS  += simd$(CC_SUFFIX).o
