@@ -167,18 +167,19 @@ int main(int argc, char* argv[]) {
 
 #ifdef __LINUX__
   timer.stop();
-  fprintf(stdout, "termalisation took %lld ns\n", timer.ellapsed_time());
-  double fnano_sec = (double)timer.ellapsed_time();
-  fprintf(stderr,
-          "that makes %lf ns per update\n",
-          fnano_sec / (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term));
+  std::cerr << "termalisation took " << timer.ellapsed_time() << " ns"
+            << std::endl();
+  std::cerr << "that makes"
+            << (double)timer.ellapsed_time() /
+                   (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term)
+            << "ns per update" << std::endl;
 #endif
 
   if (n_term > 0)
-    fprintf(stderr,
-            "acceptance %f\n",
-            ((double)accepted) /
-                (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term));
+    std::cerr << "acceptance"
+              << (double)accepted /
+                     (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term)
+              << std::endl;
 
   MagnetisationMeasurer<Field::n_components> magnetisation;
   accepted = 0;
@@ -215,10 +216,10 @@ int main(int argc, char* argv[]) {
   }
 
   if (n_prod > 0)
-    fprintf(stderr,
-            "acceptance %lf\n",
-            ((double)accepted) / (block_sweeps * (double)N_HIT *
-                                  (double)Ind::n_sites() * (double)n_prod));
+    std::cerr << "acceptance"
+              << (double)accepted /
+                     (block_sweeps * N_HIT * (double)Ind::n_sites() * n_prod)
+              << std::endl;
 #ifndef CACHE
   Ind::clean();
 #endif
