@@ -100,7 +100,7 @@ template <typename F> class Updater {
 
       if (delta_action < (Float)0.0)
         if (std::exp(delta_action) < RAND(tid))
-          goto next;
+          continue;
 
       for (int k = 0; k < F::n_components; ++k) {
         field.set(i, k, phi_tmp[k]);
@@ -108,9 +108,7 @@ template <typename F> class Updater {
 
       old_action = new_action;
       accepted++;
-
-    next:
-    }  // MULTI_HIT LOOP
+    }
 
     return accepted;
   }
