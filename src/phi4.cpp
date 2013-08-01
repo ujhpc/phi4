@@ -1,26 +1,16 @@
 #include <iostream>
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <cmath>
-#include "cmdline.h"
-
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 #ifdef __LINUX__
 #include <time.h>
 #include "linux_time.h"
 #endif
-
-#ifndef NAME
-#define FILE_NAME "phi4"
-#else
-#define STRINGIZE(x) #x
-#define STRINGIZE_VALUE_OF(x) STRINGIZE(x)
-#define FILE_NAME STRINGIZE_VALUE_OF(NAME)
-#endif
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
+#include "cmdline.h"
 
 #include "typedefs.h"
 #include "sweep.h"
@@ -34,6 +24,14 @@ const int default_b = 8;
 #else
 const int default_n = 128;
 const int default_b = 16;
+#endif
+
+#ifndef NAME
+#define FILE_NAME "phi4"
+#else
+#define STRINGIZE(x) #x
+#define STRINGIZE_VALUE_OF(x) STRINGIZE(x)
+#define FILE_NAME STRINGIZE_VALUE_OF(NAME)
 #endif
 
 int main(int argc, char* argv[]) {

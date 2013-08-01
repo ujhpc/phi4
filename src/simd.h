@@ -89,7 +89,7 @@ template <typename type, int ncomp> struct simd {};
   #define INT64 long long
 #endif
 #if !defined INT32 || !defined INT64
-  #include <stdint.h>
+  #include <cstdint>
 #endif
 #if !defined INT32
   #define INT32 int32_t

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+
 #include "iterator.h"
 
 template <int Dim> class Indexer {

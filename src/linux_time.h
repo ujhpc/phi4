@@ -1,7 +1,7 @@
 #pragma once
 
 #include <time.h>
-#include <stdint.h>
+#include <cstdint>
 
 class LinuxTimer {
  public:

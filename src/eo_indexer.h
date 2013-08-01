@@ -186,8 +186,6 @@ template <int Dim> class EOIndexer {
     delete[] site_dn_eo_;
   }
 
- protected:
-
  private:
 
   void init(const int* dims) {
