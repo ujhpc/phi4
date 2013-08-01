@@ -106,10 +106,21 @@ int main(int argc, char* argv[]) {
         cl.get<Float>("i-Lambda"),
   };
 
-  // print_parameters(std::cerr, options);
-  std::cerr << "# Dim " << DIM << std::endl;
-  std::cerr << "# n-components " << Field::n_components << std::endl;
-  // std::cerr << "# Float " << numericType<Float>::name << std::endl;
+  std::cerr << "# Dimensions " << DIM << std::endl;
+  std::cerr << "# Components " << Field::n_components << std::endl;
+  std::cerr << "# Float " << cmdline::detail::readable_typename<Float>()
+            << std::endl;
+#ifdef _OPENMP
+  if (cl.exist("threads")) {
+    omp_set_num_threads(cl.get<int>("threads"));
+  }
+  const int n_threads = omp_get_max_threads();
+  std::cerr << "# OpenMP Yes  " << n_threads << " threads\n";
+#else
+  const int n_threads = 1;
+  std::cerr << "# OpenMP No\n";
+#endif
+  std::cerr << cl;
 
   std::string mag_file_name(FILE_NAME ".");
   mag_file_name += cl.get<std::string>("tag");
@@ -121,17 +132,6 @@ int main(int argc, char* argv[]) {
 
   Field phi_field(Ind::n_sites());
   srand48(seed);
-
-#ifdef _OPENMP
-  if (cl.exist("threads")) {
-    omp_set_num_threads(cl.get<int>("threads"));
-  }
-  const int n_threads = omp_get_max_threads();
-  std::cerr << "# OpenMP Yes  " << n_threads << " threads\n";
-#else
-  const int n_threads = 1;
-  std::cerr << "# OpenMP No\n";
-#endif
 
   rand_array_t::init(n_threads, seed);
 
