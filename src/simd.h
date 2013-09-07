@@ -75,8 +75,8 @@ template <typename type, int ncomp> struct simd {};
   simd<mask_type, ncomp>(REP(ncomp, INDEX, scalar s))                         \
       : v((type) { REP(ncomp, INDEX, s) }) {} \
   simd<mask_type, ncomp>(scalar* p) : v(*(type*)p) {} \
-  scalar& operator[](int i) { return ((scalar*)&v)[i]; } float_class          \
-  operator()(const float_class& mv) {                             \
+  scalar& operator[](int i) { return ((scalar*)&v)[i]; }                      \
+  float_class operator()(const float_class& mv) {                             \
     return float_class((float_class::type)((type)mv.v & v));                  \
   }
 
