@@ -45,10 +45,10 @@ template <typename F> class Updater {
       // register
       for (int mu = 0; mu < indexer_t::D; mu++) {
 #define index_up(n, i) indexer_t::up(i[n], mu)
-        int up[]
+        int up[SIMD]
             __attribute__((aligned(16))) = { REP(SIMD, index_up, indices) };
 #define index_dn(n, i) indexer_t::dn(i[n], mu)
-        int dn[]
+        int dn[SIMD]
             __attribute__((aligned(16))) = { REP(SIMD, index_dn, indices) };
 
 #define field_up_dn(n, p) p.get(up[n], k) + p.get(dn[n], k)
@@ -67,7 +67,7 @@ template <typename F> class Updater {
 
       FVec big_corona = FVec(-pars_.i_Lambda) *
                         (big_corona_02 -
-                         FVec(Float(4.0)) * FVec(indexer_t::D) * big_corona_01 +
+                         FVec(Float(4.0)) * FVec((Float)indexer_t::D) * big_corona_01 +
                          FVec(Float(2.0)) * big_corona_11);
       corona[k] = small_corona + big_corona;
 
