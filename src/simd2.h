@@ -72,8 +72,9 @@ template <> struct simd_float_of<long long> {
       f(10, __VA_ARGS__), f(11, __VA_ARGS__), f(12, __VA_ARGS__),             \
       f(13, __VA_ARGS__), f(14, __VA_ARGS__), f(15, __VA_ARGS__)
 
-// Main SIMD wrapper template type for vector
+/// Main SIMD wrapper template type for vector
 template <typename T, int N> struct simd {
+  /// Number of vector components
   static const int vector_size = sizeof(T) * N;
   typedef T scalar_t;
   typedef typename simd_integral_of<T>::type iscalar_t;
@@ -86,9 +87,13 @@ template <typename T, int N> struct simd {
   typedef simd<iscalar_t, N> itype;
   typedef simd<fscalar_t, N> ftype;
   vector_t v;
+
+  /// Default constructor returning zero
   simd() : v() {}
+  /// Constructor taking native representation
   simd(vector_t a) : v(a) {}
 
+// Constructors taking vector size number of arguments
 #define __simd_ctora(N, T) T s##N
   simd(__simd_rep(2, __simd_ctora, T));
   simd(__simd_rep(4, __simd_ctora, T));
@@ -98,7 +103,7 @@ template <typename T, int N> struct simd {
   // We need dummy here otherwise GCC will not allow us override contructor even
   // vector and scalar types are different.
   simd(scalar_t, char dummy = 0);
-  // Unsigned to signed constructor
+  /// Unsigned to signed constructor
   simd(uiscalar_t u, char dummy = 0) { v = simd<iscalar_t, N>((iscalar_t)u).v; }
 
   scalar_t& operator[](int i) { return ((scalar_t*)&v)[i]; }
