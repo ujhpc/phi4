@@ -45,34 +45,35 @@ template <typename F> class Updater {
       // register
       for (int mu = 0; mu < indexer_t::D; mu++) {
 #define index_up(n, i) indexer_t::up(i[n], mu)
-        int up[]
-            __attribute__((aligned(16))) = { REP(SIMD, index_up, indices) };
+        int up[SIMD] __attribute__((aligned(16))) = { __simd_rep(
+            SIMD, index_up, indices) };
 #define index_dn(n, i) indexer_t::dn(i[n], mu)
-        int dn[]
-            __attribute__((aligned(16))) = { REP(SIMD, index_dn, indices) };
+        int dn[SIMD] __attribute__((aligned(16))) = { __simd_rep(
+            SIMD, index_dn, indices) };
 
 #define field_up_dn(n, p) p.get(up[n], k) + p.get(dn[n], k)
-        small_corona += FVec(REP(SIMD, field_up_dn, field));
+        small_corona += FVec(__simd_rep(SIMD, field_up_dn, field));
 #define field_up_dn_2(n, p) \
   p.get(indexer_t::up(up[n], mu), k) + p.get(indexer_t::dn(dn[n], mu), k)
-        big_corona_02 += FVec(REP(SIMD, field_up_dn_2, field));
+        big_corona_02 += FVec(__simd_rep(SIMD, field_up_dn_2, field));
 
         for (int nu = 0; nu < mu; nu++) {
 #define index_nu(n, p)                                                      \
   p.get(indexer_t::up(up[n], nu), k) + p.get(indexer_t::up(dn[n], nu), k) + \
       p.get(indexer_t::dn(up[n], nu), k) + p.get(indexer_t::dn(dn[n], nu), k)
-          big_corona_11 += FVec(REP(SIMD, index_nu, field));
+          big_corona_11 += FVec(__simd_rep(SIMD, index_nu, field));
         }
       }
 
-      FVec big_corona = FVec(-pars_.i_Lambda) *
-                        (big_corona_02 -
-                         FVec(Float(4.0)) * FVec(indexer_t::D) * big_corona_01 +
-                         FVec(Float(2.0)) * big_corona_11);
+      FVec big_corona =
+          FVec(-pars_.i_Lambda) *
+          (big_corona_02 -
+           FVec(Float(4.0)) * FVec((Float)indexer_t::D) * big_corona_01 +
+           FVec(Float(2.0)) * big_corona_11);
       corona[k] = small_corona + big_corona;
 
 #define indexed_field(n, p, i) p.get(i[n], k)
-      phi[k] = FVec(REP(SIMD, indexed_field, field, indices));
+      phi[k] = FVec(__simd_rep(SIMD, indexed_field, field, indices));
       phi2 += phi[k] * phi[k];
       action += corona[k] * phi[k];
     }
