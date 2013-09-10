@@ -48,8 +48,8 @@ class taus_array {
   static const int pitch = 16;
 
   taus_array(int n) : n_generators_(n) {
-    seeds_ = (SIVec*)_mm_malloc(pitch * n_generators_ * sizeof(SIVec),
-                                sizeof(SIVec));
+    seeds_ = (SIVec*)_mm_malloc(pitch * n_generators_ * sizeof(IVec),
+                                sizeof(IVec));
     gen_seeds(121245);
   }
 
