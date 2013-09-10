@@ -72,6 +72,7 @@ template <typename T, int N> struct simd {
   // We need dummy here otherwise GCC will not allow us override contructor even
   // vector and scalar types are different.
   simd(scalar_t, scalar_t dummy = 0) : v() {}
+  // Unsigned to signed constructor
   simd(uiscalar_t u, uiscalar_t dummy = 0) {
     v = simd<iscalar_t, N>((iscalar_t)u).v;
   }
@@ -109,16 +110,13 @@ template <typename T, int N> struct simd {
   simd operator()(const itype& tval) const { return tval; }
   simd operator()(const itype& tval, const itype& fval) const { return tval; }
 
-  friend simd& min(const simd& a, const simd& b) { return a < b ? a : b; }
-  friend simd& max(const simd& a, const simd& b) { return a > b ? a : b; }
-
 // Assign operators
 #define __simd_aop(T, O)     \
   simd& operator O##=(T a) { \
     v = (*this O a).v;       \
     return *this;            \
   }
-      __simd_aop(const simd&, +);
+  __simd_aop(const simd&, +);
   __simd_aop(const simd&, -);
   __simd_aop(const simd&, *);
   __simd_aop(const simd&, / );
@@ -243,6 +241,42 @@ __simd_cast(int, float, 8, __m256i, _mm256_cvtepi32_ps);
 __simd_cast(float, int, 8, __m256, _mm256_cvtps_epi32);
 #endif
 #undef __simd_cast
+
+// Finally some helper functions
+#define __simd_fun(F, T, N, I) \
+  inline simd<T, N> F(const simd<T, N>& a) { return simd<T, N>(I(a.v)); }
+// SVML
+extern "C" {
+__m128 __svml_logf4(__m128);
+__m128d __svml_logd2(__m128d);
+#if __AVX__
+__m256 __svml_logf8(__m256);
+__m256d __svml_logd4(__m256d);
+#endif
+}
+__simd_fun(log, float, 4, __svml_logf4);
+__simd_fun(log, double, 2, __svml_logd2);
+#if __AVX__
+__simd_fun(log, float, 8, __svml_logf8);
+__simd_fun(log, double, 4, __svml_logd4);
+#endif
+#undef __simd_fun
+
+#define __simd_fun2(F, T, N, I)                                   \
+  inline simd<T, N> F(const simd<T, N>& a, const simd<T, N>& b) { \
+    return simd<T, N>(I(a.v, b.v));                               \
+  }
+__simd_fun2(min, float, 4, _mm_min_ps);
+__simd_fun2(max, float, 4, _mm_max_ps);
+__simd_fun2(min, double, 2, _mm_min_pd);
+__simd_fun2(max, double, 2, _mm_max_pd);
+#if __AVX__
+__simd_fun2(min, float, 8, _mm256_min_ps);
+__simd_fun2(max, float, 8, _mm256_max_ps);
+__simd_fun2(min, double, 4, _mm256_min_pd);
+__simd_fun2(max, double, 4, _mm256_max_pd);
+#endif
+#undef __simd_fun2
 
 #undef __simd_has_cmp
 #undef __simd_has_shift
