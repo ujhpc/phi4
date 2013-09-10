@@ -112,7 +112,7 @@ template <typename T, int N> struct simd {
 // Assign operators
 #define __simd_aop(T, O)     \
   simd& operator O##=(T a) { \
-    v = (*this O a).v;       \
+    v = (operator O(a)).v;   \
     return *this;            \
   }
   __simd_aop(const simd&, +);
@@ -123,7 +123,12 @@ template <typename T, int N> struct simd {
   __simd_aop(const simd&, | );
   __simd_aop(const simd&, &);
   __simd_aop(const simd&, ^);
-
+  // Workaround for GCC <= 4.6
+#if __GNUC__ < 4 || __GNUC__ == 4 && __GNUC_MINOR__ <= 6
+#undef __simd_aop
+#define __simd_aop(T, O) \
+  simd& operator O##=(T a) { return *this; }
+#endif
   __simd_aop(const int, << );
   __simd_aop(const int, >> );
   __simd_aop(const simd&, >> );
@@ -205,25 +210,30 @@ __simd_op(float, 8, !=, __v8si, _mm256_cmp_ps, _CMP_NEQ_OS);
 #define __simd_op(T, N, O, V, IV, I)                                          \
   template <> inline simd<T, N> simd<T, N>::operator O(const T shift) const { \
     return simd<T, N>((V)I((IV)v, shift));                                    \
+  }                                                                           \
+  template <> inline simd<T, N>& simd<T, N>::operator O##=(const T shift) {   \
+    v = ((V)I((IV)v, shift));                                                 \
+    return *this;                                                             \
   }
 __simd_op(int, 4, <<, __v4si, __m128i, _mm_slli_epi32);
 __simd_op(int, 4, >>, __v4si, __m128i, _mm_srli_epi32);
-#if __AVX__
+#if __AVX2__
 __simd_op(int, 8, <<, __v8si, __m256i, _mm256_slli_epi32);
 __simd_op(int, 8, >>, __v8si, __m256i, _mm256_srli_epi32);
 #endif
 #undef __simd_op
 // Shift by vector
-#define __simd_op(T, N, O, V, IV, I)                                        \
+#define __simd_op(T, N, O, V, IV, S, I)                                     \
   template <>                                                               \
   inline simd<T, N> simd<T, N>::operator O(const simd<T, N>& shift) const { \
-    return simd<T, N>((V)I((IV)v, (IV)shift.v));                            \
+    return simd<T, N>((V)I((IV)v, S));                                      \
   }
-__simd_op(int, 4, <<, __v4si, __m128i, _mm_sll_epi32);
-__simd_op(int, 4, >>, __v4si, __m128i, _mm_srl_epi32);
-#if __AVX__
-// __simd_op(int, 8, <<, __v8si, __m256i, _mm256_sll_epi32);
-// __simd_op(int, 8, >>, __v8si, __m256i, _mm256_srl_epi32);
+__simd_op(int, 4, <<, __v4si, __m128i, (__m128i)shift.v, _mm_sll_epi32);
+__simd_op(int, 4, >>, __v4si, __m128i, (__m128i)shift.v, _mm_srl_epi32);
+#if __AVX2__
+// FIXME: this is probably incorrect since shift argument is 128-bit!
+__simd_op(int, 8, <<, __v8si, __m256i, *((__m128i*)&shift.v), _mm256_sll_epi32);
+__simd_op(int, 8, >>, __v8si, __m256i, *((__m128i*)&shift.v), _mm256_srl_epi32);
 #endif
 #undef __simd_op
 #endif
@@ -254,7 +264,7 @@ __simd_cast(float, int, 8, __m256, _mm256_cvtps_epi32);
 __simd_op(float, int, 4, _mm_blendv_ps(fv.v, tv.v, (__m128)v));
 __simd_op(double, long long, 2, _mm_blendv_pd(fv.v, tv.v, (__m128d)v));
 #elif __SSE__
-__simd_op(float, int, 4, (__m128)((~v&(__m128i)fv.v) | (v&(__m128i)tv.v)));
+__simd_op(float, int, 4, (__m128)((~v&(__v4si)fv.v) | (v&(__v4si)tv.v)));
 #endif
 #if __AVX__
 __simd_op(float, int, 8, _mm256_blendv_ps(fv.v, tv.v, (__m256)v));
