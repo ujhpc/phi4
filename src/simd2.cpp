@@ -22,3 +22,8 @@ extern "C" int int_test(int a, int b) {
   c >>= 2;
   return c[2];
 }
+extern "C" int int_test2(int a, int b) {
+  ivec_t c(a+1, a+2, a+3, a+4);
+  ivec_t d(a-1, a-2, a-3, a-4);
+  return (c^d)[2];
+}

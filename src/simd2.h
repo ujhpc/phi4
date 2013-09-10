@@ -14,6 +14,8 @@
 //   accessors.
 //   This class is drop in replecement for that, addressing above shortcommings.
 
+#pragma once
+
 // Helper type for itegral <-> float mapping with same size
 template <typename Type> struct simd_integral_of {
   typedef Type type;
@@ -52,6 +54,24 @@ template <> struct simd_float_of<long long> {
 #define __simd_type(T, N) __attribute__((vector_size(sizeof(T) * N))) T
 #endif
 
+// Replication helper
+#define __simd_repn(n) __simd_rep##n
+#define __simd_rep(n, f, ...) __simd_repn(n)(f, __VA_ARGS__)
+#define __simd_rep1(f, ...) f(0, __VA_ARGS__)
+#define __simd_rep2(f, ...) f(0, __VA_ARGS__), f(1, __VA_ARGS__)
+#define __simd_rep4(f, ...) \
+  f(0, __VA_ARGS__), f(1, __VA_ARGS__), f(2, __VA_ARGS__), f(3, __VA_ARGS__)
+#define __simd_rep8(f, ...)                                                   \
+  f(0, __VA_ARGS__), f(1, __VA_ARGS__), f(2, __VA_ARGS__), f(3, __VA_ARGS__), \
+      f(4, __VA_ARGS__), f(5, __VA_ARGS__), f(6, __VA_ARGS__),                \
+      f(7, __VA_ARGS__)
+#define __simd_rep16(f, ...)                                                  \
+  f(0, __VA_ARGS__), f(1, __VA_ARGS__), f(2, __VA_ARGS__), f(3, __VA_ARGS__), \
+      f(4, __VA_ARGS__), f(5, __VA_ARGS__), f(6, __VA_ARGS__),                \
+      f(7, __VA_ARGS__), f(8, __VA_ARGS__), f(9, __VA_ARGS__),                \
+      f(10, __VA_ARGS__), f(11, __VA_ARGS__), f(12, __VA_ARGS__),             \
+      f(13, __VA_ARGS__), f(14, __VA_ARGS__), f(15, __VA_ARGS__)
+
 // Main SIMD wrapper template type for vector
 template <typename T, int N> struct simd {
   static const int vector_size = sizeof(T) * N;
@@ -69,13 +89,17 @@ template <typename T, int N> struct simd {
   simd() : v() {}
   simd(vector_t a) : v(a) {}
 
+#define __simd_ctora(N, T) T s##N
+  simd(__simd_rep(2, __simd_ctora, T));
+  simd(__simd_rep(4, __simd_ctora, T));
+  simd(__simd_rep(8, __simd_ctora, T));
+  simd(__simd_rep(16, __simd_ctora, T));
+
   // We need dummy here otherwise GCC will not allow us override contructor even
   // vector and scalar types are different.
-  simd(scalar_t, scalar_t dummy = 0) : v() {}
+  simd(scalar_t, char dummy = 0);
   // Unsigned to signed constructor
-  simd(uiscalar_t u, uiscalar_t dummy = 0) {
-    v = simd<iscalar_t, N>((iscalar_t)u).v;
-  }
+  simd(uiscalar_t u, char dummy = 0) { v = simd<iscalar_t, N>((iscalar_t)u).v; }
 
   scalar_t& operator[](int i) { return ((scalar_t*)&v)[i]; }
 
@@ -107,7 +131,7 @@ template <typename T, int N> struct simd {
 
   // Masking operator
   ftype operator()(const ftype& tval, const ftype& fval) const { return tval; }
-  ftype operator()(const ftype& tval) const { (*this)(tval, ftype()); }
+  ftype operator()(const ftype& tval) const { return (*this)(tval, ftype()); }
 
 // Assign operators
 #define __simd_aop(T, O)     \
@@ -123,7 +147,7 @@ template <typename T, int N> struct simd {
   __simd_aop(const simd&, | );
   __simd_aop(const simd&, &);
   __simd_aop(const simd&, ^);
-  // Workaround for GCC <= 4.6
+// Workaround for GCC <= 4.6
 #if __GNUC__ < 4 || __GNUC__ == 4 && __GNUC_MINOR__ <= 6
 #undef __simd_aop
 #define __simd_aop(T, O) \
@@ -144,9 +168,13 @@ template <typename T, int N> struct simd {
 #define __simd_seq4(s) __simd_seq2(s), __simd_seq2(s)
 #define __simd_seq8(s) __simd_seq4(s), __simd_seq4(s)
 #define __simd_seq16(s) __simd_seq8(s), __simd_seq8(s)
-#define __simd_ctor_(T, N)                           \
-  template <> inline simd<T, N>::simd(T s, T) {      \
-    v = (simd<T, N>::vector_t) { __simd_seq(s, N) }; \
+#define __simd_ctori(N, T) s##N
+#define __simd_ctor_(T, N)                                              \
+  template <> inline simd<T, N>::simd(T s, char) {                      \
+    v = (simd<T, N>::vector_t) { __simd_seq(s, N) };                    \
+  }                                                                     \
+  template <> inline simd<T, N>::simd(__simd_rep(N, __simd_ctora, T)) { \
+    v = (simd<T, N>::vector_t) { __simd_rep(N, __simd_ctori, T) };      \
   }
 // single precition
 #define __simd_ctor(I, T, N) __simd_ctor_(T, N) __simd_ctor_(I, N)
@@ -166,6 +194,18 @@ __simd_ctor(long long, double, 16);
 #undef __simd_seq16
 #undef __simd_ctor_
 #undef __simd_ctor
+#undef __simd_ctora
+#undef __simd_ctori
+
+#ifndef __simd_use_rep
+#undef __simd_rep
+#undef __simd_repn
+#undef __simd_rep1
+#undef __simd_rep2
+#undef __simd_rep4
+#undef __simd_rep8
+#undef __simd_rep16
+#endif
 
 // This section defines missing operators using X86 intrinsics
 #define __simd_has_cmp __clang__
