@@ -6,16 +6,20 @@
 # You may control build settings using: make VAR=value ...
 #
 #   CC=compiler name i.e. CC=icc, CC=gcc, CC=clang (automatically sets CXX)
-#   DIM=dimensions (2 or 3)
-#   NCOMP=number_of_components (>=1)
-#   FLOAT=float_type (double or float) (defaults to double, float on SIMD)
-#   SIMD=(4 or 8) size of SIMD vector (enabled SIMD computing)
+#   DIM=(2 or 3) dimensions
+#   NCOMP=(>=1) number_of_components
+#   FLOAT=(double or float) defaults to double, float on SIMD
+#   SIMD=(4 or 8) size of SIMD vector (enables SIMD computing)
+#   INS=(sse, avx or avx2) instruction set, default native
+#   FAST_INDEX=1 fast index (avoid memory index) size only power of 2
 #
 # Note: output executable will have suffix indicating current settings.
 
 CC    := cc
 DIM   := 3
 NCOMP := 1
+INS   := arch=native
+O     := 3
 ifdef SIMD
 FLOAT := float
 else
@@ -24,33 +28,31 @@ endif
 SED   := sed
 MV    := mv
 
-# ICC
+# Instruction set
+CPPFLAGS += -m$(INS)
+
+# ICC specif flags
 ifeq ($(CC),icc)
-CPPFLAGS += -fast -fno-alias -g \
+CPPFLAGS += -fno-alias -g \
             -vec-report \
             -fp-model fast=2 \
             -opt-ra-region-strategy=block
+ifeq ($(O),3)
+CFLAGS   += -fast
 else
-# Clang
-ifneq ($(findstring clang,$(CC)),)
-CXX      := $(subst clang,clang++,$(CC))
-CPPFLAGS += -g \
-            -mavx \
-            -O3 \
-            -funsafe-math-optimizations \
-            -ffast-math
+CFLAGS   += -O$(O)
+endif
+# GCC & Clang flags
 else
-# generic GCC compatible compiler
-CPPFLAGS += -g \
-            -march=native \
-            -O3 \
+CPPFLAGS += -O$(O) \
+            -g \
             -funsafe-math-optimizations \
             -ffast-math
 endif
+
 # non-ICC use ICC svml on SIMD
 ifdef SIMD
 LDFLAGS  += -lsvml
-endif
 endif
 
 CXX := $(subst cc,c++,$(subst gcc,g++,$(subst icc,icpc,$(CC))))
@@ -73,9 +75,26 @@ endif
 ifdef OPENMP
 SUFFIX := $(SUFFIX)-omp
 endif
+ifneq ($(FIDX),)
+FAST_INDEX := 1
+endif
+ifneq ($(FAST_INDEX),)
+CPPFLAGS += -DFAST_INDEX=1
+SUFFIX   := $(SUFFIX)-fidx
+endif
 ifneq ($(CC),cc)
 SUFFIX := $(SUFFIX)-$(CC)
 CC_SUFFIX := -$(CC)
+endif
+ifneq ($(O),3)
+SUFFIX := $(SUFFIX)-o$(O)
+endif
+ifneq ($(INS),arch=native)
+SUFFIX := $(SUFFIX)-$(INS)
+endif
+ifneq ($(OLD),)
+SUFFIX := $(SUFFIX)-old
+CPPFLAGS += -DOLD
 endif
 
 ifdef OPENMP
@@ -94,11 +113,6 @@ CPPFLAGS += -DSIMD=$(SIMD)
 ifdef CACHE
 CPPFLAGS += -DCACHE=1
 endif
-endif
-
-ifdef FIDX
-CPPFLAGS += -DFAST_INDEX=1
-SUFFIX   += -fidx
 endif
 
 EXEC      = ../phi4$(SUFFIX)
@@ -132,7 +146,7 @@ dsym: $(EXEC)
 %$(SUFFIX).o: %.c Makefile
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
-test: $(OBJECTS) $(TESTS_OBJECTS) 
+test: $(OBJECTS) $(TESTS_OBJECTS)
 	$(CXX) $(LDFLAGS) -o $@ $^ -lpthread
 
 clean:

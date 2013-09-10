@@ -13,8 +13,15 @@ typedef FLOAT Float;
 
 #ifdef SIMD
 
+#ifndef OLD
 #define __simd_use_rep
 #include "simd2.h"
+#else
+#define __SIMD_H__REP
+#include "simd.h"
+#define __simd_rep REP
+#define itype mask
+#endif
 
 #if SIMD <= 1
 typedef Float FVec;
