@@ -13,7 +13,7 @@ typedef FLOAT Float;
 
 #ifdef SIMD
 
-#define __SIMD_H__REP
+#define __simd_use_rep
 #include "simd2.h"
 
 #if SIMD <= 1
