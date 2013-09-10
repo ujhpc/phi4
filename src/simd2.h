@@ -106,9 +106,8 @@ template <typename T, int N> struct simd {
   operator ftype() const { return ftype(); }
 
   // Masking operator
-  // FIXME: Implement me!
-  simd operator()(const itype& tval) const { return tval; }
-  simd operator()(const itype& tval, const itype& fval) const { return tval; }
+  ftype operator()(const ftype& tval, const ftype& fval) const { return tval; }
+  ftype operator()(const ftype& tval) const { (*this)(tval, ftype()); }
 
 // Assign operators
 #define __simd_aop(T, O)     \
@@ -234,13 +233,34 @@ __simd_op(int, 4, >>, __v4si, __m128i, _mm_srl_epi32);
   template <> inline simd<F, N>::operator simd<T, N>() const { \
     return simd<T, N>((simd<T, N>::vector_t)I((V)v));          \
   }
+#if __SSE2__
 __simd_cast(int, float, 4, __m128i, _mm_cvtepi32_ps);
 __simd_cast(float, int, 4, __m128, _mm_cvtps_epi32);
+#endif
 #if __AVX__
 __simd_cast(int, float, 8, __m256i, _mm256_cvtepi32_ps);
 __simd_cast(float, int, 8, __m256, _mm256_cvtps_epi32);
 #endif
 #undef __simd_cast
+
+// Blend (conditional assign) operator
+#define __simd_op(T, IT, N, I)                                            \
+  template <>                                                             \
+  inline simd<T, N> simd<IT, N>::operator()(const simd<T, N>& tv,         \
+                                            const simd<T, N>& fv) const { \
+    return simd<T, N>(I);                                                 \
+  }
+#if __SSE4_1__
+__simd_op(float, int, 4, _mm_blendv_ps(fv.v, tv.v, (__m128)v));
+__simd_op(double, long long, 2, _mm_blendv_pd(fv.v, tv.v, (__m128d)v));
+#elif __SSE__
+__simd_op(float, int, 4, (__m128)((~v&(__m128i)fv.v) | (v&(__m128i)tv.v)));
+#endif
+#if __AVX__
+__simd_op(float, int, 8, _mm256_blendv_ps(fv.v, tv.v, (__m256)v));
+__simd_op(double, long long, 4, _mm256_blendv_pd(fv.v, tv.v, (__m256d)v));
+#endif
+#undef __simd_op
 
 // Finally some helper functions
 #define __simd_fun(F, T, N, I) \
