@@ -72,6 +72,15 @@ template <> struct simd_float_of<long long> {
       f(10, __VA_ARGS__), f(11, __VA_ARGS__), f(12, __VA_ARGS__),             \
       f(13, __VA_ARGS__), f(14, __VA_ARGS__), f(15, __VA_ARGS__)
 
+#ifdef __INTEL_COMPILER
+#pragma warning(push)
+// warning #597: "simd<T, N>::operator simd<float, 2>() const
+// will not be called for implicit or explicit conversions
+#pragma warning(disable : 597)
+// warning #171: invalid type conversion ...
+#pragma warning(disable : 171)
+#endif
+
 /// Main SIMD wrapper template type for vector
 template <typename T, int N> struct simd {
   /// Number of vector components
@@ -89,7 +98,7 @@ template <typename T, int N> struct simd {
   vector_t v;
 
   /// Default constructor returning zero
-  simd() : v() {}
+  simd();
   /// Constructor taking native representation
   simd(vector_t a) : v(a) {}
 
@@ -131,8 +140,8 @@ template <typename T, int N> struct simd {
   itype operator==(const simd& a) const { return itype(v == a); }
   simd operator!() const { return simd(!v); }
 
-  operator itype() const { return itype(); }
-  operator ftype() const { return ftype(); }
+  operator itype() const;
+  operator ftype() const;
 
   // Masking operator
   ftype operator()(const ftype& tval, const ftype& fval) const { return tval; }
@@ -174,24 +183,27 @@ template <typename T, int N> struct simd {
 #define __simd_seq8(s) __simd_seq4(s), __simd_seq4(s)
 #define __simd_seq16(s) __simd_seq8(s), __simd_seq8(s)
 #define __simd_ctori(N, T) s##N
-#define __simd_ctor_(T, N)                                              \
-  template <> inline simd<T, N>::simd(T s, char) {                      \
-    v = (simd<T, N>::vector_t) { __simd_seq(s, N) };                    \
-  }                                                                     \
-  template <> inline simd<T, N>::simd(__simd_rep(N, __simd_ctora, T)) { \
-    v = (simd<T, N>::vector_t) { __simd_rep(N, __simd_ctori, T) };      \
-  }
+#define __simd_ctor_(T, N)                                   \
+  template <>                                                \
+  inline simd<T, N>::simd()                                  \
+      : v((simd<T, N>::vector_t) { __simd_seq((T)0, N) }) {} \
+  template <>                                                \
+  inline simd<T, N>::simd(T s, char)                         \
+      : v((simd<T, N>::vector_t) { __simd_seq(s, N) }) {}    \
+  template <>                                                \
+  inline simd<T, N>::simd(__simd_rep(N, __simd_ctora, T))    \
+      : v((simd<T, N>::vector_t) { __simd_rep(N, __simd_ctori, T) }) {}
 // single precition
 #define __simd_ctor(I, T, N) __simd_ctor_(T, N) __simd_ctor_(I, N)
-__simd_ctor(int, float, 2);
 __simd_ctor(int, float, 4);
+#ifdef __AVX__
 __simd_ctor(int, float, 8);
-__simd_ctor(int, float, 16);
+#endif
 // double precision
 __simd_ctor(long long, double, 2);
+#ifdef __AVX__
 __simd_ctor(long long, double, 4);
-__simd_ctor(long long, double, 8);
-__simd_ctor(long long, double, 16);
+#endif
 #undef __simd_seq
 #undef __simd_seq2
 #undef __simd_seq4
@@ -356,3 +368,7 @@ __simd_fun2(max, double, 4, _mm256_max_pd);
 #undef __simd_has_cmp
 #undef __simd_has_shift
 #undef __simd_has_bitop
+
+#if defined(__INTEL_COMPILER)
+#pragma warning(pop)
+#endif
