@@ -18,7 +18,7 @@
 CC    := cc
 DIM   := 3
 NCOMP := 1
-INS   := arch=native
+ARCH  := native
 O     := 3
 ifdef SIMD
 FLOAT := float
@@ -28,8 +28,8 @@ endif
 SED   := sed
 MV    := mv
 
-# Instruction set
-CPPFLAGS += -m$(INS)
+# Architecture
+CPPFLAGS += -march=$(ARCH)
 
 # ICC specif flags
 ifeq ($(CC),icc)
@@ -37,11 +37,14 @@ CPPFLAGS += -fno-alias -g \
             -vec-report \
             -fp-model fast=2 \
             -opt-ra-region-strategy=block
+
+# change O3 to Intels -fast flavor
 ifeq ($(O),3)
 CFLAGS   += -fast
 else
 CFLAGS   += -O$(O)
 endif
+
 # GCC & Clang flags
 else
 CPPFLAGS += -O$(O) \
@@ -57,24 +60,31 @@ endif
 
 CXX := $(subst cc,c++,$(subst gcc,g++,$(subst icc,icpc,$(CC))))
 
-ifdef OMP
-ifndef OPENMP
-OPENMP := $(OMP)
+# define executable suffix
+SUFFIX := -$(NCOMP)nc-$(DIM)d-$(FLOAT)
+
+# SIMD option
+ifneq ($(SIMD),)
+SUFFIX := $(SUFFIX)-vec$(SIMD)
+SRC_SUFFIX := _simd
+CPPFLAGS += -DSIMD=$(SIMD)
+ifneq ($(CACHE),)
+SUFFIX   := $(SUFFIX)-cache
+CPPFLAGS += -DCACHE=1
 endif
 endif
 
-# define executable suffix
-SUFFIX := -$(NCOMP)nc-$(DIM)d-$(FLOAT)
-ifdef SIMD
-SUFFIX := $(SUFFIX)-vec$(SIMD)
-SIMD_SUFFIX := _simd
+# OpenMP option
+ifneq ($(OMP),)
+OPENMP := $(OMP)
 endif
-ifdef CACHE
-SUFFIX := $(SUFFIX)-cache
+ifneq ($(OPENMP),)
+SUFFIX   := $(SUFFIX)-omp
+CXXFLAGS += -fopenmp
+LDFLAGS  += -fopenmp
 endif
-ifdef OPENMP
-SUFFIX := $(SUFFIX)-omp
-endif
+
+# Fast index option
 ifneq ($(FIDX),)
 FAST_INDEX := 1
 endif
@@ -82,24 +92,27 @@ ifneq ($(FAST_INDEX),)
 CPPFLAGS += -DFAST_INDEX=1
 SUFFIX   := $(SUFFIX)-fidx
 endif
+
+# Custom compiler
 ifneq ($(CC),cc)
 SUFFIX := $(SUFFIX)-$(CC)
 CC_SUFFIX := -$(CC)
 endif
+
+# Custom architecture
+ifneq ($(ARCH),native)
+SUFFIX := $(SUFFIX)-$(INS)
+endif
+
+# Custom optimization
 ifneq ($(O),3)
 SUFFIX := $(SUFFIX)-o$(O)
 endif
-ifneq ($(INS),arch=native)
-SUFFIX := $(SUFFIX)-$(INS)
-endif
+
+# Old SIMD wrapper
 ifneq ($(OLD),)
 SUFFIX := $(SUFFIX)-old
 CPPFLAGS += -DOLD
-endif
-
-ifdef OPENMP
-CXXFLAGS += -fopenmp
-LDFLAGS  += -fopenmp
 endif
 
 LDFLAGS  += -g
@@ -108,18 +121,12 @@ CPPFLAGS += -MMD \
             -DFLOAT=$(FLOAT) \
             -DNCOMP=$(NCOMP) \
             -DNAME=phi4$(SUFFIX)
-ifdef SIMD
-CPPFLAGS += -DSIMD=$(SIMD)
-ifdef CACHE
-CPPFLAGS += -DCACHE=1
-endif
-endif
 
 EXEC      = ../phi4$(SUFFIX)
 MAIN      = phi4$(SUFFIX).o
-OBJECTS   = sweep$(SIMD_SUFFIX)$(SUFFIX).o \
-            random$(SIMD_SUFFIX)$(SUFFIX).o
-ifdef SIMD
+OBJECTS   = sweep$(SRC_SUFFIX)$(SUFFIX).o \
+            random$(SRC_SUFFIX)$(SUFFIX).o
+ifneq ($(SIMD),)
 OBJECTS  += simd$(CC_SUFFIX).o
 endif
 TOBJECTS  = $(subst .cpp,.o,$(wildcard *_test.cpp)) gtest-all.o
