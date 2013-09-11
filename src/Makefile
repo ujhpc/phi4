@@ -101,7 +101,7 @@ endif
 
 # Custom architecture
 ifneq ($(ARCH),native)
-SUFFIX := $(SUFFIX)-$(INS)
+SUFFIX := $(SUFFIX)-$(ARCH)
 endif
 
 # Custom optimization
