@@ -184,9 +184,11 @@ int main(int argc, char* argv[]) {
   MagnetisationMeasurer<Field::n_components> magnetisation;
   accepted = 0;
 
-  FILE* fmag;
-  if (NULL == (fmag = fopen(mag_file_name.c_str(), "w"))) {
-    throw("cannot open file `" + mag_file_name + "' for  writing");
+  FILE* fmag = NULL;
+  if (n_prod) {
+    if ((fmag = fopen(mag_file_name.c_str(), "w")) == NULL) {
+      throw("cannot open file `" + mag_file_name + "' for  writing");
+    }
   }
 
   // Main simulation loop /////////////////////////////////////////////////////
