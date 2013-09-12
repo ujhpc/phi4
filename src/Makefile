@@ -29,6 +29,8 @@ SED   := sed
 MV    := mv
 OS    := $(shell uname -s)
 
+COMPILERS := gcc-4.9 icc clang
+
 # Architecture
 CPPFLAGS += -march=$(ARCH)
 
@@ -147,21 +149,19 @@ DEPEND    = $(subst .o,.d,$(MAIN)) \
 
 all: $(EXEC)
 
-time:; $(EXEC) -t 1000
+time:; $(EXEC) -b -t 1000
 
-time-all:
-	@for cc in gcc-4.9 icc clang; do \
-		make --no-print-directory CC=$$cc SIMD=4 ARCH=corei7 time; \
-		make --no-print-directory CC=$$cc SIMD=8 ARCH=corei7-avx time; \
-		make --no-print-directory CC=$$cc SIMD=8 ARCH=core-avx2 time; \
+define recurse
+$1:
+	@for cc in $$(COMPILERS); do \
+		make --no-print-directory CC=$$$$cc SIMD=4 ARCH=corei7 $2; \
+		make --no-print-directory CC=$$$$cc SIMD=8 ARCH=corei7-avx $2; \
+		make --no-print-directory CC=$$$$cc SIMD=8 ARCH=core-avx2 $2; \
 	done
+endef
 
-build-all:
-	@for cc in icc gcc-4.9 clang; do \
-		make --no-print-directory CC=$$cc SIMD=4 ARCH=corei7; \
-		make --no-print-directory CC=$$cc SIMD=8 ARCH=corei7-avx; \
-		make --no-print-directory CC=$$cc SIMD=8 ARCH=core-avx2; \
-	done
+$(eval $(call recurse,time-all,time))
+$(eval $(call recurse,build-all,))
 
 $(EXEC): $(MAIN) $(OBJECTS)
 	$(CXX) -o $(EXEC) $^ $(LDFLAGS)

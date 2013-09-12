@@ -38,6 +38,10 @@ int main(int argc, char* argv[]) {
   cmdline::parser cl;
   cl.footer(FILE_NAME " ...");
 
+  cl.add("verbose", 'v', "be verbose");
+#ifdef __linux__
+  cl.add("benchmark", 'b', "show time benchmark");
+#endif
 #ifdef _OPENMP
   cl.add<int>("threads", 0, "number of OpenMP threads", false, 0);
 #endif
@@ -104,28 +108,33 @@ int main(int argc, char* argv[]) {
         cl.get<Float>("i-Lambda"),
   };
 
-  std::cerr << "# Dimensions " << DIM << std::endl;
-  std::cerr << "# Components " << Field::n_components << std::endl;
-  std::cerr << "# Float " << cmdline::detail::readable_typename<Float>()
-            << std::endl;
 #ifdef _OPENMP
   if (cl.exist("threads")) {
     omp_set_num_threads(cl.get<int>("threads"));
   }
   const int n_threads = omp_get_max_threads();
-  std::cerr << "# OpenMP " << n_threads << " threads" << std::endl;
 #else
   const int n_threads = 1;
-  std::cerr << "# No OpenMP" << std::endl;
-#endif
-#ifdef SIMD
-  std::cerr << "# SIMD " << SIMD << " elements" << std::endl;
-#else
-  std::cerr << "# No SIMD" << std::endl;
 #endif
 
-  // Dump command line parameters
-  std::cerr << cl;
+  if (cl.exist("verbose")) {
+    std::cerr << "# Dimensions " << DIM << std::endl;
+    std::cerr << "# Components " << Field::n_components << std::endl;
+    std::cerr << "# Float " << cmdline::detail::readable_typename<Float>()
+              << std::endl;
+#ifdef _OPENMP
+    std::cerr << "# OpenMP " << n_threads << " threads" << std::endl;
+#else
+    std::cerr << "# No OpenMP" << std::endl;
+#endif
+#ifdef SIMD
+    std::cerr << "# SIMD " << SIMD << " elements" << std::endl;
+#else
+    std::cerr << "# No SIMD" << std::endl;
+#endif
+    // Dump command line parameters
+    std::cerr << cl;
+  }
 
   std::string mag_file_name(FILE_NAME ".");
   mag_file_name += cl.get<std::string>("tag");
@@ -166,7 +175,7 @@ int main(int argc, char* argv[]) {
   clock_gettime(CLOCK_REALTIME, &stop);
   double ns =
       1.0e9 * (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec);
-  std::cerr << "termalisation took " << ns << " ns" << std::endl;
+  std::cerr << "termalisation took " << (ns / 1.0e9) << " s" << std::endl;
   std::cerr << "that makes "
             << ns / (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term)
             << " ns per update" << std::endl;
