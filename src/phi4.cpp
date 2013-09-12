@@ -165,8 +165,7 @@ int main(int argc, char* argv[]) {
 #ifdef __linux__
   clock_gettime(CLOCK_REALTIME, &stop);
   double ns = 1.0e9 * stop.tv_sec + stop.tv_nsec;
-  std::cerr << "termalisation took " << ns << " ns"
-            << std::endl;
+  std::cerr << "termalisation took " << ns << " ns" << std::endl;
   std::cerr << "that makes"
             << ns / (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term)
             << "ns per update" << std::endl;

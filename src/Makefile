@@ -58,7 +58,7 @@ ifdef SIMD
 LDFLAGS  += -lsvml
 endif
 
-CXX := $(subst cc,c++,$(subst gcc,g++,$(subst icc,icpc,$(CC))))
+CXX := $(subst cc,c++,$(subst gcc,g++,$(subst icc,icpc,$(subst clang,clang++,$(CC)))))
 
 # define executable suffix
 SUFFIX := -$(NCOMP)nc-$(DIM)d-$(FLOAT)
@@ -135,6 +135,22 @@ DEPEND    = $(subst .o,.d,$(MAIN)) \
             $(subst .o,.d,$(TESTS_OBJECTS))
 
 all: $(EXEC)
+
+time:; $(EXEC) -t 1000
+
+time-all:
+	@for cc in gcc-4.9 icc clang; do \
+		make --no-print-directory CC=$$cc SIMD=4 ARCH=corei7 time; \
+		make --no-print-directory CC=$$cc SIMD=8 ARCH=corei7-avx time; \
+		make --no-print-directory CC=$$cc SIMD=8 ARCH=core-avx2 time; \
+	done
+
+build-all:
+	@for cc in icc gcc-4.9 clang; do \
+		make --no-print-directory CC=$$cc SIMD=4 ARCH=corei7; \
+		make --no-print-directory CC=$$cc SIMD=8 ARCH=corei7-avx; \
+		make --no-print-directory CC=$$cc SIMD=8 ARCH=core-avx2; \
+	done
 
 $(EXEC): $(MAIN) $(OBJECTS)
 	$(CXX) -o $(EXEC) $^ $(LDFLAGS)
