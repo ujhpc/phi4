@@ -27,12 +27,13 @@ FLOAT := double
 endif
 SED   := sed
 MV    := mv
+OS    := $(shell uname -s)
 
 # Architecture
 CPPFLAGS += -march=$(ARCH)
 
 # ICC specif flags
-ifeq ($(CC),icc)
+ifeq ($(findstring $(CC),icc),icc)
 CPPFLAGS += -fno-alias -g \
             -vec-report \
             -fp-model fast=2 \
@@ -51,11 +52,21 @@ CPPFLAGS += -O$(O) \
             -g \
             -funsafe-math-optimizations \
             -ffast-math
+# non-ICC use ICC svml on SIMD
+ifneq ($(SIMD),)
+LDFLAGS  += -lsvml
+endif
+# fix Clang on Linux compilation
+ifeq ($(findstring $(CC),clang),clang)
+ifeq ($(OS),Linux)
+CPPFLAGS += -D__extern_always_inline=inline
+endif
+endif
 endif
 
-# non-ICC use ICC svml on SIMD
-ifdef SIMD
-LDFLAGS  += -lsvml
+# link to rt to get realtime clock
+ifeq ($(OS),Linux)
+LDFLAGS  += -lrt
 endif
 
 CXX := $(subst cc,c++,$(subst gcc,g++,$(subst icc,icpc,$(subst clang,clang++,$(CC)))))
