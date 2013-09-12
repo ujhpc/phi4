@@ -6,9 +6,8 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-#ifdef __LINUX__
+#ifdef __linux__
 #include <time.h>
-#include "linux_time.h"
 #endif
 #include "cmdline.h"
 
@@ -148,11 +147,9 @@ int main(int argc, char* argv[]) {
   long int accepted = 0;
   Partition partition;
 
-#ifdef __LINUX__
-  LinuxTimer timer(CLOCK_MONOTONIC);
-  if (timer)
-    timer.print_res();
-  timer.start();
+#ifdef __linux__
+  struct timespec start, stop;
+  clock_gettime(CLOCK_REALTIME, &start);
 #endif
 
   // Termalisation loop ///////////////////////////////////////////////////////
@@ -165,13 +162,13 @@ int main(int argc, char* argv[]) {
 #endif
   }
 
-#ifdef __LINUX__
-  timer.stop();
-  std::cerr << "termalisation took " << timer.ellapsed_time() << " ns"
-            << std::endl();
+#ifdef __linux__
+  clock_gettime(CLOCK_REALTIME, &stop);
+  double ns = 1.0e9 * stop.tv_sec + stop.tv_nsec;
+  std::cerr << "termalisation took " << ns << " ns"
+            << std::endl;
   std::cerr << "that makes"
-            << (double)timer.ellapsed_time() /
-                   (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term)
+            << ns / (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term)
             << "ns per update" << std::endl;
 #endif
 
