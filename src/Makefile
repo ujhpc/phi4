@@ -29,29 +29,18 @@ SED   := sed
 MV    := mv
 OS    := $(shell uname -s)
 
-COMPILERS := gcc-4.9 icc clang
+COMPILERS := gcc-4.9 gcc-4.8 clang
 
 # Architecture
 CPPFLAGS += -march=$(ARCH)
 
 # ICC specif flags
 ifeq ($(findstring $(CC),icc),icc)
-CPPFLAGS += -fno-alias -g \
-            -vec-report \
-            -fp-model fast=2 \
-            -opt-ra-region-strategy=block
-
-# change O3 to Intels -fast flavor
-ifeq ($(O),3)
-CFLAGS   += -fast
-else
-CFLAGS   += -O$(O)
-endif
-
+CPPFLAGS += -O$(O) -fno-alias -g \
+            -fp-model fast=2
 # GCC & Clang flags
 else
-CPPFLAGS += -O$(O) \
-            -g \
+CPPFLAGS += -O$(O) -g \
             -funsafe-math-optimizations \
             -ffast-math
 # non-ICC use ICC svml on SIMD
@@ -61,7 +50,8 @@ endif
 # fix Clang on Linux compilation
 ifeq ($(findstring $(CC),clang),clang)
 ifeq ($(OS),Linux)
-CPPFLAGS += -D__extern_always_inline=inline
+CPPFLAGS += -D__extern_always_inline=inline \
+            -fomit-frame-pointer
 endif
 endif
 endif
