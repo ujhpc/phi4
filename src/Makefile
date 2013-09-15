@@ -139,16 +139,19 @@ DEPEND    = $(subst .o,.d,$(MAIN)) \
 
 all: $(EXEC)
 
-time:; $(EXEC) -b -t 1000
+time:
+	@echo -n "$(CC)	"
+	@echo -n "SIMD=$(SIMD)	"
+	@$(EXEC) --time -t 1000
 
 define recurse
 $1:
 	@for cc in $$(COMPILERS); do \
 		$$(MAKE) --no-print-directory CC=$$$$cc SIMD=4 ARCH=corei7 $2; \
-		$$(MAKE) --no-print-directory CC=$$$$cc SIMD=8 ARCH=corei7-avx $2; \
-		$$(MAKE) --no-print-directory CC=$$$$cc SIMD=8 ARCH=core-avx2 $2; \
 		$$(MAKE) --no-print-directory CC=$$$$cc SIMD=4 ARCH=corei7 OLD=1 $2; \
+		$$(MAKE) --no-print-directory CC=$$$$cc SIMD=8 ARCH=corei7-avx $2; \
 		$$(MAKE) --no-print-directory CC=$$$$cc SIMD=8 ARCH=corei7-avx OLD=1 $2; \
+		$$(MAKE) --no-print-directory CC=$$$$cc SIMD=8 ARCH=core-avx2 $2; \
 	done
 endef
 

@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
 
   cl.add("verbose", 'v', "be verbose");
 #ifdef __linux__
-  cl.add("benchmark", 'b', "show time benchmark");
+  cl.add("time", 0, "output single line benchmark");
 #endif
 #ifdef _OPENMP
   cl.add<int>("threads", 0, "number of OpenMP threads", false, 0);
@@ -85,16 +85,20 @@ int main(int argc, char* argv[]) {
   int n_prod = cl.get<int>("sweep");
   int seed = cl.get<int>("seed");
 
-  int dim[DIM] = { cl.get<int>("n-x"), cl.get<int>("n-y"),
+  int dim[DIM] = {
+    cl.get<int>("n-x"),
+    cl.get<int>("n-y"),
 #if DIM >= 3
-                   cl.get<int>("n-z"),
+    cl.get<int>("n-z"),
 #endif
   };
 
 #ifdef CACHE
-  int block_dim[DIM] = { cl.get<int>("b-x"), cl.get<int>("b-y"),
+  int block_dim[DIM] = {
+    cl.get<int>("b-x"),
+    cl.get<int>("b-y"),
 #if DIM >= 3
-                         cl.get<int>("b-z"),
+    cl.get<int>("b-z"),
 #endif
   };
 
@@ -175,13 +179,36 @@ int main(int argc, char* argv[]) {
   clock_gettime(CLOCK_REALTIME, &stop);
   double ns =
       1.0e9 * (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec);
-  std::cerr << "termalisation took " << (ns / 1.0e9) << " s" << std::endl;
-  std::cerr << "that makes "
-            << ns / (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term)
-            << " ns per update" << std::endl;
+  if (cl.exist("verbose")) {
+    std::cerr << "termalisation took " << (ns / 1.0e9) << " s" << std::endl;
+    std::cerr << "that makes "
+              << ns / (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term)
+              << " ns per update" << std::endl;
+  }
+  if (cl.exist("time")) {
+#ifdef __AVX2__
+    std::cout << "AVX2\t";
+#elif __AVX__
+    std::cout << "AVX\t";
+#elif __SSE4_2__
+    std::cout << "SSE4.2\t";
+#elif __SSE4_1__
+    std::cout << "SSE4.1\t";
+#elif __SSE3__
+    std::cout << "SSE3\t";
+#elif __SSE2__
+    std::cout << "SSE2\t";
+#endif
+    std::cout << (ns / 1.0e9) << "\t";
+    std::cerr << ns / (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term);
+#ifdef OLD
+    std::cout << "\t(old)";
+#endif
+    std::cout << std::endl;
+  }
 #endif
 
-  if (n_term > 0)
+  if (cl.exist("verbose") && n_term > 0)
     std::cerr << "acceptance "
               << (double)accepted /
                      (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term)
@@ -223,7 +250,7 @@ int main(int argc, char* argv[]) {
       fflush(fmag);
   }
 
-  if (n_prod > 0)
+  if (cl.exist("verbose") && n_prod > 0)
     std::cerr << "acceptance "
               << (double)accepted /
                      (block_sweeps * N_HIT * (double)Ind::n_sites() * n_prod)
