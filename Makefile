@@ -17,5 +17,5 @@ clean-all:
 %::
 	@for dir in $(subdirs); do \
 		[ -t 1 ] && printf "$(bold)## %s$(none)\n" "$$dir" || echo "## $$dir"; \
-		make --no-print-directory -C $$dir $*; \
+		$(MAKE) --no-print-directory -C $$dir $*; \
 	done

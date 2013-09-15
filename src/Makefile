@@ -154,9 +154,11 @@ time:; $(EXEC) -b -t 1000
 define recurse
 $1:
 	@for cc in $$(COMPILERS); do \
-		make --no-print-directory CC=$$$$cc SIMD=4 ARCH=corei7 $2; \
-		make --no-print-directory CC=$$$$cc SIMD=8 ARCH=corei7-avx $2; \
-		make --no-print-directory CC=$$$$cc SIMD=8 ARCH=core-avx2 $2; \
+		$$(MAKE) --no-print-directory CC=$$$$cc SIMD=4 ARCH=corei7 $2; \
+		$$(MAKE) --no-print-directory CC=$$$$cc SIMD=8 ARCH=corei7-avx $2; \
+		$$(MAKE) --no-print-directory CC=$$$$cc SIMD=8 ARCH=core-avx2 $2; \
+		$$(MAKE) --no-print-directory CC=$$$$cc SIMD=4 ARCH=corei7 OLD=1 $2; \
+		$$(MAKE) --no-print-directory CC=$$$$cc SIMD=8 ARCH=corei7-avx OLD=1 $2; \
 	done
 endef
 
