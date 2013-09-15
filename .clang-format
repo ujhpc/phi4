@@ -1,0 +1,7 @@
+---
+BasedOnStyle: Chromium
+Standard: C++03
+Cpp11BracedListStyle: false
+AlwaysBreakTemplateDeclarations: false
+# AllowShortIfStatementsOnASingleLine: true
+...
