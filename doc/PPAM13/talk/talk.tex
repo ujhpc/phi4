@@ -1,0 +1,558 @@
+\documentclass{beamer}
+\usepackage{multirow}
+\usepackage{listings}
+
+\input {header.tex}
+\renewcommand{\H}{\mathcal{H}}
+\renewcommand{\a}[1]{\v{a}_{#1}}
+\renewcommand{\L}{\mathcal{L}}
+
+\newcommand{\vphi}{\vec{\varphi}}
+\newcommand{\vi}{{\vec{i}}}
+\newcommand{\vj}{{\vec{j}}}
+\newcommand{\vmu}{\vec{\mu}}
+
+\newcommand{\redblack}[3]{ 
+\pgfmathtruncatemacro{\odd}{Mod(#1+#2,2)}
+   \ifnum \odd=0
+      \fill[fill=black] (#1,#2) circle[radius=#3];
+   \else
+      \fill[fill=red] (#1,#2) circle[radius=#3];
+   \fi
+}
+
+\newcommand{\fillblockgray}[2]{
+\pgfmathtruncatemacro\llx{\bksize*(#1)-2}
+\pgfmathtruncatemacro\lly{\bksize*(#2)-2}
+\pgfmathtruncatemacro\urx{\bksize*(#1+1)+1}
+\pgfmathtruncatemacro\ury{\bksize*(#2+1)+1}
+\foreach \x in {\llx, ..., \urx}
+  \foreach \y in {\lly,...,\ury} {
+    \fill[craneorange] (\x, \y) circle(.25);
+  }
+}
+
+\newcommand{\npartition}[3]{
+\pgfmathtruncatemacro\row{Mod(#2,4)}
+\ifnum \row = 0
+   \pgfmathtruncatemacro\num{Mod(#1,4)}
+\else \ifnum \row  = 1
+   \pgfmathtruncatemacro\num{Mod(#1,4)+4}
+\else \ifnum \row  = 2
+   \pgfmathtruncatemacro\num{Mod(Mod(#1,4)+2,4)}
+\else \ifnum \row  = 3
+   \pgfmathtruncatemacro\num{Mod(Mod(#1,4)+2,4)+4}
+\fi
+\fi
+\fi
+\fi
+\ifnum \num = #3
+\fill[black] (#1, #2) circle(0.35);
+\fi
+
+}
+
+\newcommand{\markpartition}[3]{
+\pgfmathtruncatemacro\llx{\bksize*(#1)}
+\pgfmathtruncatemacro\lly{\bksize*(#2)}
+\pgfmathtruncatemacro\urx{\bksize*(#1+1)-1}
+\pgfmathtruncatemacro\ury{\bksize*(#2+1)-1}
+\foreach \x in {\llx, ..., \urx}
+  \foreach \y in {\lly,...,\ury} {
+    \npartition{\x}{\y}{#3}
+  }
+}
+
+
+\newcommand{\partition}[3]{
+\pgfmathtruncatemacro\lchalf{\bksize / 2}
+      \pgfmathtruncatemacro\my{Mod(#1, 2)}
+      \ifnum \my = 0
+        \pgfmathtruncatemacro\ny{Mod(#1, 4)}
+        \ifnum \ny = 2
+          \pgfmathtruncatemacro\mx{Mod(#2+2, 4)}
+        \else
+          \pgfmathtruncatemacro\mx{Mod(#2, 4)}
+        \fi
+        \ifnum \mx = 0
+            \fill[red] (#2, #1) circle(#3);
+          \fi
+         \fi         
+       }
+
+
+\definecolor{colorone}{HTML}{006633} % default 116699
+\definecolor{colortwo}{HTML}{DDFF99} % default CCCCCC
+\def\bksize{8}
+\def\bkcount{4}
+\def\lcsize{5}
+
+\lstset{basicstyle=\small}
+
+
+\title{GPU implementation of the Monte-Carlo simulations of the extended Ginzburg-Landau model.}
+\date{10 September 2013}
+\author{Piotr Bialas}
+\institute{Faculty of Physics, Astronomy and Computer Science, Jagiellonian University \\
+Department of Game Technology \\
+\vspace{1em}
+\includegraphics[height=0.18\paperheight]{../../UJ-logo}}
+\begin{document}
+
+\begin{frame}
+\titlepage
+\vfill
+J.~Kowal, A.~Strzelecki
+\vfill
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Outline}
+\tableofcontents
+\end{frame}
+
+\section{The model}
+
+
+\begin{frame}
+\frametitle{Ginsburg-Landau model ($\vphi^4$)}
+\begin{equation*}\label{eq:ham}\begin{split}
+\H[\varphi]&=\sum_{\vi}\Biggl(
+\frac{1}{2}\sum_{\mu=1}^d(\vphi(x_\vi+\a{\mu})-\vphi(x_\vi))^2\\
+&\phantom{=\sum_{\vi}\bigl(}+\frac{\mu^2}{2}|\vphi(x_{\vi})|^2+
+\frac{g}{24}(|\vphi(x_{\vi})|^2)^2\\
+&\phantom{=\sum_{\vi}\bigl(}+
+\frac{1}{2\Lambda}\Bigl(\sum_{\mu=1}^d
+(\vphi(x_\vi+\a{\mu})-2\vphi(x_{\vi})+\vphi(x_\vi-\a\mu))\Bigr)^2\Biggr).
+\end{split}
+\end{equation*}
+\begin{equation*}
+P[\varphi]\propto \exp\left(-H[\varphi]\right)
+\end{equation*}
+\end{frame}
+
+\begin{frame}
+\frametitle{Monte-Carlo}
+\[
+\av{O}=\mathcal{Z}^{-1}\int\mathcal{D}\phi 
+O\bigl(\v\phi(x)\bigr)
+\exp
+\biggl(
+-\mathcal{H}\bigl[\v\phi(x)\bigr]
+\biggr)
+\]
+
+
+\[
+\av{O}\approx\frac{1}{N}\sum O(\v\phi_i)
+\]
+
+$\phi_i$ idenpendent samples drawn from  distribution
+
+\[
+\mathcal{Z}^{-1}
+\exp
+\biggl(
+-\mathcal{H}\bigl[\v\phi\bigr]
+\biggr)
+\]
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Metropolis}
+
+\begin{align*}
+\phi_{new}(x_i)&=\phi(x_i)+\epsilon\\
+\Delta\L&=\H[\v\phi_{new}]-\H[\v\phi]
+\end{align*}
+We assign  $\phi(x_i)=\phi_{new}(x_i)$ with probability
+\[
+\min\bigl(1,\exp(-\Delta\H)\bigr)
+\]
+
+\[
+r < exp(-\Delta\H) ,\qquad r \in [0,1)  \text{ random}
+\]
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Ginsburg-Landau model ($\vphi^4$)}
+\begin{tikzpicture} 
+%\pgfmathtruncatemacro\lcsize{\bksize * \bkcount}
+\def\lcsize{8}
+\pgfmathtruncatemacro\lcsizem{\lcsize - 1}
+\pgfmathtruncatemacro\lcsizeb{\lcsize - \bksize}
+\pgfmathtruncatemacro\bksizea{\bksize - 2}
+\pgfmathtruncatemacro\bksizeb{\bksize - 1}
+\pgfmathtruncatemacro\bksizec{\bksize * 2}
+\pgfmathtruncatemacro\bksizem{\bksizec - 1}
+\pgfmathtruncatemacro\bksized{\bksizec + 1}
+\draw[very thin, gray] (-.5, -.5) grid (\bksize - .5, \bksize - .5);
+\foreach \x in {0,...,\lcsizem} 
+\foreach \y in {0, ...,\lcsizem}
+\draw[fill=white,draw=black]  (\x, \y) circle[radius=0.1];
+
+\coordinate (c) at (4,4);
+
+\node at (c)  [circle,fill=red,draw=black] {};
+
+\def\coronaa{(0,1), (0,-1), (1,0), (-1,0)}
+\def\coronab{(0,2), (0,-2), (2,0), (-2,0)}
+\def\coronac{(1,1), (1,-1), (-1,-1), (-1,1)}
+
+\foreach \p in \coronaa {
+\path (c) +\p node  [circle,fill=gray]    {};
+}
+
+\foreach \p in \coronab {
+\path (c) +\p node  [circle,fill=gray]    {};
+}
+
+\foreach \p in \coronac {
+\path (c) +\p node  [circle,fill=gray]    {};
+}
+
+
+\end{tikzpicture}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Parallel partitions}
+\begin{tikzpicture}[scale=0.75]
+
+% \clip[rounded corners=0cm] (-1, -1) rectangle (\bksize + 1, \bksize + 1);
+
+% \draw[help lines] (-1, -1) grid (\bksize + 1, \bksize + 1);
+
+\pgfmathtruncatemacro\bksizem{\bksize - 1}
+
+% % lattice points
+ \foreach \x in {0, ..., \bksizem}
+   \foreach \y in {0, ..., \bksizem} {
+     \pgfmathtruncatemacro\four{Mod(\y,4)}
+     \pgfmathtruncatemacro\eight{Mod(\x,4)+4*Mod(\y,2)}
+     \ifnum \four<2
+     \pgfmathtruncatemacro\eight{Mod(\x,4)+4*Mod(\y,2)}
+     \node[draw,rectangle,minimum size=0.6cm] at (\x,\y)  {\eight};
+     \else
+     \pgfmathtruncatemacro\eight{Mod(\x+2,4)+4*Mod(\y,2)}
+     \node[draw,rectangle,minimum size=0.6cm] at (\x,\y)  {\eight};
+     \fi
+}
+% neighborhood
+\def\neighborhood{--
+  ++( 0,  -.5)-- ++( 1,  0)-- ++( 0, -.5 )-- ++(0, -.5)-- ++( 1, 0  )--
+  ++( 0, -1.0)-- ++( 1,  0)-- ++( 0,  1.0)-- ++(1, 0  )-- ++( 0, 1.0)--
+  ++( 1,  0  )-- ++( 0,  1)-- ++(-1,  0  )-- ++(0, 1  )-- ++(-1, 0  )--
+  ++( 0,  1  )-- ++(-1,  0)-- ++( 0, -1  )--
+  ++(-1,  0  )-- ++( 0, -1)-- ++(-1,  0  )-- ++(0, -.6)}
+
+\pgfmathtruncatemacro\lchalf{\bksize / 2}
+
+
+% main center neighborhood
+\path[draw=red,  rounded corners=.1cm, shorten >=2pt, line width=.75mm]
+(\lchalf - 2.5, \lchalf) \neighborhood;
+
+\end{tikzpicture}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Random number generation}
+\begin{itemize}
+\item Generating random number involves changing state.
+\item Two processes cannot do it at the same time.  
+\item Every process/thread  must have his own random number generator. 
+\item We use Hybrid Tausworthe generator from GPU GEMS III.
+\end{itemize}
+\end{frame}
+
+
+\section{CUDA implementation}
+
+
+
+
+\begin{frame}
+\frametitle{Memory hierarchy}
+\begin{itemize}
+\item Max throughput
+\begin{itemize}
+\item 32 FMAD per cycle
+\begin{itemize}
+\item 12 bytes in 4 bytes out
+\item 12x 32x15x1401MHz
+\item 8.07 TB/s in 2.67 TB/s out
+\end{itemize}
+\end{itemize}
+\item Registers can sustain it.
+\item Shared memory
+\begin{itemize}
+\item 4 x 32 x 15 x 1401MHz/2 = 1.3TB/s
+\end{itemize}
+\item Global memory
+\begin{itemize}
+\item 156GB/s
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+
+\begin{tikzpicture}[scale=0.25]
+
+\pgfmathtruncatemacro\lcsize{\bksize * \bkcount}
+\pgfmathtruncatemacro\lcsizem{\lcsize - 1}
+\pgfmathtruncatemacro\lcsizeb{\lcsize - \bksize}
+
+
+\draw[very thin, gray] (-.5, -.5) grid (\lcsize - .5, \lcsize - .5);
+
+\foreach \x in {0, \bksize, ..., \lcsizeb}
+  \foreach \y in {0, \bksize, ..., \lcsizeb} {
+    \pgfmathtruncatemacro\n{Mod(\x/\bksize, 2)+2 * Mod(\y/\bksize, 2)+1}
+    \draw[colorone, xshift=\x cm, yshift=\y cm, rounded corners=2pt]
+      (-.4, -.4) rectangle
+      node[red, fill opacity=0, anchor=center, font=\Huge\bfseries\sffamily]
+      {\n} (\bksize - .6, \bksize - .6);
+  }
+
+\foreach \x in {0, ..., \lcsizem}
+  \foreach \y in {0, ..., \lcsizem}{
+ 
+    \path[draw=black, fill=white] (\x, \y) circle(.25);
+}
+
+
+\only<1>{\fillblockgray{0}{0}
+\markpartition{0}{0}{0}
+\fillblockgray{0}{2}
+\markpartition{0}{2}{0}
+\fillblockgray{2}{0}
+\markpartition{2}{0}{0}
+\fillblockgray{2}{2}
+\markpartition{2}{2}{0}}
+
+\only<2>{\fillblockgray{0}{0}
+\markpartition{0}{0}{1}
+\fillblockgray{0}{2}
+\markpartition{0}{2}{1}
+\fillblockgray{2}{0}
+\markpartition{2}{0}{1}
+\fillblockgray{2}{2}
+\markpartition{2}{2}{1}}
+
+\only<3>{\fillblockgray{0}{0}
+\markpartition{0}{0}{2}
+\fillblockgray{0}{2}
+\markpartition{0}{2}{2}
+\fillblockgray{2}{0}
+\markpartition{2}{0}{2}
+\fillblockgray{2}{2}
+\markpartition{2}{2}{2}}
+
+\only<4>{
+\fillblockgray{1}{0}
+\markpartition{1}{0}{0}
+\fillblockgray{1}{2}
+\markpartition{1}{2}{0}
+\fillblockgray{3}{0}
+\markpartition{3}{0}{0}
+\fillblockgray{3}{2}
+\markpartition{3}{2}{0}}
+
+\only<5>{
+\fillblockgray{1}{0}
+\markpartition{1}{0}{1}
+\fillblockgray{1}{2}
+\markpartition{1}{2}{1}
+\fillblockgray{3}{0}
+\markpartition{3}{0}{1}
+\fillblockgray{3}{2}
+\markpartition{3}{2}{1}}
+
+
+\only<6>{
+\fillblockgray{1}{0}
+\markpartition{1}{0}{2}
+\fillblockgray{1}{2}
+\markpartition{1}{2}{2}
+\fillblockgray{3}{0}
+\markpartition{3}{0}{2}
+\fillblockgray{3}{2}
+\markpartition{3}{2}{2}}
+
+
+\end{tikzpicture}
+
+\visible<1>{\tiny M.~Weigel, J.~Comput.~Phys. 231 (2012) 3064.}
+\end{frame}
+
+
+\section{CPU implementation}
+
+\begin{frame}
+\frametitle{CPU}
+\begin{itemize}
+\item First measurements shoved over 300 fold  performance increase over CPU!
+\item Not fair.
+\item Compared to a non--parallel, non-vectorized program.
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{CPU implementation}
+\begin{itemize}
+\item We use same structure as on GPU.
+\item We use OpenMP to distribute lattice blocks across cores.
+\item In each block we use SSE instructions to process 4 or 8 lattice points in parallel. 
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+
+\begin{tikzpicture}[scale=0.25]
+
+\pgfmathtruncatemacro\lcsize{\bksize * \bkcount}
+\pgfmathtruncatemacro\lcsizem{\lcsize - 1}
+\pgfmathtruncatemacro\lcsizeb{\lcsize - \bksize}
+
+
+\draw[very thin, gray] (-.5, -.5) grid (\lcsize - .5, \lcsize - .5);
+
+\foreach \x in {0, \bksize, ..., \lcsizeb}
+  \foreach \y in {0, \bksize, ..., \lcsizeb} {
+    \pgfmathtruncatemacro\n{Mod(\x/\bksize, 2)+2 * Mod(\y/\bksize, 2)+1}
+    \draw[colorone, xshift=\x cm, yshift=\y cm, rounded corners=2pt]
+      (-.4, -.4) rectangle
+      node[red, fill opacity=0, anchor=center, font=\Huge\bfseries\sffamily]
+      {\n} (\bksize - .6, \bksize - .6);
+  }
+
+\foreach \x in {0, ..., \lcsizem}
+  \foreach \y in {0, ..., \lcsizem}{
+ 
+    \path[draw=black, fill=white] (\x, \y) circle(.25);
+}
+
+
+\only<1>{\fillblockgray{0}{0}
+\markpartition{0}{0}{0}
+\fillblockgray{0}{2}
+\markpartition{0}{2}{0}
+\fillblockgray{2}{0}
+\markpartition{2}{0}{0}
+\fillblockgray{2}{2}
+\markpartition{2}{2}{0}}
+\end{tikzpicture}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{SSE/AVX}
+\begin{itemize}
+\item Modern Intel and AMD processors have vector operations.
+\begin{itemize} 
+\item Streaming Side Extension  (SSE) Four single precision operations.
+\item Advanced Vector Extensions (AVX) Eight  single precision operations.
+\item Xeon $\phi$ 16  singleprecision operations.
+\end{itemize}
+\item Not using vector operations wastes up to 7/8 of CPU power!.  
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{SSE/AVX}
+\begin{itemize}
+\item Programming  with vector operations can be done
+\begin{itemize}
+\item Asembler :)
+\item Instrinsincs
+\item Vector types
+\item Compiler directives (Intel 13)
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{AVX/SSE  library}
+  \begin{itemize}
+    \item Custom class wrapping \texttt{vector\_size}
+    \item Drop in vector replacement for scalar type
+    \item Defines all operators available for scalar types
+    \item Existing function just take vector arguments now
+    \item Rest remains the same \\
+    \texttt{action -= phi2*(quadratic\_coef+gr*phi2)}
+  \end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame} 
+
+\frametitle{Performance}
+
+\begin{center}
+\def\arraystretch{1.1}%
+\setlength{\tabcolsep}{0.25em}
+\begin{tabular}{ r| r r r | r r r| r }
+           & \multicolumn{3}{c|}{GPU\footnotemark} &
+             \multicolumn{3}{c|}{CPU\footnotemark}  &  \\
+    size   & time(ns) & Gflops & Gexps &time(ns) & Gflops & Glogs & boost \\
+  \hline
+   $32^3$  & 1.26     &  27.1 & 0.8 & 3.88    &  8.8 & 0.26 &  $3.1 \times$ \\
+   $64^3$  & 0.17     & 206.8 & 6.1 & 3.09    & 11.0 & 0.32 & $18.8 \times$ \\
+  $128^3$  & 0.13     & 273.0 & 8.0 & 3.31    & 10.3 & 0.30 & $26.5 \times$ \\
+  $256^3$  & 0.11     & 302.0 & 8.9 & 3.33    & 10.3 & 0.30 & $29.5 \times$ \\
+  \hline
+                      & \footnotesize peak & $\approx 1000$ &
+                      & \footnotesize peak & $\approx 160$ &
+\end{tabular}
+\end{center}
+\vfill
+\small
+$^1$\emph{GeForce GTX 470} \, 1.2 GHz, 1.25GB, 448 CUDA cores \\
+$^2$\emph{Intel Core i5-2400S} \, 2.5 GHz, 4 core, 6MB cache, SSE4.x/AVX
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Conclusions}
+
+\begin{frame}
+  \frametitle{Conclusions}
+  \begin{itemize}
+    \item GPU has more computing power.
+    \item GPU is more efficient: easier to reach closer to the peak.
+    \begin{itemize}
+      \item Possible thanks to the use of fast shared memory
+      \item Using cache is just not enough
+      \item Shared memory simplifies indexing
+    \end{itemize}
+    \item The CUDA (SIMT) execution model can be ported to CPU:
+    \begin{itemize}
+      \item No shared memory, only cache, little control
+      \item No gather/scatter vector load operations
+      \item Vector assembly from memory is a bottleneck
+      \item Half-wide only (128-bit) vector integer operations
+      \vspace{1em}
+      \item \emph{Xeon $\phi$} \&  \emph{Haswell} address (some) these issues
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\end{document}

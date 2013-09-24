@@ -1,0 +1,72 @@
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{calc}
+\usetikzlibrary{shadows}
+\usetikzlibrary{fit}
+
+\mode<presentation>
+{
+\usetheme{boxes}
+\usecolortheme{crane}
+%\usetheme{Warsaw}
+\setbeamercovered{transparent}
+}
+
+
+\usepackage[polish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{psfrag}
+\usepackage{graphicx}
+\usepackage{times}
+
+\usepackage{listings}
+
+
+\makeatletter
+\newenvironment{minsizebox}[2]{%
+    \pgfmathsetlength\@tempdima{#2}%
+    \pgfmathsetlength\pgf@yc{\pgfkeysvalueof{/pgf/inner ysep}}%
+    \advance\@tempdima by -2\pgf@yc
+    \begin{lrbox}{\@tempboxa}%
+        \begin{minipage}[t]{#1}%
+           \vspace{0pt}%
+}{%
+        \end{minipage}%
+    \end{lrbox}%
+    \ifdim\@tempdima>\dp\@tempboxa
+        \dp\@tempboxa=\@tempdima
+    \fi
+    \box\@tempboxa
+}
+\makeatother
+\tikzset{onslide/.code args={<#1>#2}{%
+  \only<#1>{\pgfkeysalso{#2}} % \pgfkeysalso doesn't change the path
+}}
+
+\newenvironment{pic}[1]{%
+\begin{center}\begin{tikzpicture}#1}{%
+\end{tikzpicture}
+\end{center}
+\end{lstlisting}}
+
+
+\newcommand{\listing}{\node[listing]{\begin{lstlisting}
+\end{lstlisting}
+}
+}
+
+
+\tikzset{common/.style={fill=white,draw=black,rounded corners=1mm}}
+\tikzset{listing/.style={fill=white,draw=black,font=\scriptsize,
+rounded corners=0.5mm,drop shadow}}
+\tikzset{title/.style={fill=white,font=\Large,rectangle, draw=black,
+drop shadow, minimum width=\textheight, minimum height=15mm,
+ rounded corners =3mm}}
+
+\tikzset{display/.style={fill=white,rectangle, draw=black,
+drop shadow, minimum width=8cm, minimum height=15mm,
+ rounded corners =3mm}}
+
+\renewcommand{\v}[1]{\vec{#1}}
+\newcommand{\av}[1]{\langle#1\rangle}

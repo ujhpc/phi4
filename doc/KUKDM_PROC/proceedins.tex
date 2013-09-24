@@ -184,7 +184,7 @@ generating the field configurations with probability proportional to
 $\exp(-H(\vphi))$.
 
 The  generation is done by the mean of the Metropolis
-algorithm. This amounts to sequentially updating all the points of the
+algorithm\cite{metropolis}. This amounts to sequentially updating all the points of the
 lattice. During each update we change the value of the field $\vphi$
 in on a single lattice point ($\vphi_i$ is a shorthand for $\vphi(x_\vi)$).
 \begin{equation}
@@ -722,10 +722,14 @@ architectures.
 
 \begin{thebibliography}{9}
 \bibitem{top500}{\tt http://www.top500.org/}
-\bibitem{spin1}Benjamin Block , Peter Virnau , Tobias Preis, Computer Physics Communications, Volume 181 2010 1549–1556.
+\bibitem{spin1}Benjamin Block , Peter Virnau , Tobias Preis, Computer Physics Communications, Volume 181 (2010) 1549–1556.
 \bibitem{spin2}Ezequiel E. Ferrero, Juan Pablo De Francesco, Nicolás Wolovick, Sergio A. Cannas. Computer Physics Communications, volume 183, 1578--1587, 2012
-\bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231}, 3064 (2012).
+\bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231},  (2012) 3064.
 \bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus Books Publishing (1998).
+\bibitem{metropolis}
+N.~Metropolis, A.W.~Rosenbluth, M.N.~Rosenbluth, A.H.~Teller, E. Teller,
+   J.~Chem.~Phys.~\textbf{21} (6) (1953) 1087--1092.\\
+J.J.~Binney, N.J. Dowrick, A.J.~Fisher, and M.E.J.~Newman ``The Theory of Critical Phenomena'', Oxford University Press (1993).
 \bibitem{Fermi} 
 ``NVIDIA's Next Generation CUDA ComputeArchitecture: Fermi'' \\
 \verb!http://www.nvidia.com/content/PDF/fermi_white_papers/!\\
