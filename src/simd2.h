@@ -121,7 +121,7 @@ template <typename T, int N> struct simd {
   // vector and scalar types are different.
   simd(scalar_t, char dummy = 0);
   /// Load from memory constructor
-  simd(scalar_t* ptr) : v(*(vector_t*)ptr) {}
+  simd(const scalar_t* ptr) : v(*(const vector_t*)ptr) {}
   /// Unsigned to signed constructor
   simd(uiscalar_t u, char dummy = 0) { v = simd<iscalar_t, N>((iscalar_t)u).v; }
   /// Gather
@@ -219,6 +219,10 @@ __simd_ctor(long long, double, 4)
 #endif
 #undef __simd_ctor_
 #undef __simd_ctor
+
+template <>
+inline simd<int, 8>::simd(const int* ptr)
+    : v((simd<int, 8>::vector_t)_mm256_loadu_ps((const float*)ptr)) {}
 
 // Add gather constructors
 #ifdef __AVX2__
