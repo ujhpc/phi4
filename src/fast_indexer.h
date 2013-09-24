@@ -2,26 +2,22 @@
 
 #include "iterator.h"
 
-template <int Dim, typename Site = int, typename Direction = int>
-class Indexer {
+template <int Dim, typename Site = int> class Indexer {
  public:
   enum {
     D = Dim
   };
   typedef Site coordinate_t[Dim];
   typedef Site site_t;
-  typedef Direction direction_t;
 
   typedef LatticeIterator<Dim> iterator;
 
-  static void init(const coordinate_t dim) {
+  static void init(const int dim[Dim]) {
     vols_[0] = 1;
-
     for (int i = 0; i < Dim; i++) {
       dims_[i] = dim[i];
       vols_[i + 1] = dims_[i] * vols_[i];
     }
-
     n_links_ = vols_[Dim] * Dim;
   }
 
@@ -29,10 +25,8 @@ class Indexer {
 
   static site_t site(const coordinate_t coord) {
     int s = 0;
-
     for (int i = 0; i < Dim; i++)
       s += vol(i) * coord[i];
-
     return s;
   }
 
@@ -57,31 +51,22 @@ class Indexer {
   static LatticeIterator<Dim> begin() { return LatticeIterator<Dim>(dims_); }
   static LatticeIterator<Dim> end() { return LatticeIterator<Dim>(); }
 
-  static site_t up(site_t site, direction_t dir) {
+  static site_t up(site_t site, int dir) {
     site_t mask = vols_[dir + 1] - 1;
     return (site & ~mask) | ((site + vols_[dir]) & mask);
   }
 
-  static site_t dn(site_t site, direction_t dir) {
+  static site_t dn(site_t site, int dir) {
     site_t mask = vols_[dir + 1] - 1;
     return (site & ~mask) | ((site - vols_[dir]) & mask);
   }
 
  private:
-  static site_t n_links_;
-
-  static site_t dims_[Dim];
-  static site_t vols_[Dim + 1];
+  static int n_links_;
+  static int dims_[Dim];
+  static int vols_[Dim + 1];
 };
 
-template <int Dim, typename Site, typename Direction>
-typename Indexer<Dim, Site, Direction>::site_t
-    Indexer<Dim, Site, Direction>::n_links_;
-
-template <int Dim, typename Site, typename Direction>
-typename Indexer<Dim, Site, Direction>::site_t
-    Indexer<Dim, Site, Direction>::dims_[Dim];
-
-template <int Dim, typename Site, typename Direction>
-typename Indexer<Dim, Site, Direction>::site_t
-    Indexer<Dim, Site, Direction>::vols_[Dim + 1];
+template <int Dim, typename Site> int Indexer<Dim, Site>::n_links_;
+template <int Dim, typename Site> int Indexer<Dim, Site>::dims_[Dim];
+template <int Dim, typename Site> int Indexer<Dim, Site>::vols_[Dim + 1];

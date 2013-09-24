@@ -54,15 +54,21 @@ typedef SFVec::itype SIVec;
 #endif
 #ifdef FAST_INDEXER
 #include "fast_indexer.h"
+#if 0  // SSIMD == SIMD
+#define SIMD_INDEXER
+typedef Indexer<DIM, IVec> Ind;
+#else
+typedef Indexer<DIM> Ind;
+#endif
 #else
 #include "indexer.h"
+typedef Indexer<DIM> Ind;
 #endif
 #include "field.h"
 #include "partition.h"
 
 // FIELD TYPE /////////////////////////////////////////////////////////////////
 
-typedef Indexer<DIM> Ind;
 #if NCOMP <= 1
 typedef ScalarField<ScalarFieldArray<Float>, Ind> Field;
 #else

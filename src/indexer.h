@@ -1,22 +1,18 @@
 #pragma once
 
-#include <iostream>
-
 #include "iterator.h"
 
-template <int Dim, typename Site = int, typename Direction = int>
-class Indexer {
+template <int Dim, typename Site = int> class Indexer {
  public:
   enum {
     D = Dim
   };
   typedef Site coordinate_t[Dim];
   typedef Site site_t;
-  typedef Direction direction_t;
 
   typedef LatticeIterator<Dim> iterator;
 
-  static void init(const coordinate_t dim) {
+  static void init(const int dim[Dim]) {
     vols_[0] = 1;
 
     for (int i = 0; i < Dim; i++) {
@@ -44,8 +40,8 @@ class Indexer {
   }
 
   static site_t site_safe(const coordinate_t coord) {
-    int c[D];
-    for (int i = 0; i < D; ++i) {
+    int c[Dim];
+    for (int i = 0; i < Dim; ++i) {
       c[i] = coord[i];
       if (c[i] >= dim(i))
         c[i] -= dim(i);
@@ -55,17 +51,14 @@ class Indexer {
     return site(c);
   }
 
-  static site_t index(site_t site, direction_t dir) {
-    return dir * vols_[Dim] + site;
-  }
+  static site_t index(site_t site, int dir) { return dir * vols_[Dim] + site; }
 
-  static site_t index(const coordinate_t coord, direction_t dir) {
+  static site_t index(const coordinate_t coord, int dir) {
     return dir * vols_[Dim] + site(coord);
   }
 
   static int dim(int i) { return dims_[i]; }
   static int dim() { return Dim; }
-  static const int* dims() { return &dims_[0]; }
   static int vol(int i) { return vols_[i]; }
   static int n_sites() { return vol(Dim); }
   static int n_links() { return n_links_; }
@@ -73,27 +66,19 @@ class Indexer {
   static LatticeIterator<Dim> begin() { return LatticeIterator<Dim>(dims_); }
   static LatticeIterator<Dim> end() { return LatticeIterator<Dim>(); }
 
-  static site_t up(site_t site, direction_t dir) {
-    return up_[index(site, dir)];
-  }
-
-  static site_t dn(site_t site, direction_t dir) {
-    return dn_[index(site, dir)];
-  }
+  static site_t up(site_t site, int dir) { return up_[index(site, dir)]; }
+  static site_t dn(site_t site, int dir) { return dn_[index(site, dir)]; }
 
  private:
   static void init_arrays() {
-
     up_ = new site_t[n_links_];
     dn_ = new site_t[n_links_];
 
     for (iterator it = begin(); it != end(); ++it) {
-
       for (int mu = 0; mu < Dim; ++mu) {
-
         int coord[Dim];
-        for (int i = 0; i < Dim; ++i) {
 
+        for (int i = 0; i < Dim; ++i) {
           coord[i] = (*it)[i];
         }
 
@@ -121,22 +106,11 @@ class Indexer {
   static site_t* dn_;
 };
 
-template <int Dim, typename Site, typename Direction>
-typename Indexer<Dim, Site, Direction>::site_t
-    Indexer<Dim, Site, Direction>::n_links_;
+template <int Dim, typename Site> int Indexer<Dim, Site>::n_links_;
+template <int Dim, typename Site> int Indexer<Dim, Site>::dims_[Dim];
+template <int Dim, typename Site> int Indexer<Dim, Site>::vols_[Dim + 1];
 
-template <int Dim, typename Site, typename Direction>
-typename Indexer<Dim, Site, Direction>::site_t
-    Indexer<Dim, Site, Direction>::dims_[Dim];
-
-template <int Dim, typename Site, typename Direction>
-typename Indexer<Dim, Site, Direction>::site_t
-    Indexer<Dim, Site, Direction>::vols_[Dim + 1];
-
-template <int Dim, typename Site, typename Direction>
-typename Indexer<Dim, Site, Direction>::site_t*
-    Indexer<Dim, Site, Direction>::up_;
-
-template <int Dim, typename Site, typename Direction>
-typename Indexer<Dim, Site, Direction>::site_t*
-    Indexer<Dim, Site, Direction>::dn_;
+template <int Dim, typename Site>
+typename Indexer<Dim, Site>::site_t* Indexer<Dim, Site>::up_;
+template <int Dim, typename Site>
+typename Indexer<Dim, Site>::site_t* Indexer<Dim, Site>::dn_;
