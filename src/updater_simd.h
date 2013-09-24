@@ -25,10 +25,7 @@ template <typename F> class Updater {
     const int tid = 0;
 #endif
 
-#ifdef SIMD_INDEXER
     IVec i(indices);
-#endif
-
     FVec corona[F::n_components];
     FVec phi[F::n_components];
     FVec phi2(Float(0));
@@ -42,54 +39,22 @@ template <typename F> class Updater {
       FVec big_corona_02(Float(0));
       FVec big_corona_11(Float(0));
 
-#ifdef SIMD_INDEXER
       for (int mu = 0; mu < indexer_t::D; mu++) {
-        big_corona_02 += field.get(indexer_t::up(indexer_t::up(i, mu), mu), k);
-        big_corona_02 += field.get(indexer_t::dn(indexer_t::dn(i, mu), mu), k);
-
-        big_corona_01 += field.get(indexer_t::up(i, mu), k);
-        big_corona_01 += field.get(indexer_t::dn(i, mu), k);
+        IVec up = indexer_t::up(i, mu);
+        IVec dn = indexer_t::dn(i, mu);
+        big_corona_02 += field.template get<FVec>(indexer_t::up(up, mu), k);
+        big_corona_02 += field.template get<FVec>(indexer_t::dn(dn, mu), k);
+        small_corona += field.template get<FVec>(up, k);
+        small_corona += field.template get<FVec>(dn, k);
 
         for (int nu = 0; nu < mu; nu++) {
-          big_corona_11 +=
-              field.get(indexer_t::up(indexer_t::up(i, mu), nu), k);
-          big_corona_11 +=
-              field.get(indexer_t::dn(indexer_t::dn(i, mu), nu), k);
-          big_corona_11 +=
-              field.get(indexer_t::dn(indexer_t::up(i, mu), nu), k);
-          big_corona_11 +=
-              field.get(indexer_t::up(indexer_t::dn(i, mu), nu), k);
+          big_corona_11 += field.template get<FVec>(indexer_t::up(up, nu), k);
+          big_corona_11 += field.template get<FVec>(indexer_t::dn(up, nu), k);
+          big_corona_11 += field.template get<FVec>(indexer_t::dn(dn, nu), k);
+          big_corona_11 += field.template get<FVec>(indexer_t::up(dn, nu), k);
         }
       }
-#else
-      // NOTE: This code doesn't look nice as it could, however due lack of
-      // gatter on SSE/AVX,
-      // loading values into SSE/AVX registers then performing addition produces
-      // many more
-      // instructions than first adding them then putting (gathering) them into
-      // register
-      for (int mu = 0; mu < indexer_t::D; mu++) {
-#define index_up(n, i) indexer_t::up(i[n], mu)
-        int up[SIMD] __attribute__((aligned(16))) = { __simd_rep(
-            SIMD, index_up, indices) };
-#define index_dn(n, i) indexer_t::dn(i[n], mu)
-        int dn[SIMD] __attribute__((aligned(16))) = { __simd_rep(
-            SIMD, index_dn, indices) };
 
-#define field_up_dn(n, p) p.get(up[n], k) + p.get(dn[n], k)
-        small_corona += FVec(__simd_rep(SIMD, field_up_dn, field));
-#define field_up_dn_2(n, p) \
-  p.get(indexer_t::up(up[n], mu), k) + p.get(indexer_t::dn(dn[n], mu), k)
-        big_corona_02 += FVec(__simd_rep(SIMD, field_up_dn_2, field));
-
-        for (int nu = 0; nu < mu; nu++) {
-#define index_nu(n, p)                                                      \
-  p.get(indexer_t::up(up[n], nu), k) + p.get(indexer_t::up(dn[n], nu), k) + \
-      p.get(indexer_t::dn(up[n], nu), k) + p.get(indexer_t::dn(dn[n], nu), k)
-          big_corona_11 += FVec(__simd_rep(SIMD, index_nu, field));
-        }
-      }
-#endif
       FVec big_corona =
           FVec(-pars_.i_Lambda) *
           (big_corona_02 -
@@ -97,8 +62,7 @@ template <typename F> class Updater {
            FVec(Float(2.0)) * big_corona_11);
       corona[k] = small_corona + big_corona;
 
-#define indexed_field(n, p, i) p.get(i[n], k)
-      phi[k] = FVec(__simd_rep(SIMD, indexed_field, field, indices));
+      phi[k] = field.template get<FVec>(i, k);
       phi2 += phi[k] * phi[k];
       action += corona[k] * phi[k];
     }
@@ -108,15 +72,7 @@ template <typename F> class Updater {
     FVec randsym[N_HIT][F::n_components];
     FVec randlog[N_HIT];
 
-// NOTE: Why keep accepted as float vector, well simple
-// there are 8 component no integer operations on AVX,
-// but there are 8 component float operations.
-#if SIMD <= 1
-    int accepted = 0;
-#else
-    FVec accepted(Float(0));
-#endif
-
+    IVec accepted(0);
     for (int h = 0; h < N_HIT; h++)
       for (int k = 0; k < F::n_components; k++)
         randsym[h][k] = RAND_SYM(tid);
@@ -143,14 +99,6 @@ template <typename F> class Updater {
           (FVec(quadratic_coef) + FVec(gr) * FVec(new_phi2)) * new_phi2;
       FVec delta_action = new_action - action;
 
-#if SIMD <= 1
-      if (delta_action >= Float(0) || delta_action >= randlog[h]) {
-        for (int k = 0; k < F::n_components; k++)
-          phi[k] = new_phi[k];
-        action = new_action;
-        accepted++;
-      }
-#else
       IVec action_cond = delta_action >= min(Float(0), randlog[h]);
 
       for (int k = 0; k < F::n_components; k++)
@@ -158,28 +106,18 @@ template <typename F> class Updater {
 
       action = action_cond(new_action, action);
       accepted += action_cond(Float(1));
-#endif
     }
 
-// Scatter into field
-#if SIMD <= 1
-    for (int k = 0; k < F::n_components; k++)
-      field.set(*indices, k, phi[k]);
-#else
+    // Scatter into field
     for (int si = 0; si < SIMD; si++)
       for (int k = 0; k < F::n_components; k++)
         field.set(indices[si], k, phi[k][si]);
-#endif
 
-// Reduce acceptance
-#if SIMD <= 1
-    return accepted;
-#else
+    // Reduce acceptance
     int ret = 0;
     for (int si = 0; si < SIMD; si++)
       ret += accepted[si];
     return ret;
-#endif
   }
 
 #ifdef CACHE

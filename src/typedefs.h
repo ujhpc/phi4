@@ -14,65 +14,56 @@ typedef FLOAT Float;
 #ifdef SIMD
 
 #ifndef OLD
-#define __simd_use_rep
 #include "simd2.h"
 #else
-#define __SIMD_H__REP
 #include "simd.h"
-#define __simd_rep REP
 #define itype mask
 #endif
 
 #if SIMD <= 1
 typedef Float FVec;
 typedef simd_integral_of<Float>::type IVec;
-typedef FVec SFVec;
-typedef IVec SIVec;
-#define SSIMD 1
 #else
 // some integer ops like shift are not available on AVX1
 #if !__AVX2__&& SIMD > 4
-#define SSIMD 4
-#else
-#define SSIMD SIMD
+#error SIMD=8 requires at least AVX2
 #endif
-
 typedef simd<FLOAT, SIMD> FVec;
 typedef FVec::itype IVec;
-typedef simd<FLOAT, SSIMD> SFVec;
-typedef SFVec::itype SIVec;
 #endif
 
 #endif
 
 // COMMON HEADERS /////////////////////////////////////////////////////////////
 
-#ifdef SIMD
-#include "random_simd.h"
-#else
-#include "random.h"
-#endif
-#ifdef FAST_INDEXER
+#if defined(SIMD) || defined(FAST_INDEXER)
 #include "fast_indexer.h"
-#if SSIMD == SIMD
-#define SIMD_INDEXER
 typedef Indexer<DIM, IVec> Ind;
-#else
-typedef Indexer<DIM> Ind;
-#endif
 #else
 #include "indexer.h"
 typedef Indexer<DIM> Ind;
 #endif
+
 #include "field.h"
 #include "partition.h"
 
 // FIELD TYPE /////////////////////////////////////////////////////////////////
 
-#if NCOMP <= 1
-typedef ScalarField<Float, Ind> Field;
+#ifdef SIMD
+class Storage : public std::vector<Float> {
+ public:
+  Storage(int size) : std::vector<Float>(size) {}
+  Float at(const int i) const { return (*this)[i]; }
+  FVec at(const IVec& i) const { return FVec(this->data(), i); }
+};
 #else
-typedef VectorField<Float, NCOMP, Ind> Field;
+typedef std::vector<Float> Storage;
+#endif
+
+#if NCOMP <= 1
+typedef ScalarField<Float, Ind, Storage> Field;
+#else
+typedef VectorField<Float, NCOMP, Ind, Storage> Field;
 #endif
 
 // PARTITIONING ///////////////////////////////////////////////////////////////
@@ -91,6 +82,12 @@ typedef Block<DIM, Ind, octal_cell<DIM> > BlockType;
 #endif
 
 // RANDOM GENERATOR ///////////////////////////////////////////////////////////
+
+#ifdef SIMD
+#include "random_simd.h"
+#else
+#include "random.h"
+#endif
 
 #if !defined(SIMD) && defined(USE_RAND48)
 

@@ -33,35 +33,28 @@ template <typename F> class Updater {
     Float corona[F::n_components];
 
     for (int k = 0; k < F::n_components; ++k) {
-
       Float small_corona = Float(0);
       Float big_corona = Float(0);
-
-      for (int mu = 0; mu < indexer_t::D; mu++) {
-        small_corona += field.get(indexer_t::up(i, mu), k) +
-                        field.get(indexer_t::dn(i, mu), k);
-      }
-
       Float big_corona_01 = Float(0);
       Float big_corona_02 = Float(0);
       Float big_corona_11 = Float(0);
 
       for (int mu = 0; mu < indexer_t::D; mu++) {
-        big_corona_02 += field.get(indexer_t::up(indexer_t::up(i, mu), mu), k);
-        big_corona_02 += field.get(indexer_t::dn(indexer_t::dn(i, mu), mu), k);
+        int up = indexer_t::up(i, mu);
+        int dn = indexer_t::dn(i, mu);
 
-        big_corona_01 += field.get(indexer_t::up(i, mu), k);
-        big_corona_01 += field.get(indexer_t::dn(i, mu), k);
+        big_corona_02 += field.get(indexer_t::up(up, mu), k);
+        big_corona_02 += field.get(indexer_t::dn(dn, mu), k);
+        big_corona_01 += field.get(up, k);
+        big_corona_01 += field.get(dn, k);
+        small_corona += field.get(up, k);
+        small_corona += field.get(dn, k);
 
         for (int nu = 0; nu < mu; nu++) {
-          big_corona_11 +=
-              field.get(indexer_t::up(indexer_t::up(i, mu), nu), k);
-          big_corona_11 +=
-              field.get(indexer_t::dn(indexer_t::dn(i, mu), nu), k);
-          big_corona_11 +=
-              field.get(indexer_t::dn(indexer_t::up(i, mu), nu), k);
-          big_corona_11 +=
-              field.get(indexer_t::up(indexer_t::dn(i, mu), nu), k);
+          big_corona_11 += field.get(indexer_t::up(up, nu), k);
+          big_corona_11 += field.get(indexer_t::dn(dn, nu), k);
+          big_corona_11 += field.get(indexer_t::dn(up, nu), k);
+          big_corona_11 += field.get(indexer_t::up(dn, nu), k);
         }
       }
 
