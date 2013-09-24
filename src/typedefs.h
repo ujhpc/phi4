@@ -50,11 +50,16 @@ typedef Indexer<DIM> Ind;
 // FIELD TYPE /////////////////////////////////////////////////////////////////
 
 #ifdef SIMD
-class Storage : public std::vector<Float> {
+class Storage {
  public:
-  Storage(int size) : std::vector<Float>(size) {}
-  Float at(const int i) const { return (*this)[i]; }
-  FVec at(const IVec& i) const { return FVec(this->data(), i); }
+  Storage(int size) { ptr = new Float[size]; }
+  ~Storage() { delete[] ptr; }
+  Float at(const int i) const { return ptr[i]; }
+  void assign(const int i, const Float v) { ptr[i] = v; }
+  FVec at(const IVec& i) const { return FVec(ptr, i); }
+
+ private:
+  Float* ptr;
 };
 #else
 typedef std::vector<Float> Storage;
