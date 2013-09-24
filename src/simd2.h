@@ -16,6 +16,10 @@
 
 #pragma once
 
+#if __i386__ || __x86_64__
+#include <immintrin.h>
+#endif
+
 // Helper type for itegral <-> float mapping with same size
 template <typename Type> struct simd_integral_of {
   typedef Type type;
@@ -54,7 +58,7 @@ template <> struct simd_float_of<long long> {
 #define __simd_type(T, N) __attribute__((vector_size(sizeof(T) * N))) T
 #endif
 
-// Replication helper
+// Argument replication macros
 #define __simd_repn(n) __simd_rep##n
 #define __simd_rep(n, f, ...) __simd_repn(n)(f, __VA_ARGS__)
 #define __simd_rep1(f, ...) f(0, __VA_ARGS__)
@@ -71,6 +75,11 @@ template <> struct simd_float_of<long long> {
       f(7, __VA_ARGS__), f(8, __VA_ARGS__), f(9, __VA_ARGS__),                \
       f(10, __VA_ARGS__), f(11, __VA_ARGS__), f(12, __VA_ARGS__),             \
       f(13, __VA_ARGS__), f(14, __VA_ARGS__), f(15, __VA_ARGS__)
+
+#define __simd_array(n, ...) __VA_ARGS__[n]
+#define __simd_iarray(n, i, ...) __VA_ARGS__[i[n]]
+#define __simd_index(n, ...) __VA_ARGS__##n
+#define __simd_scalar(n, ...) __VA_ARGS__
 
 #ifdef __INTEL_COMPILER
 #pragma warning(push)
@@ -102,20 +111,28 @@ template <typename T, int N> struct simd {
   /// Constructor taking native representation
   simd(vector_t a) : v(a) {}
 
-// Constructors taking vector size number of arguments
-#define __simd_ctora(N, T) T s##N
-  simd(__simd_rep(2, __simd_ctora, T));
-  simd(__simd_rep(4, __simd_ctora, T));
-  simd(__simd_rep(8, __simd_ctora, T));
-  simd(__simd_rep(16, __simd_ctora, T));
+  // Constructors taking vector size number of arguments
+  simd(__simd_rep(2, __simd_index, T s));
+  simd(__simd_rep(4, __simd_index, T s));
+  simd(__simd_rep(8, __simd_index, T s));
+  simd(__simd_rep(16, __simd_index, T s));
 
   // We need dummy here otherwise GCC will not allow us override contructor even
   // vector and scalar types are different.
   simd(scalar_t, char dummy = 0);
   /// Unsigned to signed constructor
   simd(uiscalar_t u, char dummy = 0) { v = simd<iscalar_t, N>((iscalar_t)u).v; }
+  /// Gather
+  simd(const scalar_t* ptr,
+       const itype& index,
+       const itype& mask = itype(-1),
+       const simd& def = simd((scalar_t)0)) {
+    for (int i = 0; i < N; ++i)
+      (*this)[i] = ptr[index[i]];
+  }
 
-  scalar_t& operator[](int i) { return ((scalar_t*)&v)[i]; }
+  scalar_t& operator[](const int i) { return ((scalar_t*)&v)[i]; }
+  scalar_t operator[](const int i) const { return ((scalar_t*)&v)[i]; }
 
   simd operator+(const simd a) const { return simd(v + a.v); }
   simd operator-(const simd a) const { return simd(v - a.v); }
@@ -153,67 +170,88 @@ template <typename T, int N> struct simd {
     v = (operator O(a)).v;   \
     return *this;            \
   }
-  __simd_aop(const simd&, +);
-  __simd_aop(const simd&, -);
-  __simd_aop(const simd&, *);
-  __simd_aop(const simd&, / );
+  __simd_aop(const simd&, +)
+  __simd_aop(const simd&, -)
+  __simd_aop(const simd&, *)
+  __simd_aop(const simd&, / )
 
-  __simd_aop(const simd&, | );
-  __simd_aop(const simd&, &);
-  __simd_aop(const simd&, ^);
+  __simd_aop(const simd&, | )
+  __simd_aop(const simd&, &)
+  __simd_aop(const simd&, ^)
 // Workaround for GCC <= 4.6
 #if __GNUC__ < 4 || __GNUC__ == 4 && __GNUC_MINOR__ <= 6
 #undef __simd_aop
 #define __simd_aop(T, O) \
   simd& operator O##=(T a) { return *this; }
 #endif
-  __simd_aop(const int, << );
-  __simd_aop(const int, >> );
-  __simd_aop(const simd&, >> );
-  __simd_aop(const simd&, << );
+  __simd_aop(const int, << )
+  __simd_aop(const int, >> )
+  __simd_aop(const simd&, >> )
+  __simd_aop(const simd&, << )
 #undef __simd_aop
 };
 #undef __simd_type
 
 // This is mumbo-jumbo generating scalar to vector constructors.
 // Thanks to that we can get simd<int, 4>(1) -> {1, 1, 1, 1}
-#define __simd_seq(s, n) __simd_seq##n(s)
-#define __simd_seq2(s) s, s
-#define __simd_seq4(s) __simd_seq2(s), __simd_seq2(s)
-#define __simd_seq8(s) __simd_seq4(s), __simd_seq4(s)
-#define __simd_seq16(s) __simd_seq8(s), __simd_seq8(s)
-#define __simd_ctori(N, T) s##N
-#define __simd_ctor_(T, N)                                   \
-  template <>                                                \
-  inline simd<T, N>::simd()                                  \
-      : v((simd<T, N>::vector_t) { __simd_seq((T)0, N) }) {} \
-  template <>                                                \
-  inline simd<T, N>::simd(T s, char)                         \
-      : v((simd<T, N>::vector_t) { __simd_seq(s, N) }) {}    \
-  template <>                                                \
-  inline simd<T, N>::simd(__simd_rep(N, __simd_ctora, T))    \
-      : v((simd<T, N>::vector_t) { __simd_rep(N, __simd_ctori, T) }) {}
-// single precition
-#define __simd_ctor(I, T, N) __simd_ctor_(T, N) __simd_ctor_(I, N)
-__simd_ctor(int, float, 4);
+#define __simd_ctor_(T, N)                                                  \
+  template <>                                                               \
+  inline simd<T, N>::simd()                                                 \
+      : v((simd<T, N>::vector_t) { __simd_rep(N, __simd_scalar, (T)0) }) {} \
+  template <>                                                               \
+  inline simd<T, N>::simd(T s, char)                                        \
+      : v((simd<T, N>::vector_t) { __simd_rep(N, __simd_scalar, s) }) {}    \
+  template <>                                                               \
+  inline simd<T, N>::simd(__simd_rep(N, __simd_index, T s))                 \
+      : v((simd<T, N>::vector_t) { __simd_rep(N, __simd_index, s) }) {}
+#define __simd_ctor(TI, T, N) __simd_ctor_(T, N) __simd_ctor_(TI, N)
+// single precision
+__simd_ctor(int, float, 4)
 #ifdef __AVX__
-__simd_ctor(int, float, 8);
+__simd_ctor(int, float, 8)
 #endif
 // double precision
-__simd_ctor(long long, double, 2);
+__simd_ctor(long long, double, 2)
 #ifdef __AVX__
-__simd_ctor(long long, double, 4);
+__simd_ctor(long long, double, 4)
 #endif
-#undef __simd_seq
-#undef __simd_seq2
-#undef __simd_seq4
-#undef __simd_seq8
-#undef __simd_seq16
 #undef __simd_ctor_
 #undef __simd_ctor
-#undef __simd_ctora
-#undef __simd_ctori
 
+// Add gather constructors
+#ifdef __AVX2__
+#define __simd_gather_impl(T, TF, N, I) \
+  (simd<T, N>::vector_t) I(def.v, (const TF*)ptr, index.v, mask.v, N)
+#else
+#define __simd_gather_impl(T, TF, N, I) \
+  (simd<T, N>::vector_t) { __simd_rep(N, __simd_iarray, index, ptr) }
+#endif
+
+#define __simd_gather_(T, TF, N, I)                        \
+  template <>                                              \
+  inline simd<T, N>::simd(const simd<T, N>::scalar_t* ptr, \
+                          const simd<T, N>::itype& index,  \
+                          const simd<T, N>::itype& mask,   \
+                          const simd<T, N>& def)           \
+      : v(__simd_gather_impl(T, TF, N, I)) {}
+#define __simd_gather(TI, T, N, I) \
+  __simd_gather_(T, T, N, I) __simd_gather_(TI, T, N, I)
+// single precision
+__simd_gather(int, float, 4, _mm_mask_i32gather_ps)
+#ifdef __AVX__
+__simd_gather(int, float, 8, _mm256_mask_i32gather_ps)
+#endif
+// double precision
+__simd_gather(long long, double, 2, _mm_mask_i64gather_pd)
+#ifdef __AVX__
+__simd_gather(long long, double, 4, _mm256_mask_i64gather_pd)
+#endif
+#undef __simd_gather
+#undef __simd_gather_impl
+#undef __simd_scatter
+#undef __simd_gather_scatter
+
+// Drop replication macros
 #ifndef __simd_use_rep
 #undef __simd_rep
 #undef __simd_repn
@@ -222,16 +260,16 @@ __simd_ctor(long long, double, 4);
 #undef __simd_rep4
 #undef __simd_rep8
 #undef __simd_rep16
+#undef __simd_array
+#undef __simd_parray
+#undef __simd_index
+#undef __simd_scalar
 #endif
 
 // This section defines missing operators using X86 intrinsics
 #define __simd_has_cmp __clang__
 #define __simd_has_shift __clang__
 #define __simd_has_bitop __clang__
-
-#if __i386__ || __x86_64__
-#include <immintrin.h>
-#endif
 
 // Add missing comparsion type built-ins
 #if !__simd_has_cmp
@@ -241,21 +279,21 @@ __simd_ctor(long long, double, 4);
     return simd<T, N>::itype((V)I(__VA_ARGS__));                               \
   }
 #define __simd_op(T, N, O, V, I) __simd_op_(T, N, O, V, I, v, a.v)
-__simd_op(float, 4, <, __v4si, _mm_cmplt_ps);
-__simd_op(float, 4, <=, __v4si, _mm_cmple_ps);
-__simd_op(float, 4, >=, __v4si, _mm_cmpge_ps);
-__simd_op(float, 4, >, __v4si, _mm_cmpgt_ps);
-__simd_op(float, 4, ==, __v4si, _mm_cmpeq_ps);
-__simd_op(float, 4, !=, __v4si, _mm_cmpneq_ps);
+__simd_op(float, 4, <, __v4si, _mm_cmplt_ps)
+__simd_op(float, 4, <=, __v4si, _mm_cmple_ps)
+__simd_op(float, 4, >=, __v4si, _mm_cmpge_ps)
+__simd_op(float, 4, >, __v4si, _mm_cmpgt_ps)
+__simd_op(float, 4, ==, __v4si, _mm_cmpeq_ps)
+__simd_op(float, 4, !=, __v4si, _mm_cmpneq_ps)
 #undef __simd_op
 #if __AVX__
 #define __simd_op(T, N, O, V, I, X) __simd_op_(T, N, O, V, I, v, a.v, X)
-__simd_op(float, 8, <, __v8si, _mm256_cmp_ps, _CMP_LT_OS);
-__simd_op(float, 8, <=, __v8si, _mm256_cmp_ps, _CMP_LE_OS);
-__simd_op(float, 8, >=, __v8si, _mm256_cmp_ps, _CMP_GE_OS);
-__simd_op(float, 8, >, __v8si, _mm256_cmp_ps, _CMP_GT_OS);
-__simd_op(float, 8, ==, __v8si, _mm256_cmp_ps, _CMP_EQ_OS);
-__simd_op(float, 8, !=, __v8si, _mm256_cmp_ps, _CMP_NEQ_OS);
+__simd_op(float, 8, <, __v8si, _mm256_cmp_ps, _CMP_LT_OS)
+__simd_op(float, 8, <=, __v8si, _mm256_cmp_ps, _CMP_LE_OS)
+__simd_op(float, 8, >=, __v8si, _mm256_cmp_ps, _CMP_GE_OS)
+__simd_op(float, 8, >, __v8si, _mm256_cmp_ps, _CMP_GT_OS)
+__simd_op(float, 8, ==, __v8si, _mm256_cmp_ps, _CMP_EQ_OS)
+__simd_op(float, 8, !=, __v8si, _mm256_cmp_ps, _CMP_NEQ_OS)
 #undef __simd_op
 #endif
 #undef __simd_op_
@@ -272,11 +310,11 @@ __simd_op(float, 8, !=, __v8si, _mm256_cmp_ps, _CMP_NEQ_OS);
     v = ((V)I((IV)v, shift));                                                 \
     return *this;                                                             \
   }
-__simd_op(int, 4, <<, __v4si, __m128i, _mm_slli_epi32);
-__simd_op(int, 4, >>, __v4si, __m128i, _mm_srli_epi32);
+__simd_op(int, 4, <<, __v4si, __m128i, _mm_slli_epi32)
+__simd_op(int, 4, >>, __v4si, __m128i, _mm_srli_epi32)
 #if __AVX2__
-__simd_op(int, 8, <<, __v8si, __m256i, _mm256_slli_epi32);
-__simd_op(int, 8, >>, __v8si, __m256i, _mm256_srli_epi32);
+__simd_op(int, 8, <<, __v8si, __m256i, _mm256_slli_epi32)
+__simd_op(int, 8, >>, __v8si, __m256i, _mm256_srli_epi32)
 #endif
 #undef __simd_op
 // Shift by vector
@@ -285,12 +323,12 @@ __simd_op(int, 8, >>, __v8si, __m256i, _mm256_srli_epi32);
   inline simd<T, N> simd<T, N>::operator O(const simd<T, N>& shift) const { \
     return simd<T, N>((V)I((IV)v, S));                                      \
   }
-__simd_op(int, 4, <<, __v4si, __m128i, (__m128i)shift.v, _mm_sll_epi32);
-__simd_op(int, 4, >>, __v4si, __m128i, (__m128i)shift.v, _mm_srl_epi32);
+__simd_op(int, 4, <<, __v4si, __m128i, (__m128i)shift.v, _mm_sll_epi32)
+__simd_op(int, 4, >>, __v4si, __m128i, (__m128i)shift.v, _mm_srl_epi32)
 #if __AVX2__
 // FIXME: this is probably incorrect since shift argument is 128-bit!
-__simd_op(int, 8, <<, __v8si, __m256i, *((__m128i*)&shift.v), _mm256_sll_epi32);
-__simd_op(int, 8, >>, __v8si, __m256i, *((__m128i*)&shift.v), _mm256_srl_epi32);
+__simd_op(int, 8, <<, __v8si, __m256i, *((__m128i*)&shift.v), _mm256_sll_epi32)
+__simd_op(int, 8, >>, __v8si, __m256i, *((__m128i*)&shift.v), _mm256_srl_epi32)
 #endif
 #undef __simd_op
 #endif
@@ -301,12 +339,12 @@ __simd_op(int, 8, >>, __v8si, __m256i, *((__m128i*)&shift.v), _mm256_srl_epi32);
     return simd<T, N>((simd<T, N>::vector_t)I((V)v));          \
   }
 #if __SSE2__
-__simd_cast(int, float, 4, __m128i, _mm_cvtepi32_ps);
-__simd_cast(float, int, 4, __m128, _mm_cvtps_epi32);
+__simd_cast(int, float, 4, __m128i, _mm_cvtepi32_ps)
+__simd_cast(float, int, 4, __m128, _mm_cvtps_epi32)
 #endif
 #if __AVX__
-__simd_cast(int, float, 8, __m256i, _mm256_cvtepi32_ps);
-__simd_cast(float, int, 8, __m256, _mm256_cvtps_epi32);
+__simd_cast(int, float, 8, __m256i, _mm256_cvtepi32_ps)
+__simd_cast(float, int, 8, __m256, _mm256_cvtps_epi32)
 #endif
 #undef __simd_cast
 
@@ -318,14 +356,14 @@ __simd_cast(float, int, 8, __m256, _mm256_cvtps_epi32);
     return simd<T, N>(I);                                                 \
   }
 #if __SSE4_1__
-__simd_op(float, int, 4, _mm_blendv_ps(fv.v, tv.v, (__m128)v));
-__simd_op(double, long long, 2, _mm_blendv_pd(fv.v, tv.v, (__m128d)v));
+__simd_op(float, int, 4, _mm_blendv_ps(fv.v, tv.v, (__m128)v))
+__simd_op(double, long long, 2, _mm_blendv_pd(fv.v, tv.v, (__m128d)v))
 #elif __SSE__
-__simd_op(float, int, 4, (__m128)((~v&(__v4si)fv.v) | (v&(__v4si)tv.v)));
+__simd_op(float, int, 4, (__m128)((~v&(__v4si)fv.v) | (v&(__v4si)tv.v)))
 #endif
 #if __AVX__
-__simd_op(float, int, 8, _mm256_blendv_ps(fv.v, tv.v, (__m256)v));
-__simd_op(double, long long, 4, _mm256_blendv_pd(fv.v, tv.v, (__m256d)v));
+__simd_op(float, int, 8, _mm256_blendv_ps(fv.v, tv.v, (__m256)v))
+__simd_op(double, long long, 4, _mm256_blendv_pd(fv.v, tv.v, (__m256d)v))
 #endif
 #undef __simd_op
 
@@ -341,11 +379,11 @@ __m256 __svml_logf8(__m256);
 __m256d __svml_logd4(__m256d);
 #endif
 }
-__simd_fun(log, float, 4, __svml_logf4);
-__simd_fun(log, double, 2, __svml_logd2);
+__simd_fun(log, float, 4, __svml_logf4)
+__simd_fun(log, double, 2, __svml_logd2)
 #if __AVX__
-__simd_fun(log, float, 8, __svml_logf8);
-__simd_fun(log, double, 4, __svml_logd4);
+__simd_fun(log, float, 8, __svml_logf8)
+__simd_fun(log, double, 4, __svml_logd4)
 #endif
 #undef __simd_fun
 
@@ -353,15 +391,15 @@ __simd_fun(log, double, 4, __svml_logd4);
   inline simd<T, N> F(const simd<T, N>& a, const simd<T, N>& b) { \
     return simd<T, N>(I(a.v, b.v));                               \
   }
-__simd_fun2(min, float, 4, _mm_min_ps);
-__simd_fun2(max, float, 4, _mm_max_ps);
-__simd_fun2(min, double, 2, _mm_min_pd);
-__simd_fun2(max, double, 2, _mm_max_pd);
+__simd_fun2(min, float, 4, _mm_min_ps)
+__simd_fun2(max, float, 4, _mm_max_ps)
+__simd_fun2(min, double, 2, _mm_min_pd)
+__simd_fun2(max, double, 2, _mm_max_pd)
 #if __AVX__
-__simd_fun2(min, float, 8, _mm256_min_ps);
-__simd_fun2(max, float, 8, _mm256_max_ps);
-__simd_fun2(min, double, 4, _mm256_min_pd);
-__simd_fun2(max, double, 4, _mm256_max_pd);
+__simd_fun2(min, float, 8, _mm256_min_ps)
+__simd_fun2(max, float, 8, _mm256_max_ps)
+__simd_fun2(min, double, 4, _mm256_min_pd)
+__simd_fun2(max, double, 4, _mm256_max_pd)
 #endif
 #undef __simd_fun2
 
