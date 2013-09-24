@@ -591,7 +591,7 @@ four different lattice sizes. First thing we noticed is that it is not
 possible to fit all the data simultaneously to the model
 \eqref{eq:model}. However when fitting data for each lattice size
 separately we obtain a very good fit accuracy better then $1\%$ on the
-average.  This understandable: the execution time can depend non
+average.  This is understandable: the execution time can depend non
 linearly on the lattice volume.  One reason is that for small lattice
 sizes not all SM on the GPU are used. For the $64^3$ lattice we need
 $64^3/128=2048$ threads. With $256$ threads per CTA we use only $8$
@@ -674,7 +674,7 @@ iterations would not need to access the global memory and the performance
 should be comparable to our original implementation.
 
 This turned out not to be the case. The algorithm using the L1 cache
-was approximately six times slower then the one using shared
+was approximately six times slower than the one using shared
 memory. This deteriorated performance could be traced back to large
 number of cache misses. Nominally the $20^3$ block should fit in L1
 cache as it did fit into the shared memory. However the cache line is
@@ -689,7 +689,7 @@ to accommodate the whole block.
 
 Results presented in table~\ref{tab:comp} show clear advantage of the
 GPU over CPU. This is hardly surprising, but the $26\times$ difference
-is much higher that comes from comparison of theoretical performance of
+is much higher than comes from comparison of theoretical performance of
 tested i5 CPU to \emph{GTX 470}. The GTX is thus more efficient in
 that sense that is capable of achieving performance much closer to the
 peak. This can be attributed to two main reasons:
@@ -703,7 +703,7 @@ peak. This can be attributed to two main reasons:
 \item Modern CPU are not fully vector processors. Not every scalar
   instruction has a vector counterpart. In particular the eight words
   wide integer instructions are missing from the AVX instruction set.
-  This makes impossible to make a 256-bit pseudo-random number
+  This makes it impossible to make a 256-bit pseudo-random number
   generator.
 \item Efficient load and store vector (gather/scatter) instruction are
   also missing from CPU.  When not loading/storing from the
@@ -712,7 +712,7 @@ peak. This can be attributed to two main reasons:
 \end{itemize}
 
 Undeniably the trend of vectorization of CPUs is continuing and the
-software that wants to stay competitive must adapt to it.  However the
+software that wants to stay competitive must adapt to it.  However, the
 current CPU make this more difficult than the GPU, due to the lack of
 some crucial vector features.  The CPU producers are already
 addressing those issues. Intel Xeon $\phi$ has a extended vector
