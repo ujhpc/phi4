@@ -6,9 +6,8 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-#ifdef __LINUX__
+#ifdef __linux__
 #include <time.h>
-#include "linux_time.h"
 #endif
 #include "cmdline.h"
 
@@ -39,6 +38,10 @@ int main(int argc, char* argv[]) {
   cmdline::parser cl;
   cl.footer(FILE_NAME " ...");
 
+  cl.add("verbose", 'v', "be verbose");
+#ifdef __linux__
+  cl.add("time", 0, "output single line benchmark");
+#endif
 #ifdef _OPENMP
   cl.add<int>("threads", 0, "number of OpenMP threads", false, 0);
 #endif
@@ -73,7 +76,7 @@ int main(int argc, char* argv[]) {
     std::cerr << error << std::endl;
     return 2;
   }
-  catch (const char * error) {
+  catch (const char* error) {
     std::cerr << error << std::endl;
     return 2;
   }
@@ -82,16 +85,20 @@ int main(int argc, char* argv[]) {
   int n_prod = cl.get<int>("sweep");
   int seed = cl.get<int>("seed");
 
-  int dim[DIM] = { cl.get<int>("n-x"), cl.get<int>("n-y"),
+  int dim[DIM] = {
+    cl.get<int>("n-x"),
+    cl.get<int>("n-y"),
 #if DIM >= 3
-                   cl.get<int>("n-z"),
+    cl.get<int>("n-z"),
 #endif
   };
 
 #ifdef CACHE
-  int block_dim[DIM] = { cl.get<int>("b-x"), cl.get<int>("b-y"),
+  int block_dim[DIM] = {
+    cl.get<int>("b-x"),
+    cl.get<int>("b-y"),
 #if DIM >= 3
-                         cl.get<int>("b-z"),
+    cl.get<int>("b-z"),
 #endif
   };
 
@@ -105,28 +112,33 @@ int main(int argc, char* argv[]) {
         cl.get<Float>("i-Lambda"),
   };
 
-  std::cerr << "# Dimensions " << DIM << std::endl;
-  std::cerr << "# Components " << Field::n_components << std::endl;
-  std::cerr << "# Float " << cmdline::detail::readable_typename<Float>()
-            << std::endl;
 #ifdef _OPENMP
   if (cl.exist("threads")) {
     omp_set_num_threads(cl.get<int>("threads"));
   }
   const int n_threads = omp_get_max_threads();
-  std::cerr << "# OpenMP " << n_threads << " threads" << std::endl;
 #else
   const int n_threads = 1;
-  std::cerr << "# No OpenMP" << std::endl;
-#endif
-#ifdef SIMD
-  std::cerr << "# SIMD " << SIMD << " elements" << std::endl;
-#else
-  std::cerr << "# No SIMD" << std::endl;
 #endif
 
-  // Dump command line parameters
-  std::cerr << cl;
+  if (cl.exist("verbose")) {
+    std::cerr << "# Dimensions " << DIM << std::endl;
+    std::cerr << "# Components " << Field::n_components << std::endl;
+    std::cerr << "# Float " << cmdline::detail::readable_typename<Float>()
+              << std::endl;
+#ifdef _OPENMP
+    std::cerr << "# OpenMP " << n_threads << " threads" << std::endl;
+#else
+    std::cerr << "# No OpenMP" << std::endl;
+#endif
+#ifdef SIMD
+    std::cerr << "# SIMD " << SIMD << " elements" << std::endl;
+#else
+    std::cerr << "# No SIMD" << std::endl;
+#endif
+    // Dump command line parameters
+    std::cerr << cl;
+  }
 
   std::string mag_file_name(FILE_NAME ".");
   mag_file_name += cl.get<std::string>("tag");
@@ -148,11 +160,9 @@ int main(int argc, char* argv[]) {
   long int accepted = 0;
   Partition partition;
 
-#ifdef __LINUX__
-  LinuxTimer timer(CLOCK_MONOTONIC);
-  if (timer)
-    timer.print_res();
-  timer.start();
+#ifdef __linux__
+  struct timespec start, stop;
+  clock_gettime(CLOCK_REALTIME, &start);
 #endif
 
   // Termalisation loop ///////////////////////////////////////////////////////
@@ -165,17 +175,40 @@ int main(int argc, char* argv[]) {
 #endif
   }
 
-#ifdef __LINUX__
-  timer.stop();
-  std::cerr << "termalisation took " << timer.ellapsed_time() << " ns"
-            << std::endl();
-  std::cerr << "that makes"
-            << (double)timer.ellapsed_time() /
-                   (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term)
-            << "ns per update" << std::endl;
+#ifdef __linux__
+  clock_gettime(CLOCK_REALTIME, &stop);
+  double ns =
+      1.0e9 * (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec);
+  if (cl.exist("verbose")) {
+    std::cerr << "termalisation took " << (ns / 1.0e9) << " s" << std::endl;
+    std::cerr << "that makes "
+              << ns / (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term)
+              << " ns per update" << std::endl;
+  }
+  if (cl.exist("time")) {
+#ifdef __AVX2__
+    std::cout << "AVX2\t";
+#elif __AVX__
+    std::cout << "AVX\t";
+#elif __SSE4_2__
+    std::cout << "SSE4.2\t";
+#elif __SSE4_1__
+    std::cout << "SSE4.1\t";
+#elif __SSE3__
+    std::cout << "SSE3\t";
+#elif __SSE2__
+    std::cout << "SSE2\t";
+#endif
+    std::cout << (ns / 1.0e9) << "\t";
+    std::cerr << ns / (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term);
+#ifdef OLD
+    std::cout << "\t(old)";
+#endif
+    std::cout << std::endl;
+  }
 #endif
 
-  if (n_term > 0)
+  if (cl.exist("verbose") && n_term > 0)
     std::cerr << "acceptance "
               << (double)accepted /
                      (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term)
@@ -184,9 +217,11 @@ int main(int argc, char* argv[]) {
   MagnetisationMeasurer<Field::n_components> magnetisation;
   accepted = 0;
 
-  FILE* fmag;
-  if (NULL == (fmag = fopen(mag_file_name.c_str(), "w"))) {
-    throw("cannot open file `" + mag_file_name + "' for  writing");
+  FILE* fmag = NULL;
+  if (n_prod) {
+    if ((fmag = fopen(mag_file_name.c_str(), "w")) == NULL) {
+      throw("cannot open file `" + mag_file_name + "' for  writing");
+    }
   }
 
   // Main simulation loop /////////////////////////////////////////////////////
@@ -215,7 +250,7 @@ int main(int argc, char* argv[]) {
       fflush(fmag);
   }
 
-  if (n_prod > 0)
+  if (cl.exist("verbose") && n_prod > 0)
     std::cerr << "acceptance "
               << (double)accepted /
                      (block_sweeps * N_HIT * (double)Ind::n_sites() * n_prod)

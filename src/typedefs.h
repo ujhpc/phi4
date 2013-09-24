@@ -13,12 +13,19 @@ typedef FLOAT Float;
 
 #ifdef SIMD
 
+#ifndef OLD
+#define __simd_use_rep
+#include "simd2.h"
+#else
 #define __SIMD_H__REP
 #include "simd.h"
+#define __simd_rep REP
+#define itype mask
+#endif
 
 #if SIMD <= 1
 typedef Float FVec;
-typedef simd<FLOAT, 4>::mask_scalar IVec;
+typedef simd_integral_of<Float>::type IVec;
 typedef FVec SFVec;
 typedef IVec SIVec;
 #define SSIMD 1
@@ -31,9 +38,9 @@ typedef IVec SIVec;
 #endif
 
 typedef simd<FLOAT, SIMD> FVec;
-typedef simd<FVec::mask_scalar, SIMD> IVec;
+typedef FVec::itype IVec;
 typedef simd<FLOAT, SSIMD> SFVec;
-typedef simd<FVec::mask_scalar, SSIMD> SIVec;
+typedef SFVec::itype SIVec;
 #endif
 
 #endif

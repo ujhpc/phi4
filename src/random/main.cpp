@@ -40,8 +40,8 @@ double rand48(long unsigned& seed) {
 
 main() {
 
-  unsigned z[8] = { 6544u, 9988877u, 9888u, 1234u, 98765u, 98766u, 87654u,
-                    776666u };
+  unsigned z[8] = { 6544u,  9988877u, 9888u,  1234u,
+                    98765u, 98766u,   87654u, 776666u };
 
   double sum1 = 0.0;
   double sum2 = 0.0;
