@@ -89,10 +89,10 @@ endif
 
 # Fast index option
 ifneq ($(FIDX),)
-FAST_INDEX := 1
+FAST_INDEXER := 1
 endif
-ifneq ($(FAST_INDEX),)
-CPPFLAGS += -DFAST_INDEX=1
+ifneq ($(FAST_INDEXER),)
+CPPFLAGS += -DFAST_INDEXER=1
 SUFFIX   := $(SUFFIX)-fidx
 endif
 
@@ -147,11 +147,11 @@ time:
 define recurse
 $1:
 	@for cc in $$(COMPILERS); do \
-		$$(MAKE) --no-print-directory CC=$$$$cc FAST_INDEX=1 SIMD=4 ARCH=corei7 $2; \
-		$$(MAKE) --no-print-directory CC=$$$$cc FAST_INDEX=1 SIMD=4 ARCH=corei7 OLD=1 $2; \
-		$$(MAKE) --no-print-directory CC=$$$$cc FAST_INDEX=1 SIMD=8 ARCH=corei7-avx $2; \
-		$$(MAKE) --no-print-directory CC=$$$$cc FAST_INDEX=1 SIMD=8 ARCH=corei7-avx OLD=1 $2; \
-		$$(MAKE) --no-print-directory CC=$$$$cc FAST_INDEX=1 SIMD=8 ARCH=core-avx2 $2; \
+		$$(MAKE) --no-print-directory CC=$$$$cc FIDX=1 SIMD=4 ARCH=corei7 $2; \
+		$$(MAKE) --no-print-directory CC=$$$$cc FIDX=1 SIMD=4 ARCH=corei7 OLD=1 $2; \
+		$$(MAKE) --no-print-directory CC=$$$$cc FIDX=1 SIMD=8 ARCH=corei7-avx $2; \
+		$$(MAKE) --no-print-directory CC=$$$$cc FIDX=1 SIMD=8 ARCH=corei7-avx OLD=1 $2; \
+		$$(MAKE) --no-print-directory CC=$$$$cc FIDX=1 SIMD=8 ARCH=core-avx2 $2; \
 	done
 endef
 
