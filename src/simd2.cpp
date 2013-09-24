@@ -37,7 +37,7 @@ extern "C" float gath(float* ptr, int a, int b) {
 }
 #endif
 
-fvec_t::vector_t gath(float *ptr, ivec_t::vector_t index) {
+fvec_t::vector_t gath(float* ptr, ivec_t::vector_t index) {
   ivec_t i(index);
   fvec_t f(ptr, i);
   return f.v;
