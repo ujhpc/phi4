@@ -248,7 +248,7 @@ __simd_gather(int,
               (const float*)ptr,
               (__m128i)index.v,
               (__m128)mask.v,
-              4)
+              1)
 #ifdef __AVX__
 __simd_gather(int,
               float,
@@ -258,7 +258,7 @@ __simd_gather(int,
               (const float*)ptr,
               (__m256i)index.v,
               (__m256)mask.v,
-              8)
+              1)
 #endif
 // double precision
 __simd_gather(long long,
@@ -269,7 +269,7 @@ __simd_gather(long long,
               (const double*)ptr,
               (__m128i)index.v,
               (__m128d)mask.v,
-              2)
+              1)
 #ifdef __AVX__
 __simd_gather(long long,
               double,
@@ -279,7 +279,7 @@ __simd_gather(long long,
               (const double*)ptr,
               (__m256i)index.v,
               (__m256d)mask.v,
-              4)
+              1)
 #endif
 #undef __simd_gather
 #undef __simd_gather_impl
