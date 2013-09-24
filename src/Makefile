@@ -47,11 +47,11 @@ CPPFLAGS += -O$(O) -g \
 ifneq ($(SIMD),)
 LDFLAGS  += -lsvml
 endif
-# fix Clang on Linux compilation
 ifeq ($(findstring $(CC),clang),clang)
+CPPFLAGS += -fomit-frame-pointer
+# fix Clang on Linux compilation
 ifeq ($(OS),Linux)
-CPPFLAGS += -D__extern_always_inline=inline \
-            -fomit-frame-pointer
+CPPFLAGS += -D__extern_always_inline=inline
 endif
 endif
 endif
