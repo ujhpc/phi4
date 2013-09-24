@@ -222,31 +222,64 @@ __simd_ctor(long long, double, 4)
 
 // Add gather constructors
 #ifdef __AVX2__
-#define __simd_gather_impl(T, TF, N, I) \
-  (simd<T, N>::vector_t) I(def.v, (const TF*)ptr, index.v, mask.v, N)
+#define __simd_gather_impl(T, TF, N, I, ...) \
+  (simd<T, N>::vector_t) I(__VA_ARGS__)
 #else
-#define __simd_gather_impl(T, TF, N, I) \
+#define __simd_gather_impl(T, TF, N, I, ...) \
   (simd<T, N>::vector_t) { __simd_rep(N, __simd_iarray, index, ptr) }
 #endif
 
-#define __simd_gather_(T, TF, N, I)                        \
+#define __simd_gather_(T, TF, N, I, ...)                   \
   template <>                                              \
   inline simd<T, N>::simd(const simd<T, N>::scalar_t* ptr, \
                           const simd<T, N>::itype& index,  \
                           const simd<T, N>::itype& mask,   \
                           const simd<T, N>& def)           \
-      : v(__simd_gather_impl(T, TF, N, I)) {}
-#define __simd_gather(TI, T, N, I) \
-  __simd_gather_(T, T, N, I) __simd_gather_(TI, T, N, I)
+      : v(__simd_gather_impl(T, TF, N, I, __VA_ARGS__)) {}
+#define __simd_gather(TI, T, N, I, ...)   \
+  __simd_gather_(T, T, N, I, __VA_ARGS__) \
+      __simd_gather_(TI, T, N, I, __VA_ARGS__)
 // single precision
-__simd_gather(int, float, 4, _mm_mask_i32gather_ps)
+__simd_gather(int,
+              float,
+              4,
+              _mm_mask_i32gather_ps,
+              (__m128)def.v,
+              (const float*)ptr,
+              (__m128i)index.v,
+              (__m128)mask.v,
+              4)
 #ifdef __AVX__
-__simd_gather(int, float, 8, _mm256_mask_i32gather_ps)
+__simd_gather(int,
+              float,
+              8,
+              _mm256_mask_i32gather_ps,
+              (__m256)def.v,
+              (const float*)ptr,
+              (__m256i)index.v,
+              (__m256)mask.v,
+              8)
 #endif
 // double precision
-__simd_gather(long long, double, 2, _mm_mask_i64gather_pd)
+__simd_gather(long long,
+              double,
+              2,
+              _mm_mask_i64gather_pd,
+              (__m128d)def.v,
+              (const double*)ptr,
+              (__m128i)index.v,
+              (__m128d)mask.v,
+              2)
 #ifdef __AVX__
-__simd_gather(long long, double, 4, _mm256_mask_i64gather_pd)
+__simd_gather(long long,
+              double,
+              4,
+              _mm256_mask_i64gather_pd,
+              (__m256d)def.v,
+              (const double*)ptr,
+              (__m256i)index.v,
+              (__m256d)mask.v,
+              4)
 #endif
 #undef __simd_gather
 #undef __simd_gather_impl
