@@ -24,22 +24,30 @@ template <int Dim, typename Site = int> class Indexer {
   static void clean() {}
 
   static site_t site(const coordinate_t coord) {
-    int s = 0;
+    site_t s = 0;
     for (int i = 0; i < Dim; i++)
-      s += vol(i) * coord[i];
+      s += vols_[i] * coord[i];
     return s;
   }
 
-  static site_t site_safe(const coordinate_t coord) {
-    int c[Dim];
+  static int scalar_site(const int coord[Dim]) {
+    int s = 0;
+    for (int i = 0; i < Dim; i++)
+      s += vols_[i] * coord[i];
+    return s;
+  }
+
+  static int site_safe(const int coord[Dim]) {
+    int s[Dim];
     for (int i = 0; i < Dim; ++i) {
-      c[i] = coord[i];
-      if (c[i] >= dim(i))
-        c[i] -= dim(i);
-      if (c[i] < 0)
-        c[i] += dim(i);
+      int dim = dims_[i];
+      s[i] = coord[i];
+      if (s[i] >= dim)
+        s[i] -= dim;
+      else if (s[i] < 0)
+        s[i] += dim;
     }
-    return site(c);
+    return scalar_site(s);
   }
 
   static int dim(int i) { return dims_[i]; }

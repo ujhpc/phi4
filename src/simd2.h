@@ -120,6 +120,8 @@ template <typename T, int N> struct simd {
   // We need dummy here otherwise GCC will not allow us override contructor even
   // vector and scalar types are different.
   simd(scalar_t, char dummy = 0);
+  /// Load from memory constructor
+  simd(scalar_t* ptr) : v(*(vector_t*)ptr) {}
   /// Unsigned to signed constructor
   simd(uiscalar_t u, char dummy = 0) { v = simd<iscalar_t, N>((iscalar_t)u).v; }
   /// Gather

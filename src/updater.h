@@ -1,6 +1,7 @@
 template <typename F> class Updater {
  public:
   typedef typename F::indexer_t indexer_t;
+
   Updater(F& f, const parameters<Float>& pars)
       : field(f),
         pars_(pars),

@@ -97,10 +97,10 @@ template <int Dim, typename Site = int> class Indexer {
     }
   }
 
-  static site_t n_links_;
+  static int n_links_;
 
-  static site_t dims_[Dim];
-  static site_t vols_[Dim + 1];
+  static int dims_[Dim];
+  static int vols_[Dim + 1];
 
   static site_t* up_;
   static site_t* dn_;

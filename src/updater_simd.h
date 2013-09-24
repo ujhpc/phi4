@@ -1,6 +1,7 @@
 template <typename F> class Updater {
  public:
   typedef typename F::indexer_t indexer_t;
+
   Updater(F& f, const parameters<Float>& pars)
       : field(f),
         pars_(pars),
@@ -24,6 +25,10 @@ template <typename F> class Updater {
     const int tid = 0;
 #endif
 
+#ifdef SIMD_INDEXER
+    IVec i(indices);
+#endif
+
     FVec corona[F::n_components];
     FVec phi[F::n_components];
     FVec phi2(Float(0));
@@ -37,6 +42,26 @@ template <typename F> class Updater {
       FVec big_corona_02(Float(0));
       FVec big_corona_11(Float(0));
 
+#ifdef SIMD_INDEXER
+      for (int mu = 0; mu < indexer_t::D; mu++) {
+        big_corona_02 += field.get(indexer_t::up(indexer_t::up(i, mu), mu), k);
+        big_corona_02 += field.get(indexer_t::dn(indexer_t::dn(i, mu), mu), k);
+
+        big_corona_01 += field.get(indexer_t::up(i, mu), k);
+        big_corona_01 += field.get(indexer_t::dn(i, mu), k);
+
+        for (int nu = 0; nu < mu; nu++) {
+          big_corona_11 +=
+              field.get(indexer_t::up(indexer_t::up(i, mu), nu), k);
+          big_corona_11 +=
+              field.get(indexer_t::dn(indexer_t::dn(i, mu), nu), k);
+          big_corona_11 +=
+              field.get(indexer_t::dn(indexer_t::up(i, mu), nu), k);
+          big_corona_11 +=
+              field.get(indexer_t::up(indexer_t::dn(i, mu), nu), k);
+        }
+      }
+#else
       // NOTE: This code doesn't look nice as it could, however due lack of
       // gatter on SSE/AVX,
       // loading values into SSE/AVX registers then performing addition produces
@@ -64,7 +89,7 @@ template <typename F> class Updater {
           big_corona_11 += FVec(__simd_rep(SIMD, index_nu, field));
         }
       }
-
+#endif
       FVec big_corona =
           FVec(-pars_.i_Lambda) *
           (big_corona_02 -
