@@ -233,6 +233,9 @@ In our case, because of
 the last term in \eqref{eq:hamiltonian}, this neighborhood is
 extended as compared to usual nearest neighbors (see figure~\ref{fig:nn}). 
 
+The Metropolis algorithm lends itself naturally to parallelisation,
+however some caution must be taken, notably grid points that lie in the
+same neighborhood cannot be updated together. 
 
 \section{GPU implementation}
 
