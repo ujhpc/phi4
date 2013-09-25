@@ -47,7 +47,7 @@
 \newcommand{\vi}{{\vec{i}}}
 \newcommand{\vj}{{\vec{j}}}
 \newcommand{\vmu}{\vec{\mu}}
-
+\newcommand{\ie}{{\textit{i.e.}}}
 \newcommand{\fillblockgray}[2]{
 \pgfmathtruncatemacro\llx{\bksize*(#1)-2}
 \pgfmathtruncatemacro\lly{\bksize*(#2)-2}
@@ -176,22 +176,27 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 \end{equation*}
 where $\vphi$ is a scalar\footnote{In general this can be a vector,
   but in this contribution we restrict ourselves to scalar case.} field
-defined on the sites of a two or three dimensional lattice. The $x_i$
-denote the sites of the lattice where $i$ is a multidimensional index
+defined on the sites of a $d$ dimensional lattice (we only consider $d=2$ and $3$). The $x_i$
+denote a site of the lattice where $i$ is a multidimensional index
 and $\a\mu$ denotes the unit vector in the direction $\mu$. We use
-periodic boundary conditions.  The Monte-Carlo simulations consist of
+periodic boundary conditions \ie
+\begin{equation} 
+\phi(x+L_{\mu}\a\mu)=\phi(x)
+\end{equation}
+where  $L_\mu$ is the nuber of lattice sites in direction $\mu$. 
+The Monte-Carlo simulations consist of
 generating the field configurations with probability proportional to
 $\exp(-H(\vphi))$.
 
 The  generation is done by the mean of the Metropolis
-algorithm\cite{metropolis}. This amounts to sequentially updating all the points of the
+algorithm\cite{metropolis,binney}. This amounts to sequentially updating all the points of the
 lattice. During each update we change the value of the field $\vphi$
 in on a single lattice point ($\vphi_i$ is a shorthand for $\vphi(x_\vi)$).
 \begin{equation}
-\vphi_i\longrightarrow\widetilde{\vphi_i}=\vphi_i+\eta.
+\vphi_i\longrightarrow\widetilde{\vphi_i}=\vphi_i+\eta_i.
 \end{equation}
-The $\eta$ is a pseudo--random number drawn from a distribution such
-that $P(\eta) = P(-\eta)$. In practice we draw  $\eta$ from the
+The $\eta_i$ is a pseudo--random number drawn from a distribution such
+that $P(\eta_i) = P(-\eta_i)$. In practice we draw  $\eta$ from the
 uniform distribution on interval $[-\varepsilon,\varepsilon)$.  Then we
 calculate the difference of the Hamiltonian's
 \begin{equation}
@@ -199,25 +204,29 @@ calculate the difference of the Hamiltonian's
 \end{equation}
 If $\Delta H < 0$ we accept the change and substitute
 $\widetilde{\vphi_i}$ for $\vphi_i$, otherwise we accept the change
-with the probability $\exp(-\Delta H)$. In other words we accept the
-change with the probability
+with the probability $\exp(-\Delta H)$. In other words if we denote by
+$P(\phi_i\rightarrow\phi_i+\eta_i)$ the probability of updating the
+field at lattice site $x_i$ then it is given by
 \begin{equation}
-P(\vphi_i\rightarrow\vphi_i+\eta)=\min\left(1,\exp(-\Delta H)\right)
+P(\vphi_i\rightarrow\vphi_i+\eta_i)=\min\left(1,\exp(-\Delta H)\right).
 \end{equation}
 The crucial feature of this algorithm is that the update is local {\em
   i.e.} $\Delta H$ depends only on the values of fields in the
 immediate neighborhood of the updated point 
 \begin{equation}
 \begin{split}
-\Delta H & = -(\widetilde{\vphi_i}-\vphi_i)
-\underbrace{\left(c^{01}_i-\frac{1}{\Lambda}(c^{02}_i-4 d c^{01}_i+2 c^{11}_i )\right)}_{c_i}\\ 
+\Delta H & = -(\widetilde{\vphi_i}-\vphi_i)\, c_i\\
 &\phantom{= -}
 +(\widetilde{\vphi}^2_i-\vphi_i^2)\left(d+\frac{\mu^2}{2}+d (1+2d)\frac{1}{\Lambda}\right)\\
 &\phantom{= -}+\frac{g}{4!}\left(\widetilde{\vphi}^4_i-\vphi^4_i\right)
 \end{split}
 \end{equation}
 where
-\begin{equation}\begin{split} 
+\begin{equation}
+c_i=\left(c^{01}_i-\frac{1}{\Lambda}(c^{02}_i-4 d c^{01}_i+2 c^{11}_i )\right)
+\end{equation}
+and
+\begin{equation}\label{eq:corona-terms}\begin{split} 
 c_i^{01}&=\sum_{\mu=1}^d\left(\vphi(x_\vi+\a\mu)+\vphi(x_\vi-\a\mu)\right)\\
 c_i^{02}&=\sum_{\mu=1}^d\left(\vphi(x_\vi+2\a\mu)+\vphi(x_\vi-2\a\mu)\right)\\
 c_i^{11}&=\sum_{\mu=}^d\sum_{\nu=1}^{\mu-1}
@@ -228,21 +237,15 @@ c_i^{11}&=\sum_{\mu=}^d\sum_{\nu=1}^{\mu-1}
 \bigr)
 \end{split}
 \end{equation}
-The term $c_i$ is referred to as {\em corona}. 
-In our case, because of
-the last term in \eqref{eq:hamiltonian}, this neighborhood is
-extended as compared to usual nearest neighbors (see figure~\ref{fig:nn}). 
-
-
-\section{GPU implementation}
-
-While model is inherently parallelizable, grid points that lie in the
-same neighborhood cannot be updated together. Taking into account a
-larger neighborhood means that a simple checkerboard decomposition
-pattern cannot be used and we have devised a new grid decomposition
-scheme. We choose the decomposition depicted in the
-figure~\ref{fig:part}. In 2D we need eight sublattices and 16
-sublattices in 3D.
+The term $c_i$ is referred to as {\em corona} of the site $x_i$.  The
+corona is a weighted sum of the values of the field $\phi$ on the
+sites in the neighborhood of the site $x_i$. On the
+figure~\ref{fig:nn} we provide a geometrical interpretation of corona
+in two dimensions.  In our case, because of the last term in
+\eqref{eq:hamiltonian}, the corona is extended as compared to more
+commonly used nearest neighbors neigborhood (squares on the figure~\ref{fig:nn}). As we will show in
+the next section this considerably complicates the parallelisation of
+the algorithm. 
 \begin{figure}
 \begin{center}
 \begin{tikzpicture} 
@@ -282,10 +285,48 @@ sublattices in 3D.
 
 \end{tikzpicture}
 \end{center}
-\caption{\label{fig:nn}The neighborhood used to calculate the $\Delta H$:
+\caption{\label{fig:nn}The neighborhood used to calculate the $\Delta H$. The values of the field $\phi$ on the gray marked lattice sites contribute to the corona $c_i$ with geometrical symbols marking the contribution to different terms: 
 $c^{01}$ -- squares, $c^{11}$ -- circles and $c^{02}$ -- diamonds.}
 \end{figure}
 
+
+\section{GPU implementation}
+
+The Metropolis algorithm lends itself naturally to parallelisation,
+however some caution must be taken, notably grid points that lie in
+the same neighborhood cannot be updated together. That is if we update
+the red point on the figure~\ref{fig:nn} we cannot update any of the
+gray points in the same time.  Basically this stems from the
+requirement that in order to process two sites $x_a$ and $x_b$ in
+parallel those two operation must be independent.  That means that the
+joint probability
+$P(\phi_a,\phi_b\rightarrow\phi_a+\eta_a,\phi_b+\eta_b)$ must
+factorise:
+\begin{equation}
+P(\phi_a,\phi_b\rightarrow\phi_a+\eta_a,\phi_b+\eta_b)=P(\phi_a\rightarrow\phi_a+\eta_a)P(\phi_b\rightarrow\phi_b+\eta_b)
+\end{equation}
+This can be only achieved if $P(\phi_a\rightarrow\phi_a+\eta_a)$ does
+not depend on the value of $\phi_b$ and vice versa.
+
+To ensure that this condition is satisfied we decompose the lattice
+into several sublattices such that points belonging to each sublattice
+are far enough from each other and can safely be updated in
+parallel. In case of the more commonly encountered nearest-neigbour
+interaction (squares on the figure~\ref{fig:nn}) it is enough two
+divide the lattice in two sublattices by labeleling each side
+``black'' or ``white'' as on the checkerboard (sometimes this is also
+refered as ``even-odd'' decomposition). It is easy to see that no site
+has a nearest neighbour of the same colour, so all the sites of the
+same colour can be updated in parallel. This would be the case of the
+Ginzburg-Landau model without the last term in \eqref{eq:hamiltonian}.
+
+As we consider in here a model with much bigger corona (see
+fig~\ref{fig:nn}) this simple decomposition is not sufficient any more.
+We have been unable to find a decomposition requiring less then eight
+sublattices in two dimensions, and 16 in three dimensions. The two
+dimensional decomposition is depicted on the figure~\ref{fig:part}
+where we have marked each site (square) with the index of the
+sublattice it belongs to.
 \begin{figure}
 \begin{center} 
 \begin{tikzpicture}[scale=0.95]
@@ -325,8 +366,8 @@ $c^{01}$ -- squares, $c^{11}$ -- circles and $c^{02}$ -- diamonds.}
 (\lchalf - 2.5, \lchalf) \neighborhood;
 \end{tikzpicture}
 \end{center}
-\caption{\label{fig:part}Partition of the lattice into independent
-  sublattices. Squares with same number can be updated in parallel.}
+\caption{\label{fig:part}Partition of the lattice into eight independent
+  sublattices. Squares with same number on them belong to the same sublattice and can be updated in parallel.}
 \end{figure}
 
 
@@ -728,7 +769,8 @@ architectures.
 \bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus Books Publishing (1998).
 \bibitem{metropolis}
 N.~Metropolis, A.W.~Rosenbluth, M.N.~Rosenbluth, A.H.~Teller, E. Teller,
-   J.~Chem.~Phys.~\textbf{21} (6) (1953) 1087--1092.\\
+   J.~Chem.~Phys.~\textbf{21} (6) (1953) 1087--1092.
+\bibitem{binney}
 J.J.~Binney, N.J. Dowrick, A.J.~Fisher, and M.E.J.~Newman ``The Theory of Critical Phenomena'', Oxford University Press (1993).
 \bibitem{Fermi} 
 ``NVIDIA's Next Generation CUDA ComputeArchitecture: Fermi'' \\
