@@ -43,7 +43,7 @@ long int make_sweep(F& field,
   Updater<F> update(field, pars);
 #pragma omp parallel default(none) shared(partition, update, accepted)
   for (int p = 0; p < partition.n_partitions(); ++p) {
-    int indices[SIMD] __attribute__((aligned(16)));
+    int indices[SIMD] __attribute__((aligned(sizeof(int) * SIMD)));
 /* this loop can be parallelised */
 #pragma omp for reduction(+ : accepted)
     for (int s = 0; s < partition.partition_size(); s += SIMD) {
