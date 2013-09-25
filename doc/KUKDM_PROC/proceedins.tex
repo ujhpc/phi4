@@ -308,17 +308,25 @@ P(\phi_a,\phi_b\rightarrow\phi_a+\eta_a,\phi_b+\eta_b)=P(\phi_a\rightarrow\phi_a
 This can be only achieved if $P(\phi_a\rightarrow\phi_a+\eta_a)$ does
 not depend on the value of $\phi_b$ and vice versa.
 
+To ensure that this condition is satisfied we decompose the lattice
+into several sublattices such that points belonging to each sublattice
+are far enough from each other and can safely be updated in
+parallel. In case of the more commonly encountered nearest-neigbour
+interaction (squares on the figure~\ref{fig:nn}) it is enough two
+divide the lattice in two sublattices by labeleling each side
+``black'' or ``white'' as on the checkerboard (sometimes this is also
+refered as ``even-odd'' decomposition). It is easy to see that no site
+has a nearest neighbour of the same colour, so all the sites of the
+same colour can be updated in parallel. This would be the case of the
+Ginzburg-Landau model without the last term in \eqref{eq:hamiltonian}.
 
-
-
-
-Taking into account a
-larger neighborhood means that a simple checkerboard decomposition
-pattern cannot be used and we have devised a new grid decomposition
-scheme. We choose the decomposition depicted in the
-figure~\ref{fig:part}. In 2D we need eight sublattices and 16
-sublattices in 3D.
-
+As we consider in here a model with much bigger corona (see
+fig~\ref{fig:nn}) this simple decomposition is not sufficient any more.
+We have been unable to find a decomposition requiring less then eight
+sublattices in two dimensions, and 16 in three dimensions. The two
+dimensional decomposition is depicted on the figure~\ref{fig:part}
+where we have marked each site (square) with the index of the
+sublattice it belongs to.
 \begin{figure}
 \begin{center} 
 \begin{tikzpicture}[scale=0.95]
@@ -358,8 +366,8 @@ sublattices in 3D.
 (\lchalf - 2.5, \lchalf) \neighborhood;
 \end{tikzpicture}
 \end{center}
-\caption{\label{fig:part}Partition of the lattice into independent
-  sublattices. Squares with same number can be updated in parallel.}
+\caption{\label{fig:part}Partition of the lattice into eight independent
+  sublattices. Squares with same number on them belong to the same sublattice and can be updated in parallel.}
 \end{figure}
 
 
