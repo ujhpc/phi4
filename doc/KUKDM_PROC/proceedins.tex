@@ -148,9 +148,38 @@ out of the hardware it is crucial to vectorize the algorithm and make
 good use of the available memory hierarchy.
 
 
-In this contribution we present an efficient, vectorized
-implementation of the Monte-Carlo simulations of the $\varphi^4$ or
-Ginzburg--Landau model both on GPU and CPU. Monte-Carlo simulations of
+In this contribution we present an efficient
+implementation,  both on GPU and CPU, of the Monte-Carlo simulations of the 
+discretized version of the Ginzburg--Landau model. 
+
+The Ginzburg-Landau model is probably after the Ising model the second
+most important model of the stistical physics (for an excelent
+introduction to those topics see \cite{binney}). It is the basis for
+the modern theory of the phase transitions. Under the name of the
+$\phi^4$ theory it is a model for the scalar field that describes
+among other things the much publicized lately Higgs particle.  It is a
+simple model to formulate, but inspite of its simplicity
+unsolvable. While many approximate methods exists to study its
+properties Monte-Carlo simulations are used extensively and their
+importance is growing as the speed and the accesibility of the new
+fast hardware increases.  
+
+
+Our motivation was to develop a tool to illustrate the lecture on
+Statistical Field Theory given by one of the authors. The idea was to
+create a kind of ``virtual lab'' where students could study the
+effects of various parameters on the properties of the model. This
+requires a fast implementation working on the easily accesible
+comodity hardware, so the results can be obtained in resonably short
+time. For this reason we also included a ``cut-off'' term (see next
+section) in the model, which while not stricly necessary allows for
+greater clarity of the presentation. This term however introduces the
+interactions between the sites that are not nearest neighbors (see
+figure~\ref{fig:nn}), complicating the parallisation of the algorithm. 
+
+
+
+Monte-Carlo simulations of
 this type play an important role in statistical physics and field
 theory. Those simulations are usually very time consuming so the speed
 of the algorithm is of a paramount importance. Similar model have been
