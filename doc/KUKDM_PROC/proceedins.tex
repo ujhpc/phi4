@@ -215,15 +215,18 @@ The crucial feature of this algorithm is that the update is local {\em
 immediate neighborhood of the updated point 
 \begin{equation}
 \begin{split}
-\Delta H & = -(\widetilde{\vphi_i}-\vphi_i)
-\underbrace{\left(c^{01}_i-\frac{1}{\Lambda}(c^{02}_i-4 d c^{01}_i+2 c^{11}_i )\right)}_{c_i}\\ 
+\Delta H & = -(\widetilde{\vphi_i}-\vphi_i)\, c_i\\
 &\phantom{= -}
 +(\widetilde{\vphi}^2_i-\vphi_i^2)\left(d+\frac{\mu^2}{2}+d (1+2d)\frac{1}{\Lambda}\right)\\
 &\phantom{= -}+\frac{g}{4!}\left(\widetilde{\vphi}^4_i-\vphi^4_i\right)
 \end{split}
 \end{equation}
 where
-\begin{equation}\begin{split} 
+\begin{equation}
+c_i=\left(c^{01}_i-\frac{1}{\Lambda}(c^{02}_i-4 d c^{01}_i+2 c^{11}_i )\right)
+\end{equation}
+and
+\begin{equation}\label{eq:corona-terms}\begin{split} 
 c_i^{01}&=\sum_{\mu=1}^d\left(\vphi(x_\vi+\a\mu)+\vphi(x_\vi-\a\mu)\right)\\
 c_i^{02}&=\sum_{\mu=1}^d\left(\vphi(x_\vi+2\a\mu)+\vphi(x_\vi-2\a\mu)\right)\\
 c_i^{11}&=\sum_{\mu=}^d\sum_{\nu=1}^{\mu-1}
@@ -234,24 +237,15 @@ c_i^{11}&=\sum_{\mu=}^d\sum_{\nu=1}^{\mu-1}
 \bigr)
 \end{split}
 \end{equation}
-The term $c_i$ is referred to as {\em corona}. 
-In our case, because of
-the last term in \eqref{eq:hamiltonian}, this neighborhood is
-extended as compared to usual nearest neighbors (see figure~\ref{fig:nn}). 
-
-The Metropolis algorithm lends itself naturally to parallelisation,
-however some caution must be taken, notably grid points that lie in the
-same neighborhood cannot be updated together. 
-
-\section{GPU implementation}
-
-While model is inherently parallelizable, grid points that lie in the
-same neighborhood cannot be updated together. Taking into account a
-larger neighborhood means that a simple checkerboard decomposition
-pattern cannot be used and we have devised a new grid decomposition
-scheme. We choose the decomposition depicted in the
-figure~\ref{fig:part}. In 2D we need eight sublattices and 16
-sublattices in 3D.
+The term $c_i$ is referred to as {\em corona} of the site $x_i$.  The
+corona is a weighted sum of the values of the field $\phi$ on the
+sites in the neighborhood of the site $x_i$. On the
+figure~\ref{fig:nn} we provide a geometrical interpretation of corona
+in two dimensions.  In our case, because of the last term in
+\eqref{eq:hamiltonian}, the corona is extended as compared to more
+commonly used nearest neighbors neigborhood (squares on the figure~\ref{fig:nn}). As we will show in
+the next section this considerably complicates the parallelisation of
+the algorithm. 
 \begin{figure}
 \begin{center}
 \begin{tikzpicture} 
@@ -291,9 +285,39 @@ sublattices in 3D.
 
 \end{tikzpicture}
 \end{center}
-\caption{\label{fig:nn}The neighborhood used to calculate the $\Delta H$:
+\caption{\label{fig:nn}The neighborhood used to calculate the $\Delta H$. The values of the field $\phi$ on the gray marked lattice sites contribute to the corona $c_i$ with geometrical symbols marking the contribution to different terms: 
 $c^{01}$ -- squares, $c^{11}$ -- circles and $c^{02}$ -- diamonds.}
 \end{figure}
+
+
+\section{GPU implementation}
+
+The Metropolis algorithm lends itself naturally to parallelisation,
+however some caution must be taken, notably grid points that lie in
+the same neighborhood cannot be updated together. That is if we update
+the red point on the figure~\ref{fig:nn} we cannot update any of the
+gray points in the same time.  Basically this stems from the
+requirement that in order to process two sites $x_a$ and $x_b$ in
+parallel those two operation must be independent.  That means that the
+joint probability
+$P(\phi_a,\phi_b\rightarrow\phi_a+\eta_a,\phi_b+\eta_b)$ must
+factorise:
+\begin{equation}
+P(\phi_a,\phi_b\rightarrow\phi_a+\eta_a,\phi_b+\eta_b)=P(\phi_a\rightarrow\phi_a+\eta_a)P(\phi_b\rightarrow\phi_b+\eta_b)
+\end{equation}
+This can be only achieved if $P(\phi_a\rightarrow\phi_a+\eta_a)$ does
+not depend on the value of $\phi_b$ and vice versa.
+
+
+
+
+
+Taking into account a
+larger neighborhood means that a simple checkerboard decomposition
+pattern cannot be used and we have devised a new grid decomposition
+scheme. We choose the decomposition depicted in the
+figure~\ref{fig:part}. In 2D we need eight sublattices and 16
+sublattices in 3D.
 
 \begin{figure}
 \begin{center} 
