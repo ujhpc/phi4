@@ -47,7 +47,7 @@
 \newcommand{\vi}{{\vec{i}}}
 \newcommand{\vj}{{\vec{j}}}
 \newcommand{\vmu}{\vec{\mu}}
-
+\newcommand{\ie}{{\textit{i.e.}}}
 \newcommand{\fillblockgray}[2]{
 \pgfmathtruncatemacro\llx{\bksize*(#1)-2}
 \pgfmathtruncatemacro\lly{\bksize*(#2)-2}
@@ -176,10 +176,15 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 \end{equation*}
 where $\vphi$ is a scalar\footnote{In general this can be a vector,
   but in this contribution we restrict ourselves to scalar case.} field
-defined on the sites of a two or three dimensional lattice. The $x_i$
-denote the sites of the lattice where $i$ is a multidimensional index
+defined on the sites of a $d$ dimensional lattice (we only consider $d=2$ and $3$). The $x_i$
+denote a site of the lattice where $i$ is a multidimensional index
 and $\a\mu$ denotes the unit vector in the direction $\mu$. We use
-periodic boundary conditions.  The Monte-Carlo simulations consist of
+periodic boundary conditions \ie
+\begin{equation} 
+\phi(x+L_{\mu}\a\mu)=\phi(x)
+\end{equation}
+where  $L_\mu$ is the nuber of lattice sites in direction $\mu$. 
+The Monte-Carlo simulations consist of
 generating the field configurations with probability proportional to
 $\exp(-H(\vphi))$.
 
@@ -188,10 +193,10 @@ algorithm\cite{metropolis,binney}. This amounts to sequentially updating all the
 lattice. During each update we change the value of the field $\vphi$
 in on a single lattice point ($\vphi_i$ is a shorthand for $\vphi(x_\vi)$).
 \begin{equation}
-\vphi_i\longrightarrow\widetilde{\vphi_i}=\vphi_i+\eta.
+\vphi_i\longrightarrow\widetilde{\vphi_i}=\vphi_i+\eta_i.
 \end{equation}
-The $\eta$ is a pseudo--random number drawn from a distribution such
-that $P(\eta) = P(-\eta)$. In practice we draw  $\eta$ from the
+The $\eta_i$ is a pseudo--random number drawn from a distribution such
+that $P(\eta_i) = P(-\eta_i)$. In practice we draw  $\eta$ from the
 uniform distribution on interval $[-\varepsilon,\varepsilon)$.  Then we
 calculate the difference of the Hamiltonian's
 \begin{equation}
@@ -199,10 +204,11 @@ calculate the difference of the Hamiltonian's
 \end{equation}
 If $\Delta H < 0$ we accept the change and substitute
 $\widetilde{\vphi_i}$ for $\vphi_i$, otherwise we accept the change
-with the probability $\exp(-\Delta H)$. In other words we accept the
-change with the probability
+with the probability $\exp(-\Delta H)$. In other words if we denote by
+$P(\phi_i\rightarrow\phi_i+\eta_i)$ the probability of updating the
+field at lattice site $x_i$ then it is given by
 \begin{equation}
-P(\vphi_i\rightarrow\vphi_i+\eta)=\min\left(1,\exp(-\Delta H)\right)
+P(\vphi_i\rightarrow\vphi_i+\eta_i)=\min\left(1,\exp(-\Delta H)\right).
 \end{equation}
 The crucial feature of this algorithm is that the update is local {\em
   i.e.} $\Delta H$ depends only on the values of fields in the
