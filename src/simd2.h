@@ -220,10 +220,6 @@ __simd_ctor(long long, double, 4)
 #undef __simd_ctor_
 #undef __simd_ctor
 
-template <>
-inline simd<int, 8>::simd(const int* ptr)
-    : v((simd<int, 8>::vector_t)_mm256_loadu_ps((const float*)ptr)) {}
-
 // Add gather constructors
 #ifdef __AVX2__
 #define __simd_gather_impl(T, TF, N, I, ...) \
@@ -252,7 +248,7 @@ __simd_gather(int,
               (const float*)ptr,
               (__m128i)index.v,
               (__m128)mask.v,
-              1)
+              4)
 #ifdef __AVX__
 __simd_gather(int,
               float,
@@ -262,7 +258,7 @@ __simd_gather(int,
               (const float*)ptr,
               (__m256i)index.v,
               (__m256)mask.v,
-              1)
+              4)
 #endif
 // double precision
 __simd_gather(long long,
@@ -273,7 +269,7 @@ __simd_gather(long long,
               (const double*)ptr,
               (__m128i)index.v,
               (__m128d)mask.v,
-              1)
+              8)
 #ifdef __AVX__
 __simd_gather(long long,
               double,
@@ -283,7 +279,7 @@ __simd_gather(long long,
               (const double*)ptr,
               (__m256i)index.v,
               (__m256d)mask.v,
-              1)
+              8)
 #endif
 #undef __simd_gather
 #undef __simd_gather_impl
