@@ -12,7 +12,7 @@
 \usetikzlibrary{arrows,shapes,backgrounds}
 \usetikzlibrary{shadows}
 
-%\newcommand{\dh}{\Delta H}
+\newcommand{\eg}{\textit{e.g.}}
 \newcommand{\code}[1]{\lstinline!#1!}
 
 \lstdefinelanguage
@@ -155,15 +155,15 @@ In this contribution we present an efficient
 implementation,  both on GPU and CPU, of the Monte-Carlo simulations of the 
 discretized version of the Ginzburg--Landau model. 
 The Ginzburg-Landau model is probably after the Ising model the second
-most important model of the stistical physics (for an excelent
+most important model of the statistical physics (for an excellent
 introduction to those topics see \cite{binney}). It is the basis for
 the modern theory of the phase transitions. Under the name of the
 $\phi^4$ theory it is a model for the scalar field that describes
 among other things the much publicized lately Higgs particle.  It is a
-simple model to formulate, but inspite of its simplicity
+simple model to formulate, but in spite of its simplicity
 unsolvable. While many approximate methods exists to study its
 properties Monte-Carlo simulations are used extensively and their
-importance is growing as the speed and the accesibility of the new
+importance is growing as the speed and the accessibility of the new
 fast hardware increases.  
 
 
@@ -171,28 +171,29 @@ Our motivation was to develop a tool to accompany the lecture on
 Statistical Field Theory given by one of the authors. The idea was to
 create a kind of ``virtual lab'' where students could study the
 effects of various parameters on the properties of the model. This
-requires a fast implementation working on the easily accesible
-commodity hardware, so the results can be obtained in resonably short
-time. For the eductional reasons we also included a ``cut-off'' term
-(see next section) in the model, which while not stricly necessary
+requires a fast implementation working on the easily accessible
+commodity hardware, so the results can be obtained in reasonably short
+time. For the educational reasons we also included a ``cut-off'' term
+(see next section) in the model, which while not strictly necessary
 allows for greater clarity of the presentation. This term however
 introduces the interactions between the sites that are not nearest
 neighbors (see figure~\ref{fig:nn}) complicating the parallelisation
 of the algorithm.  We have obtained a hundredfold speedup compared
 with our old CPU version.  That drew our attention to the inefficiency
-of the CPU code. We have completelly rewritten the code taking
-advantage of the many cores and SIMD intructions of the CPU,
-paradoxically it took more effort than implemnting the GPU version.
+of the CPU code. We have completely rewritten the code taking
+advantage of the many cores and SIMD instructions of the CPU,
+paradoxically it took more effort than implementing the GPU version.
 
 We believe however that our contribution is relevant to a wider
 audience.  Monte-Carlo simulations of this type play an important role
 in statistical physics, solid state physics and field theory.  Those
 simulations are usually very time consuming so the speed of the
 algorithm is of a paramount importance.  Our implementation can be
-easilly addapted to many variants of the model as we describe in more
+easily adapted to many variants of the model as we describe in more
 detail later. The GPU implementation is targeted for small
-desktop machines with commodity CUDA enabled GPU and is up to 30 times
-than CPU program running on similar machine. 
+desktop machines with commodity CUDA enabled GPU and is up to 25 times
+faster than CPU program running on the same machine. 
+
 
 Similar model have been
 ported to GPU, however they were mainly discrete spin models with
@@ -224,7 +225,7 @@ periodic boundary conditions \ie
 \begin{equation} 
 \phi(x+L_{\mu}\a\mu)=\phi(x)
 \end{equation}
-where  $L_\mu$ is the nuber of lattice sites in direction $\mu$. 
+where  $L_\mu$ is the number of lattice sites in direction $\mu$. 
 The Monte-Carlo simulations consist of
 generating the field configurations with probability proportional to
 $\exp(-H(\vphi))$.
@@ -284,7 +285,7 @@ sites in the neighborhood of the site $x_i$. On the
 figure~\ref{fig:nn} we provide a geometrical interpretation of corona
 in two dimensions.  In our case, because of the last term in
 \eqref{eq:hamiltonian}, the corona is extended as compared to more
-commonly used nearest neighbors neigborhood (squares on the figure~\ref{fig:nn}). As we will show in
+commonly used nearest neighbors neighborhood (squares on the figure~\ref{fig:nn}). As we will show in
 the next section this considerably complicates the parallelisation of
 the algorithm. 
 \begin{figure}
@@ -345,7 +346,7 @@ requirement that in order to process two sites $x_a$ and $x_b$ in
 parallel those two operation must be independent.  That means that the
 joint probability
 $P(\phi_a,\phi_b\rightarrow\phi_a+\eta_a,\phi_b+\eta_b)$ must
-factorise:
+factorize:
 \begin{equation}
 P(\phi_a,\phi_b\rightarrow\phi_a+\eta_a,\phi_b+\eta_b)
 =P(\phi_a\rightarrow\phi_a+\eta_a)P(\phi_b\rightarrow\phi_b+\eta_b)
@@ -356,13 +357,13 @@ not depend on the value of $\phi_b$ and vice versa.
 To ensure that this condition is satisfied we decompose the lattice
 into several sublattices such that points belonging to each sublattice
 are far enough from each other and can safely be updated in
-parallel. In case of the more commonly encountered nearest-neigbour
+parallel. In case of the more commonly encountered nearest-neighbor
 interaction (squares on the figure~\ref{fig:nn}) it is enough two
-divide the lattice in two sublattices by labeleling each side
+divide the lattice in two sublattices by labeling each side
 ``black'' or ``white'' as on the checkerboard (sometimes this is also
-refered as ``even-odd'' decomposition). It is easy to see that no site
-has a nearest neighbour of the same colour, so all the sites of the
-same colour can be updated in parallel. This would be the case of the
+referred as ``even-odd'' decomposition). It is easy to see that no site
+has a nearest neighbor of the same color, so all the sites of the
+same color can be updated in parallel. This would be the case of the
 Ginzburg-Landau model without the last term in \eqref{eq:hamiltonian}.
 
 As we consider in here a model with much bigger corona (see
@@ -538,14 +539,14 @@ generator, but we have not attempted this in this work.
 
 One of the problems with lattice simulations is the treatment of the boundary conditions. The
 algorithm requires access to the site neighbors during each update. Index of neighbors can be
-calculated using simple arithmetics, except at the boundaries. Indexing of neighbors requires
+calculated using simple arithmetic's, except at the boundaries. Indexing of neighbors requires
 checking for the boundary at each update or an expensive modulo operations\footnote{An exception are
   the powers of two, where modulo can be cheaply calculated. a general modulo operation is however
-  quite expensive. }. Anotherd technique is to use the precalculated and stored indices: for every
+  quite expensive. }. Another technique is to use the precalculated and stored indices: for every
 site we store the index of four or six nearest neighbors. This is also very flexible but requires a
 large amount of memory. This can have a negative impact on the performance and is not well suitable
 for the GPU which usually have less RAM then CPU's. In our algorithm the checking for boundary is
-needed only when loading to shared memory. Then we can use simple index arithmetics.
+needed only when loading to shared memory. Then we can use simple index arithmetic.
 
 
 
@@ -561,7 +562,7 @@ one level {\em i.e.} we do not partition the lattice into blocks.  The
 SIMD instructions are used to process four (SSE) or eight (AVX)
 updates in parallel (similarly to threads on GPU).  At present only
 portable way to use vector instructions is to use compiler
-intrinsics\cite{intr}. We have defined our own vector type that uses
+intrinsic\cite{intr}. We have defined our own vector type that uses
 combination of the \lstinline!__attribute__((vector_size(N)))!
 directive and intrinsics to provide a drop--in replacement for scalar
 types.
@@ -605,14 +606,14 @@ The advantage is now that the argument of \code{log} is independent of
 $\Delta H$ and the processor is free to reorder the instructions
 allowing to hide some of the latency. This implementation is safe even
 in case when \code{rand()} returns a zero as \code{log} then returns {\tt
-  -Inf}.  Actually the code above is vectorised and calculations of
-the four or eight $\log$'s in parallel are done using the Intel's svml
-library.
+  -Inf}.  Actually the code above is vectorized and calculations of
+the four or eight $\log$'s is done in parallel  using the Intel's svml
+library\cite{svml}.
 
 As already mentioned in the previous section indexing the neighbors
 can be quite costly operation requiring expensive modulo
 operations or large amount of memory. However if
-we restrict ourself to the lattice dimensions that are powers of two
+we restrict ourselves to the lattice dimensions that are powers of two
 the nearest neighbor calculations can be made using addition and bitwise
 operations. This is quite a restrictive approach, not suitable
 for real applications but we have decided to use it for comparison
@@ -625,8 +626,8 @@ the CPU performance.
 
 We have tested our implementations on  the following hardware:
 \begin{itemize}
-\item GPU \emph{Nvidia} GTX 470, 14 Scalar Multiprocessor = 448 CUDA cores, 1.2GHz, CUDA 5.0 Ubuntu Linux 12.04, 1088Gflops.
-\item CPU \emph{Intel} i5-2400S Sandy Bridge, 4 core, 2.5 GHz, 12 GB RAM, OSX 10.8.3, GCC 4.8.0 -O3 +OpenMP, 160 Gflops. 
+\item GPU Nvidia GTX 470, 14 Scalar Multiprocessor = 448 CUDA cores, 1.2GHz, CUDA 5.0 Ubuntu Linux 12.04, 1088Gflops.
+\item CPU Intel i5-2400S Sandy Bridge, 4 core, 2.5 GHz, 12 GB RAM, OSX 10.8.3, GCC 4.8.0 -O3 +OpenMP, 160 Gflops. 
 \end{itemize}
 
 The overall performance of the algorithm expressed in Gflops or
@@ -788,6 +789,16 @@ that the cache is probably not fully associative. All that together
 implies that the cache size should be up to four or five times bigger
 to accommodate the whole block. 
 
+\section{Extensions and limitations}
+
+The above implementation can be easily adapted to other variants of
+the model.  The $\Delta H$ can be arbitrary within the constraints
+that it cannot access points outside of the neighborhood considered in
+this contribution. Of course when the $\Delta H$ calculation requires
+smaller number of lattice points the above procedure can be overly
+complicated and thus not optimal. In that case it may be advantageous
+to use \eg the checkerboard decomposition.
+
 
 \section{Discussion}
 
@@ -847,7 +858,7 @@ In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
 \bibitem{intr} ``Intel C++ Intrinsic Reference.'' 
 \verb!http://software.intel.com/sites/default!\\\verb!/files/m/9/4/c/8/e/18072-347603.pdf! \\
 Intel Intrinsics Guide\\ \verb!http://software.intel.com/en-us/articles/intel-intrinsics-guide!
-
+\bibitem{svml} TO-DO ! add reference to Intel svml
 \end{thebibliography}
 
 \end{document}
