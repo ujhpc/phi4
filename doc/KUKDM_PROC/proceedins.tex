@@ -12,6 +12,9 @@
 \usetikzlibrary{arrows,shapes,backgrounds}
 \usetikzlibrary{shadows}
 
+%\newcommand{\dh}{\Delta H}
+\newcommand{\code}[1]{\lstinline!#1!}
+
 \lstdefinelanguage
   [GCC]{C++}
   []{C++}
@@ -19,8 +22,7 @@
   morekeywords={[2]__attribute__},%
   morekeywords={[3]vector_size,r,DeltaH}%
 }
-\lstset{
-  language={[GCC]C++},%
+\lstset{  language={[GCC]C++},%
   basicstyle=\small,%
   keywordstyle=\bfseries,%
   keywordstyle=[2]\bfseries,%
@@ -547,7 +549,6 @@ needed only when loading to shared memory. Then we can use simple index arithmet
 
 
 
-
 \section{CPU implementation}
 
 % CPU implementation
@@ -573,21 +574,39 @@ register), unlike GPU where gather and scatter is key feature. Another drawback
 in lack of AVX 256-bit integer operations, which makes random number generator
 utilize 128-bit SSE only, even on 256-bit AVX capable CPUs.
 
-In our CPU implementation we use a small ``trick''. Instead of using the
+In our CPU implementation we use a small enhancement exploiting the
+out of order instruction execution capabilities of the CPU. The most
+inner loop of the algorithm looks as follows
 \begin{lstlisting}
-        if ( exp(-DeltaH) > r )
-\end{lstlisting}
-condition for the Metropolis algorithm ($r$ is a pseudo--random number) we use
-an equivalent condition
-\begin{lstlisting}
-        if ( -DeltaH >  log(r) )
-\end{lstlisting}
+for(int i=0; i<N_HIT; ++i) {
 
-The advantage is now that the argument of $\log$ is independent of
-$\Delta H$ and can be calculated beforehand allowing to hide some of
-the latency. This implementation is safe even in case when $r$ is
-equal zero as $\log$ then returns {\tt -Inf}.  The calculations of the
-four or eight $\log$'s in parallel is done using the Intel's svml
+  // Here comes the  DeltaH calculations 
+ 
+  if ( exp(-DeltaH) > rand();
+    // Accept the move
+  }
+}
+\end{lstlisting}
+The exponent is an expensive, high latency operation. The processor
+has to wait for the $\Delta H$ calculations to finish before it can
+start the exponent. We have rewritten this part as
+\begin{lstlisting}
+  for(int i=0; i<N_HIT; ++i) { 
+    float lr = lor( rand() );
+ 
+    // Here comes the  DeltaH calculations 
+ 
+    if ( -DeltaH >  lr     ) {
+      // Accept the move 
+    }
+}
+\end{lstlisting}
+The advantage is now that the argument of \code{log} is independent of
+$\Delta H$ and the processor is free to reorder the instructions
+allowing to hide some of the latency. This implementation is safe even
+in case when \code{rand()} returns a zero as \code{log} then returns {\tt
+  -Inf}.  Actually the code above is vectorised and calculations of
+the four or eight $\log$'s in parallel are done using the Intel's svml
 library.
 
 As already mentioned in the previous section indexing the neighbors
