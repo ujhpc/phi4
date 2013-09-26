@@ -98,14 +98,15 @@
 \def\lcsize{5}
 
 \title{ GPU-accelerated and CPU SIMD Optimized \\
-        Monte Carlo Simulation of $\phi^4$ Model }
-\author{ Piotr Bialas\inst{1}\inst{2}\thanks{\email{pbialas@th.if.uj.edu.pl}} \and Jakub Kowal\inst{1}\thanks{\email{jakub.kowal@uj.edu.pl}}
-         \and Adam Strzelecki\inst{1}\thanks{\email{adam.strzelecki@uj.edu.pl}} }
+  Monte Carlo Simulation of $\phi^4$ Model } \author{ Piotr
+  Bialas\inst{1}\inst{2}\thanks{\email{pbialas@th.if.uj.edu.pl}} \and
+  Jakub Kowal\inst{1}\thanks{\email{jakub.kowal@uj.edu.pl}} \and Adam
+  Strzelecki\inst{1}\thanks{\email{adam.strzelecki@uj.edu.pl}} }
 \institute{ Faculty of Physics, Astronomy and Applied Computer Science \\
-            Jagiellonian University ul. Reymonta 4, 30-059 Krakow, Poland 
-            \and Mark Kac Complex Systems Research Centre \\
-            Faculty of Physics, Astronomy and Applied Computer Science \\
-            Jagiellonian University, Reymonta 4, 30-059 Krakow, Poland }
+  Jagiellonian University ul. Reymonta 4, 30-059 Krakow, Poland
+  \and Mark Kac Complex Systems Research Centre \\
+  Faculty of Physics, Astronomy and Applied Computer Science \\
+  Jagiellonian University, Reymonta 4, 30-059 Krakow, Poland }
 
 \begin{document}
 
@@ -151,7 +152,6 @@ good use of the available memory hierarchy.
 In this contribution we present an efficient
 implementation,  both on GPU and CPU, of the Monte-Carlo simulations of the 
 discretized version of the Ginzburg--Landau model. 
-
 The Ginzburg-Landau model is probably after the Ising model the second
 most important model of the stistical physics (for an excelent
 introduction to those topics see \cite{binney}). It is the basis for
@@ -165,24 +165,34 @@ importance is growing as the speed and the accesibility of the new
 fast hardware increases.  
 
 
-Our motivation was to develop a tool to illustrate the lecture on
+Our motivation was to develop a tool to accompany the lecture on
 Statistical Field Theory given by one of the authors. The idea was to
 create a kind of ``virtual lab'' where students could study the
 effects of various parameters on the properties of the model. This
 requires a fast implementation working on the easily accesible
-comodity hardware, so the results can be obtained in resonably short
-time. For this reason we also included a ``cut-off'' term (see next
-section) in the model, which while not stricly necessary allows for
-greater clarity of the presentation. This term however introduces the
-interactions between the sites that are not nearest neighbors (see
-figure~\ref{fig:nn}), complicating the parallisation of the algorithm. 
+commodity hardware, so the results can be obtained in resonably short
+time. For the eductional reasons we also included a ``cut-off'' term
+(see next section) in the model, which while not stricly necessary
+allows for greater clarity of the presentation. This term however
+introduces the interactions between the sites that are not nearest
+neighbors (see figure~\ref{fig:nn}) complicating the parallelisation
+of the algorithm.  We have obtained a hundredfold speedup compared
+with our old CPU version.  That drew our attention to the inefficiency
+of the CPU code. We have completelly rewritten the code taking
+advantage of the many cores and SIMD intructions of the CPU,
+paradoxically it took more effort than implemnting the GPU version.
 
+We believe however that our contribution is relevant to a wider
+audience.  Monte-Carlo simulations of this type play an important role
+in statistical physics, solid state physics and field theory.  Those
+simulations are usually very time consuming so the speed of the
+algorithm is of a paramount importance.  Our implementation can be
+easilly addapted to many variants of the model as we describe in more
+detail later. The GPU implementation is targeted for small
+desktop machines with commodity CUDA enabled GPU and is up to 30 times
+than CPU program running on similar machine. 
 
-
-Monte-Carlo simulations of
-this type play an important role in statistical physics and field
-theory. Those simulations are usually very time consuming so the speed
-of the algorithm is of a paramount importance. Similar model have been
+Similar model have been
 ported to GPU, however they were mainly discrete spin models with
 nearest neighbor interactions\cite{spin1,spin2,weigel}.  We use a continuous field model
 with extended neighborhood that to our knowledge was not yet ported to
@@ -314,15 +324,18 @@ the algorithm.
 
 \end{tikzpicture}
 \end{center}
-\caption{\label{fig:nn}The neighborhood used to calculate the $\Delta H$. The values of the field $\phi$ on the gray marked lattice sites contribute to the corona $c_i$ with geometrical symbols marking the contribution to different terms: 
-$c^{01}$ -- squares, $c^{11}$ -- circles and $c^{02}$ -- diamonds.}
+\caption{\label{fig:nn}The neighborhood used to calculate the $\Delta
+  H$.  The values of the field $\phi$ on the gray marked lattice sites
+  contribute to the corona $c_i$ with geometrical symbols marking the
+  contribution to different terms: $c^{01}$ -- squares, $c^{11}$ --
+  circles and $c^{02}$ -- diamonds.}
 \end{figure}
 
 
 \section{GPU implementation}
 
 The Metropolis algorithm lends itself naturally to parallelisation,
-however some caution must be taken, notably grid points that lie in
+however some caution must be taken. Notably grid points that lie in
 the same neighborhood cannot be updated together. That is if we update
 the red point on the figure~\ref{fig:nn} we cannot update any of the
 gray points in the same time.  Basically this stems from the
@@ -332,7 +345,8 @@ joint probability
 $P(\phi_a,\phi_b\rightarrow\phi_a+\eta_a,\phi_b+\eta_b)$ must
 factorise:
 \begin{equation}
-P(\phi_a,\phi_b\rightarrow\phi_a+\eta_a,\phi_b+\eta_b)=P(\phi_a\rightarrow\phi_a+\eta_a)P(\phi_b\rightarrow\phi_b+\eta_b)
+P(\phi_a,\phi_b\rightarrow\phi_a+\eta_a,\phi_b+\eta_b)
+=P(\phi_a\rightarrow\phi_a+\eta_a)P(\phi_b\rightarrow\phi_b+\eta_b)
 \end{equation}
 This can be only achieved if $P(\phi_a\rightarrow\phi_a+\eta_a)$ does
 not depend on the value of $\phi_b$ and vice versa.
@@ -395,8 +409,9 @@ sublattice it belongs to.
 (\lchalf - 2.5, \lchalf) \neighborhood;
 \end{tikzpicture}
 \end{center}
-\caption{\label{fig:part}Partition of the lattice into eight independent
-  sublattices. Squares with same number on them belong to the same sublattice and can be updated in parallel.}
+\caption{\label{fig:part}Partition of the lattice into eight
+  independent sublattices. Squares with same number on them belong to
+  the same sublattice and can be updated in parallel.}
 \end{figure}
 
 
@@ -514,32 +529,32 @@ generator, but we have not attempted this in this work.
 \EndFor
 \EndFor
 \end{algorithmic}
-\caption{\label{alg:gpu} The GPU algorithm. The CPU algorithm differs by the absence of the loops over the blocks: lines 2-4.}
+\caption{\label{alg:gpu} The GPU algorithm. The CPU algorithm differs
+  by the absence of the loops over the blocks: lines 2-4.}
 \end{algorithm}
 
 
-One of the problems with lattice simulations is the treatment of the
-boundary conditions. The algorithm requires access to the site
-neighbors during each update. Index of neighbors can be calculated
-using simple arithmetics, except at the boundaries. Indexing of
-neighbors requires  checking for the boundary at each update or
-an expensive modulo operations. Another technique is to use the
-precalculated and stored indices: for every site we store the index of
-four or six nearest neighbors. This is also very flexible but
-requires a large amount of memory. This can have a negative impact on
-the performance and is not well suitable for the GPU which usually
-have less RAM then CPU's. In our algorithm the checking for boundary
-is needed only when loading to shared memory. Then we can use simple
-index arithmetics.
+One of the problems with lattice simulations is the treatment of the boundary conditions. The
+algorithm requires access to the site neighbors during each update. Index of neighbors can be
+calculated using simple arithmetics, except at the boundaries. Indexing of neighbors requires
+checking for the boundary at each update or an expensive modulo operations\footnote{An exception are
+  the powers of two, where modulo can be cheaply calculated. a general modulo operation is however
+  quite expensive. }. Anotherd technique is to use the precalculated and stored indices: for every
+site we store the index of four or six nearest neighbors. This is also very flexible but requires a
+large amount of memory. This can have a negative impact on the performance and is not well suitable
+for the GPU which usually have less RAM then CPU's. In our algorithm the checking for boundary is
+needed only when loading to shared memory. Then we can use simple index arithmetics.
 
 
 
 
 \section{CPU implementation}
+
 % CPU implementation
+
 To make a fair comparison with the CPU we have to use both multicore
-as vector (SSE/AVX) programming.  The parallelisation on many cores
-is relatively easy using the OpenMP. The same restriction apply as on
+as vector (SSE/AVX) programming.  The parallelisation on many cores is
+relatively easy using the OpenMP. The same restriction apply as on
 GPU, so we partition the the lattice in the same way, but we use only
 one level {\em i.e.} we do not partition the lattice into blocks.  The
 SIMD instructions are used to process four (SSE) or eight (AVX)
@@ -810,7 +825,8 @@ Lee Howes and David Thomas.
 ``{\em Efficient random number generation and application using {CUDA}.}''
 In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
   Wesley, August 2007.
-\bibitem{intr} ``Intel C++ Intrinsic Reference.'' \verb!http://software.intel.com/sites/default!\\\verb!/files/m/9/4/c/8/e/18072-347603.pdf! \\
+\bibitem{intr} ``Intel C++ Intrinsic Reference.'' 
+\verb!http://software.intel.com/sites/default!\\\verb!/files/m/9/4/c/8/e/18072-347603.pdf! \\
 Intel Intrinsics Guide\\ \verb!http://software.intel.com/en-us/articles/intel-intrinsics-guide!
 
 \end{thebibliography}
