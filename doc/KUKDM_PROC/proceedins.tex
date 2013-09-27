@@ -177,7 +177,7 @@ time. For the educational reasons we also included a ``cut-off'' term
 (see next section) in the model, which while not strictly necessary
 allows for greater clarity of the presentation. This term however
 introduces the interactions between the sites that are not nearest
-neighbors (see figure~\ref{fig:nn}) complicating the parallelisation
+neighbors (see figure~\ref{fig:nn}) complicating the parallelization
 of the algorithm.  We have obtained a hundredfold speedup compared
 with our old CPU version.  That drew our attention to the inefficiency
 of the CPU code. We have completely rewritten the code taking
@@ -292,7 +292,7 @@ figure~\ref{fig:nn} we provide a geometrical interpretation of corona
 in two dimensions.  In our case, because of the last term in
 \eqref{eq:hamiltonian}, the corona is extended as compared to more
 commonly used nearest neighbors neighborhood (squares on the figure~\ref{fig:nn}). As we will show in
-the next section this considerably complicates the parallelisation of
+the next section this considerably complicates the parallelization of
 the algorithm. 
 \begin{figure}
 \begin{center}
@@ -343,7 +343,7 @@ the algorithm.
 
 \section{GPU implementation}
 
-The Metropolis algorithm lends itself naturally to parallelisation,
+The Metropolis algorithm lends itself naturally to parallelization,
 however some caution must be taken. Notably grid points that lie in
 the same neighborhood cannot be updated together. That is if we update
 the red point on the figure~\ref{fig:nn} we cannot update any of the
@@ -561,7 +561,7 @@ needed only when loading to shared memory. Then we can use simple index arithmet
 % CPU implementation
 
 To make a fair comparison with the CPU we have to use both multicore
-as vector (SSE/AVX) programming.  The parallelisation on many cores is
+as vector (SSE/AVX) programming.  The parallelization on many cores is
 relatively easy using the OpenMP. The same restriction apply as on
 GPU, so we partition the the lattice in the same way, but we use only
 one level {\em i.e.} we do not partition the lattice into blocks.  The
