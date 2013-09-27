@@ -33,6 +33,18 @@ const int default_b = 16;
 #define FILE_NAME STRINGIZE_VALUE_OF(NAME)
 #endif
 
+// Gops estimation
+#define LOG_OPS 20
+#define RNG_OPS 23
+
+#define CORONA_OPS NCOMP*(DIM*(4 + 2 * (DIM - 1)) - DIM + 6)
+#define INIT_OPS NCOMP * 4 + 2
+#define UPDATE_OPS \
+  N_HIT*((NCOMP + 1) * RNG_OPS + (NCOMP - 1) * 6 + LOG_OPS + 10)
+#define OPS (CORONA_OPS + INIT_OPS + UPDATE_OPS)
+#define NO_LOG_OPS (OPS - N_HIT * LOG_OPS)
+#define LOGS N_HIT
+
 int main(int argc, char* argv[]) {
 
   cmdline::parser cl;
@@ -178,12 +190,22 @@ int main(int argc, char* argv[]) {
 #ifdef __linux__
   clock_gettime(CLOCK_REALTIME, &stop);
   double ns =
-      1.0e9 * (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec);
+      1e9 * (stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec);
+  double sec = ns / 1e9;
+  long long sweeps = block_sweeps * Ind::n_sites() * n_term;
+  double up_ns = ns / (double)sweeps / (double)N_HIT;
+  double gops = ((double)sweeps * (double)OPS) / ns;
+  double gops_no_log = ((double)sweeps * (double)NO_LOG_OPS) / ns;
+  double logs = ((double)sweeps * (double)LOGS) / ns;
   if (cl.exist("verbose")) {
-    std::cerr << "termalisation took " << (ns / 1.0e9) << " s" << std::endl;
-    std::cerr << "that makes "
-              << ns / (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term)
-              << " ns per update" << std::endl;
+    std::cerr << "sites " << Ind::n_sites() << std::endl;
+    std::cerr << "ops per sweep " << OPS << std::endl;
+    std::cerr << "total ops " << sweeps* OPS << std::endl;
+    std::cerr << "termalisation took " << sec << " s" << std::endl;
+    std::cerr << "that makes " << up_ns << " ns per update" << std::endl;
+    std::cerr << "Gops " << gops << " per s" << std::endl;
+    std::cerr << "Gops (no log) " << gops_no_log << " per s" << std::endl;
+    std::cerr << "logs " << logs << " per s" << std::endl;
   }
   if (cl.exist("time")) {
 #ifdef __AVX2__
@@ -200,7 +222,8 @@ int main(int argc, char* argv[]) {
     std::cout << "SSE2\t";
 #endif
     std::cout << (ns / 1.0e9) << "\t";
-    std::cerr << ns / (block_sweeps * N_HIT * (double)Ind::n_sites() * n_term);
+    std::cerr << up_ns << "\t";
+    std::cerr << gops;
 #ifdef OLD
     std::cout << "\t(old)";
 #endif
