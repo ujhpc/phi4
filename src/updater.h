@@ -29,7 +29,7 @@ template <typename F> class Updater {
     Float new_action = Float(0);
     Float delta_action;
 
-    Float phi2_tmp = Float(0);
+    Float phi2 = Float(0);
     Float corona[F::n_components];
 
     for (int k = 0; k < F::n_components; ++k) {
@@ -63,33 +63,29 @@ template <typename F> class Updater {
                     Float(2) * big_corona_11);
       corona[k] = small_corona + big_corona;
 
-      Float phi_tmp = field.get(i, k);
-      old_action += corona[k] * phi_tmp;
+      Float phi = field.get(i, k);
+      old_action += corona[k] * phi;
 
-      phi2_tmp += phi_tmp * phi_tmp;
+      phi2 += phi * phi;
     }
 
-    old_action -= (quadratic_coef + gr * phi2_tmp) * phi2_tmp;
+    old_action -= (quadratic_coef + gr * phi2) * phi2;
 
     int accepted = 0;
 
 #pragma unroll
     for (int h = 0; h < N_HIT; h++) {
       new_action = Float(0);
-      Float phi_tmp[F::n_components];
-      phi2_tmp = Float(0);
+      Float new_phi[F::n_components];
+      new_phi2 = Float(0);
 
       for (int k = 0; k < F::n_components; ++k) {
-        phi_tmp[k] = field.get(i, k);
-
-        phi_tmp[k] += epsilon_ * (RAND(tid) - Float(0.5));
-
-        new_action += corona[k] * phi_tmp[k];
-
-        phi2_tmp += phi_tmp[k] * phi_tmp[k];
+        new_phi[k] = field.get(i, k);
+        new_phi[k] += epsilon_ * (RAND(tid) - Float(0.5));
+        new_action += corona[k] * new_phi[k];
+        new_phi2 += new_phi[k] * new_phi[k];
       }
-      new_action -= phi2_tmp * (quadratic_coef + gr * phi2_tmp);
-
+      new_action -= new_phi2 * (quadratic_coef + gr * new_phi2);
       delta_action = new_action - old_action;
 
       if (delta_action < Float(0))
@@ -97,7 +93,7 @@ template <typename F> class Updater {
           continue;
 
       for (int k = 0; k < F::n_components; ++k) {
-        field.set(i, k, phi_tmp[k]);
+        field.set(i, k, new_phi[k]);
       }
 
       old_action = new_action;
