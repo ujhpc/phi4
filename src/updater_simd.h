@@ -57,9 +57,8 @@ template <typename F> class Updater {
 
       FVec big_corona =
           FVec(-pars_.i_Lambda) *
-          (big_corona_02 -
-           FVec(Float(4.0)) * FVec((Float)indexer_t::D) * big_corona_01 +
-           FVec(Float(2.0)) * big_corona_11);
+          (big_corona_02 - FVec(Float(4 * indexer_t::D)) * big_corona_01 +
+           FVec(Float(2)) * big_corona_11);
       corona[k] = small_corona + big_corona;
 
       phi[k] = field.template get<FVec>(i, k);

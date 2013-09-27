@@ -59,8 +59,8 @@ template <typename F> class Updater {
       }
 
       big_corona = -pars_.i_Lambda *
-                   (big_corona_02 - Float(4.0) * indexer_t::D * big_corona_01 +
-                    Float(2.0) * big_corona_11);
+                   (big_corona_02 - Float(4 * indexer_t::D) * big_corona_01 +
+                    Float(2) * big_corona_11);
       corona[k] = small_corona + big_corona;
 
       Float phi_tmp = field.get(i, k);
