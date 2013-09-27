@@ -361,7 +361,7 @@ parallel. In case of the more commonly encountered nearest-neighbor
 interaction (squares on the figure~\ref{fig:nn}) it is enough two
 divide the lattice in two sublattices by labeling each side
 ``black'' or ``white'' as on the checkerboard (sometimes this is also
-referred as ``even-odd'' decomposition). It is easy to see that no site
+referred as ``even-odd'' decomposition)\cite{Checkboard}. It is easy to see that no site
 has a nearest neighbor of the same color, so all the sites of the
 same color can be updated in parallel. This would be the case of the
 Ginzburg-Landau model without the last term in \eqref{eq:hamiltonian}.
@@ -487,7 +487,7 @@ block in this subgrid is assigned to a block of $N_{th}$ threads (CTA
 -- Cooperative Threads Array). First we fetch the values of the fields
 from global to shared memory (including border points see
 figure~\ref{fig:blocks}).  In 3D we use $B_x=B_y=B_z=16$ which gives
-altogether $20^3$ field values to be loaded. This gives $32$KB which
+altogether $20^3$ field values to be loaded with additional boundary values on the edges. This gives $32$KB which
 fits nicely into 48KB shared memory.
 
 
@@ -627,7 +627,7 @@ the CPU performance.
 We have tested our implementations on  the following hardware:
 \begin{itemize}
 \item GPU Nvidia GTX 470, 14 Scalar Multiprocessor = 448 CUDA cores, 1.2GHz, CUDA 5.0 Ubuntu Linux 12.04, 1088Gflops.
-\item CPU Intel i5-2400S Sandy Bridge, 4 core, 2.5 GHz, 12 GB RAM, OSX 10.8.3, GCC 4.8.0 -O3 +OpenMP, 160 Gflops. 
+\item CPU Intel i5-2400S Sandy Bridge, 4 core, 2.5 GHz, 12 GB RAM, OSX 10.8.3, GCC 4.8.0 -O3 +OpenMP, 160 Gflops\footnote{To estimate Gflops on CPU, we're using our benchmark located in repository: https://github.com/ujhpc/flops}. 
 \end{itemize}
 
 The overall performance of the algorithm expressed in Gflops or
@@ -839,6 +839,7 @@ architectures.
 \bibitem{top500}{\tt http://www.top500.org/}
 \bibitem{spin1}Benjamin Block , Peter Virnau , Tobias Preis, Computer Physics Communications, Volume 181 (2010) 1549–1556.
 \bibitem{spin2}Ezequiel E. Ferrero, Juan Pablo De Francesco, Nicolás Wolovick, Sergio A. Cannas. Computer Physics Communications, volume 183, 1578--1587, 2012
+\bibitem{Checkboard}B.~Block, P.~Virnau, T.~Preis ``Multi-GPU Accelerated Multi-Spin Monte Carlo Simulations of the 2D Ising Model''. Computer Physics Communications, Volume 181, 1549--1556,2010
 \bibitem{weigel} M.~Weigel, J. Comput. Phys. \textbf{231},  (2012) 3064.
 \bibitem{parisi} G.~Parisi ``Statistical Field Theory'' Chapter 5, Perseus Books Publishing (1998).
 \bibitem{metropolis}
