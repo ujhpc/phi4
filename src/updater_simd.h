@@ -122,7 +122,7 @@ template <typename F> class Updater {
 
 #ifdef CACHE
   int update_block(const BlockType& block, int n = 1) {
-    int indices[SIMD] __attribute__((aligned(16)));
+    int indices[SIMD] __attribute__((aligned(sizeof(int) * SIMD)));
     long int accepted = 0;
     for (int i = 0; i < n; ++i) {
       for (int p = 0; p < block.n_partitions(); ++p) {
