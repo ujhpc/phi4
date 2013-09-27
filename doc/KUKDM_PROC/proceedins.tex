@@ -142,7 +142,7 @@ vendors have added GPU support to their tools.
 However like with most of the computer languages there is a learning
 gap between using them and using them efficiently. The GPU are not
 only {\em massively parallel} machines but essentially {\em vector
-  machines}. This is a trend visible also in the CPU market: the SSE
+machines}. This is a trend visible also in the CPU market: the SSE
 extensions introduced four floats wide vector (SIMD) instructions, AVX
 eight floats wide and Xeon $\phi$ 16 floats wide\footnote{The Xeon
   $\phi$ strictly speaking is not a CPU but an accelerator. However
@@ -190,16 +190,22 @@ in statistical physics, solid state physics and field theory.  Those
 simulations are usually very time consuming so the speed of the
 algorithm is of a paramount importance.  Our implementation can be
 easily adapted to many variants of the model as we describe in more
-detail later. The GPU implementation is targeted for small
-desktop machines with commodity CUDA enabled GPU and is up to 25 times
-faster than CPU program running on the same machine. 
+detail later. The GPU implementation is targeted for small desktop
+machines with commodity CUDA enabled graphics cards and is up to 25 times faster
+than CPU program running on the same machine. Such ``small-scale''
+computing plays a very important role in science as it provides for
+fast feedback righ at the workplace, without resorting to more
+laborious and/or expensive bigger machines.
 
-
-Similar model have been
-ported to GPU, however they were mainly discrete spin models with
-nearest neighbor interactions\cite{spin1,spin2,weigel}.  We use a continuous field model
-with extended neighborhood that to our knowledge was not yet ported to
-the GPU.
+Apart from providing ready to use code, which will be available
+online, we hope to contribute also to general methodology of adapting
+Monte-Carlo to SIMD architectures. This clearly is a trend in modern
+hardware but much of the knowledge remains tacit in nature.   We have
+found two published GPU implementations of similar model, however they
+were mainly discrete spin models with nearest neighbor
+interactions\cite{spin1,spin2,weigel}.  We use a continuous field
+model with extended neighborhood that to our knowledge was not yet
+ported to the GPU. 
 
 
 \section{Ginzburg--Landau model and Monte-Carlo simulations}
