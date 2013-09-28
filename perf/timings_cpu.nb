@@ -1,22 +1,12 @@
-(*CacheID: 234*)
-(* Internal cache information:
-NotebookFileLineBreakTest
-NotebookFileLineBreakTest
-NotebookDataPosition[         0,          0]
-NotebookDataLength[     11725,        353]
-NotebookOptionsPosition[     10372,        308]
-NotebookOutlinePosition[     10981,        330]
-CellTagsIndexPosition[     10938,        327]
-WindowFrame->Normal*)
-
-(* Beginning of Notebook Content *)
 Notebook[{
 Cell[BoxData[
  RowBox[{"SetDirectory", "[", 
   RowBox[{"NotebookDirectory", "[", "]"}], "]"}]], "Input",
  CellChangeTimes->{{3.572250577024014*^9, 3.572250594356232*^9}, {
   3.574496623959332*^9, 3.5744966261082172`*^9}, {3.589381665956584*^9, 
-  3.589381686588469*^9}, {3.589381852372695*^9, 3.589381860357411*^9}}],
+  3.589381686588469*^9}, {3.589381852372695*^9, 3.589381860357411*^9}, {
+  3.5893825640976887`*^9, 3.589382564800571*^9}, {3.5893828023196497`*^9, 
+  3.5893828490725803`*^9}}],
 
 Cell[BoxData[
  RowBox[{
@@ -265,46 +255,78 @@ Cell[BoxData[
 
 Cell[BoxData[
  RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{"nsec", " ", "per", " ", "update"}], " ", "*)"}], 
+  "\[IndentingNewLine]", 
   RowBox[{
-   RowBox[{"(", 
+   RowBox[{
     RowBox[{
      RowBox[{"(", 
       RowBox[{
-       RowBox[{"#", "[", 
-        RowBox[{"[", "2", "]"}], "]"}], "+", 
-       RowBox[{"nhit", " ", 
-        RowBox[{"#", "[", 
-         RowBox[{"[", "3", "]"}], "]"}]}]}], ")"}], "/", "nhit"}], " ", ")"}],
-    "&"}], "/@", " ", "coeffs"}]], "Input",
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"#", "[", 
+          RowBox[{"[", "2", "]"}], "]"}], "+", 
+         RowBox[{"nhit", " ", 
+          RowBox[{"#", "[", 
+           RowBox[{"[", "3", "]"}], "]"}]}]}], ")"}], "/", "nhit"}], " ", 
+      ")"}], "&"}], "/@", " ", "coeffs"}], "*", 
+   RowBox[{"10", "^", "9"}]}]}]], "Input",
  CellChangeTimes->{{3.589260112828611*^9, 3.5892602375938263`*^9}, 
-   3.589262880054998*^9}],
+   3.589262880054998*^9, {3.589382079904471*^9, 3.58938208197324*^9}, {
+   3.589382131979987*^9, 3.589382141598543*^9}}],
 
 Cell[BoxData[
  RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{"Gops", " ", "performance"}], " ", "*)"}], "\[IndentingNewLine]", 
   RowBox[{
    RowBox[{
-    RowBox[{"(", 
-     RowBox[{"26", "+", 
-      RowBox[{"nhit", " ", "64"}]}], ")"}], "/", 
-    RowBox[{"(", 
+    RowBox[{
      RowBox[{
-      RowBox[{"#", "[", 
-       RowBox[{"[", "2", "]"}], "]"}], "+", 
-      RowBox[{"nhit", " ", 
-       RowBox[{"#", "[", 
-        RowBox[{"[", "3", "]"}], "]"}]}]}], ")"}]}], "&"}], "/@", " ", 
-  "coeffs"}]], "Input",
+      RowBox[{"(", 
+       RowBox[{"26", "+", 
+        RowBox[{"nhit", " ", "64"}]}], ")"}], "/", 
+      RowBox[{"(", 
+       RowBox[{
+        RowBox[{"#", "[", 
+         RowBox[{"[", "2", "]"}], "]"}], "+", 
+        RowBox[{"nhit", " ", 
+         RowBox[{"#", "[", 
+          RowBox[{"[", "3", "]"}], "]"}]}]}], ")"}]}], "&"}], "/@", " ", 
+    "coeffs"}], "/", " ", 
+   RowBox[{"10", "^", "9"}]}]}]], "Input",
  CellChangeTimes->{{3.5892637549685173`*^9, 3.589263757234482*^9}, {
-  3.58926570102*^9, 3.589265704794886*^9}}],
+  3.58926570102*^9, 3.589265704794886*^9}, {3.58938204474823*^9, 
+  3.589382066099309*^9}, {3.589382112720071*^9, 3.5893821300338173`*^9}}],
 
 Cell[BoxData[
- RowBox[{"Export", "[", 
-  RowBox[{"\"\<coeffs_cpu.txt\>\"", ",", "coeffs", ",", "\"\<Table\>\""}], 
-  "]"}]], "Input",
+ RowBox[{"Button", "[", 
+  RowBox[{"\"\<Export\>\"", ",", 
+   RowBox[{"Export", "[", 
+    RowBox[{"\"\<coeffs_cpu.txt\>\"", ",", "coeffs", ",", "\"\<Table\>\""}], 
+    "]"}]}], "]"}]], "Input",
  CellChangeTimes->{{3.574264101903319*^9, 3.574264126550644*^9}, {
    3.574264184693898*^9, 3.574264254507728*^9}, {3.574264458325317*^9, 
    3.574264458589546*^9}, {3.574264537098852*^9, 3.574264552039383*^9}, 
-   3.574264670689359*^9, {3.574656796100156*^9, 3.574656796783669*^9}}]
+   3.574264670689359*^9, {3.574656796100156*^9, 3.574656796783669*^9}, {
+   3.589382150667948*^9, 3.589382158282426*^9}, {3.589382286928322*^9, 
+   3.5893823545299253`*^9}, {3.589382406089237*^9, 3.589382419656485*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"(*", " ", 
+   RowBox[{
+    RowBox[{"clear", " ", "all", " ", "output", " ", "cells"}], " ", "-", " ", 
+    RowBox[{"do", " ", "it", " ", "before", " ", "saving"}]}], " ", "*)"}], 
+  "\[IndentingNewLine]", 
+  RowBox[{"Button", "[", 
+   RowBox[{"\"\<Clear\>\"", ",", " ", 
+    RowBox[{"NotebookDelete", "[", 
+     RowBox[{"Cells", "[", 
+      RowBox[{"GeneratedCell", "\[Rule]", "True"}], "]"}], "]"}]}], 
+   "]"}]}]], "Input",
+ CellChangeTimes->{{3.589382992299118*^9, 3.589383003536738*^9}}]
 },
 WindowSize->{740, 1067},
 WindowMargins->{{Automatic, 816}, {Automatic, 10}},
@@ -313,42 +335,9 @@ PrintingPageRange->{Automatic, Automatic},
 PrintingOptions->{"PaperOrientation"->"Portrait",
 "PaperSize"->{594.75, 842.25},
 "PostScriptOutputFile"->""},
-PrivateNotebookOptions->{"VersionedStylesheet"->{"Default.nb"[8.] -> False}},
+PrivateNotebookOptions->{"FileOutlineCache"->False,
+"VersionedStylesheet"->{"Default.nb"[8.] -> False}},
 FrontEndVersion->"9.0 for Mac OS X x86 (32-bit, 64-bit Kernel) (November 20, \
 2012)",
 StyleDefinitions->"Default.nb"
 ]
-(* End of Notebook Content *)
-
-(* Internal cache information *)
-(*CellTagsOutline
-CellTagsIndex->{}
-*)
-(*CellTagsIndex
-CellTagsIndex->{}
-*)
-(*NotebookFileOutline
-Notebook[{
-Cell[400, 13, 316, 5, 36, "Input"],
-Cell[719, 20, 885, 16, 36, "Input"],
-Cell[1607, 38, 337, 9, 36, "Input"],
-Cell[1947, 49, 331, 9, 36, "Input"],
-Cell[2281, 60, 847, 23, 58, "Input"],
-Cell[3131, 85, 404, 12, 36, "Input"],
-Cell[3538, 99, 407, 12, 36, "Input"],
-Cell[3948, 113, 189, 5, 36, "Input"],
-Cell[4140, 120, 748, 21, 36, "Input"],
-Cell[4891, 143, 494, 13, 36, "Input"],
-Cell[5388, 158, 608, 17, 36, "Input"],
-Cell[5999, 177, 927, 24, 79, "Input"],
-Cell[6929, 203, 358, 10, 36, "Input"],
-Cell[7290, 215, 1146, 31, 58, "Input"],
-Cell[8439, 248, 385, 10, 36, "Input"],
-Cell[8827, 260, 168, 3, 36, "Input"],
-Cell[8998, 265, 443, 14, 36, "Input"],
-Cell[9444, 281, 504, 16, 36, "Input"],
-Cell[9951, 299, 417, 7, 36, "Input"]
-}
-]
-*)
-
