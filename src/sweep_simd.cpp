@@ -7,7 +7,11 @@
 #include "types.h"
 #include "sweep.h"
 
+#ifndef OLD
 #include "updater_simd.h"
+#else
+#include "updater_simd_old.h"
+#endif
 
 #ifdef CACHE  /////////////////////////////////////////////////////////////////
 

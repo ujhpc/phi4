@@ -14,81 +14,59 @@ typedef FLOAT Float;
 #ifdef SIMD
 
 #ifndef OLD
-#include "simd.h"
-#else  // legacy code support
+#define __simd_use_rep
+#include "simd2.h"
+#else
 #define __SIMD_H__REP
-#include "simd_old.h"
-#define itype mask
+#include "simd.h"
 #define __simd_rep REP
+#define itype mask
 #endif
 
 #if SIMD <= 1
-
 typedef Float FVec;
 typedef simd_integral_of<Float>::type IVec;
-
-#ifdef OLD  // legacy code support
 typedef FVec SFVec;
 typedef IVec SIVec;
 #define SSIMD 1
-#endif
-
 #else
-
 // some integer ops like shift are not available on AVX1
 #if !__AVX2__&& SIMD > 4
-#ifndef OLD
-#error SIMD=8 requires at least AVX2
-#else
 #define SSIMD 4
+#else
+#define SSIMD SIMD
 #endif
-#endif
+
 typedef simd<FLOAT, SIMD> FVec;
 typedef FVec::itype IVec;
-#ifdef OLD  // legacy code support
 typedef simd<FLOAT, SSIMD> SFVec;
 typedef SFVec::itype SIVec;
 #endif
 
 #endif
 
-#endif
-
 // COMMON HEADERS /////////////////////////////////////////////////////////////
 
-#if defined SIMD || defined FAST_INDEXER
+#ifdef SIMD
+#include "random_simd.h"
+#else
+#include "random.h"
+#endif
+#ifdef FAST_INDEXER
 #include "fast_indexer.h"
-typedef Indexer<DIM, IVec> Ind;
 #else
 #include "indexer.h"
-typedef Indexer<DIM> Ind;
 #endif
-
 #include "field.h"
 #include "partition.h"
 
 // FIELD TYPE /////////////////////////////////////////////////////////////////
 
-#if defined SIMD && !defined OLD
-class Storage {
- public:
-  Storage(int size) { ptr = new Float[size]; }
-  ~Storage() { delete[] ptr; }
-  Float at(const int i) const { return ptr[i]; }
-  void assign(const int i, const Float v) { ptr[i] = v; }
-  FVec at(const IVec& i) const { return FVec(ptr, i); }
-
- private:
-  Float* ptr;
-};
-#else
-typedef std::vector<Float> Storage;
-#endif
-
+typedef Indexer<DIM> Ind;
 #if NCOMP <= 1
-typedef ScalarField<Float, Ind, Storage> Field;
+typedef ScalarField<ScalarFieldArray<Float>, Ind> Field;
 #else
-typedef VectorField<Float, NCOMP, Ind, Storage> Field;
+typedef VectorField<VectorFieldArray<Float, NCOMP>, Ind> Field;
 #endif
 
 // PARTITIONING ///////////////////////////////////////////////////////////////
@@ -108,17 +86,7 @@ typedef Block<DIM, Ind, octal_cell<DIM> > BlockType;
 
 // RANDOM GENERATOR ///////////////////////////////////////////////////////////
 
-#ifdef SIMD
-#ifndef OLD
-#include "random_simd.h"
-#else  // legacy code support
-#include "random_simd_old.h"
-#endif
-#else
-#include "random.h"
-#endif
-
-#if !defined SIMD&& defined USE_RAND48
+#if !defined(SIMD) && defined(USE_RAND48)
 
 inline Float RAND(int i) { return rand48_array::generator()->rand(i); }
 inline Float RAND_SYM(int i) {
@@ -126,7 +94,7 @@ inline Float RAND_SYM(int i) {
 }
 typedef rand48_array rand_array_t;
 
-#elif defined SIMD
+#elif defined(SIMD)
 
 inline FVec RAND(int i) { return taus_array::generator()->rand(i); }
 inline FVec RAND_SYM(int i) { return taus_array::generator()->rand_sym(i); }

@@ -118,6 +118,7 @@ endif
 ifneq ($(OLD),)
 SUFFIX := $(SUFFIX)-old
 CPPFLAGS += -DOLD
+OLD_SRC_SUFFIX := _old
 endif
 
 LDFLAGS  += -g
@@ -132,7 +133,7 @@ EXECDIR  := ..
 EXEC     := $(EXECDIR)/$(NAME)$(SUFFIX)
 MAIN     := $(OBJDIR)/$(NAME)$(SUFFIX).o
 OBJECTS  := $(OBJDIR)/sweep$(SRC_SUFFIX)$(SUFFIX).o \
-            $(OBJDIR)/random$(SRC_SUFFIX)$(SUFFIX).o
+            $(OBJDIR)/random$(SRC_SUFFIX)$(OLD_SRC_SUFFIX)$(SUFFIX).o
 ifneq ($(SVML_FIX),)
 ifneq ($(SIMD),)
 ifeq ($(OS),Linux)
