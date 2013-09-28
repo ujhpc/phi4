@@ -118,7 +118,7 @@ GPU Implementation
 ------------------
 
 GPU implementation is available as separate project
-[phi4_cuda](/ujhpc/phi4_cuda).
+[phi4_cuda](//github.com/ujhpc/phi4_cuda).
 
 License
 -------
