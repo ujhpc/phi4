@@ -117,11 +117,11 @@ However like with most of the computer languages there is a learning gap
 between using them and using them efficiently. The GPU are not only {\em
 massively parallel} machines but essentially {\em vector machines}. This is a
 trend visible also in the CPU market: the SSE extensions introduced four floats
-wide vector (SIMD) instructions, AVX eight floats wide and Xeon $\phi$ 16
-floats wide\footnote{The Xeon $\phi$ strictly speaking is not a CPU but an
-accelerator. However its cores are based on \emph{Intel} CPU \emph{Pentium}
-architecture.}. To get most out of the hardware it is crucial to vectorize the
-algorithm and make good use of the available memory hierarchy.
+wide vector (SIMD) instructions, AVX eight floats wide and \emph{Xeon Phi} 16
+floats wide\footnote{The \emph{Xeon Phi} strictly speaking is not a CPU but an
+accelerator. However its cores are based on \emph{Intel} \emph{Pentium} CPU
+micro-architecture.}. To get most out of the hardware it is crucial to
+vectorize the algorithm and make good use of the available memory hierarchy.
 
 In this contribution we present an efficient implementation, both on GPU and
 CPU, of the Monte-Carlo simulations of the discretized version of the
@@ -548,8 +548,8 @@ This is partially addressed by AVX2, providing masked gather instruction.
 Another drawback in lack of 256-bit wide integer operations in AVX, which makes
 random number generator utilize 128-bit SSE only, even on 256-bit AVX capable
 CPUs. Again this has changed in AVX2, which is unfortunately available only in
-\emph{Haswell} desktop processors. \emph{Xeon} server processors need to wait
-for an upgrade until next year.
+\emph{Haswell} desktop processors. Regular \emph{Xeon} server processors need
+to wait for an upgrade until next year.
 
 In our CPU implementation we use a small enhancement exploiting the out of
 order instruction execution capabilities of the CPU. The most inner loop of the
@@ -855,8 +855,8 @@ this more difficult than the GPU, due to the lack of some crucial vector
 features present on GPU, incomplete vectorization support provided by compilers
 and complicated programming model.
 
-The CPU manufacturers are are trying to address these issues. \emph{Intel Xeon}
-$\phi$ has a extended 512-bit wide vector instructions set with hardware
+The CPU manufacturers are are trying to address these issues. \emph{Intel Xeon
+Phi} has a extended 512-bit wide vector instruction set with hardware
 gather/scatter, also recently released \emph{Haswell} CPU architecture with
 AVX2 instruction set contains 256-bit wide integer operations and gather
 instructions. AVX2 gather is still however internally mapped to several
@@ -865,8 +865,8 @@ reduction having notable impact on performance.
 
 We already have some preliminary results that show $1.5\times$ performance
 boost making or CPU implementation utilize some of new AVX2 instructions. We
-are also working to port our GPU code to recent NVIDIA \emph{Kepler}
-architecture.
+are also working to port our code to recent NVIDIA \emph{Kepler} architecture
+and \emph{Xeon Phi} accelerator.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
