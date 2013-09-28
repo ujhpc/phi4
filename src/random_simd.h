@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "typedefs.h"
+#include "types.h"
 
 static inline IVec taus_step(IVec z, IVec S1, IVec S2, IVec S3, IVec M) {
   IVec b = (((z << S1) ^ z) >> S2);

@@ -1,7 +1,7 @@
 #include <cmath>
 #include <gtest/gtest.h>
 
-#include "typedefs.h"
+#include "types.h"
 
 template <typename R> class rand_array_test : public ::testing::Test {
  protected:

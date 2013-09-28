@@ -6,7 +6,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "typedefs.h"
+#include "types.h"
 
 template <typename S, int SEEDS_PER_GEN, int ALIGNMENT_IN_BYTES>
 class random_array_state {

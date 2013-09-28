@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include "typedefs.h"
+#include "types.h"
 
 rand48_array* rand48_array::generator_;
 

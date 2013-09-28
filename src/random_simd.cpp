@@ -1,4 +1,4 @@
-#include "typedefs.h"
+#include "types.h"
 
 void taus_array::gen_seeds(long seed) {
   srand48(seed);

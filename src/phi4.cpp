@@ -11,7 +11,7 @@
 #endif
 #include "cmdline.h"
 
-#include "typedefs.h"
+#include "types.h"
 #include "sweep.h"
 #include "measurments.h"
 

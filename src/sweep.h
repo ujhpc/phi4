@@ -1,7 +1,7 @@
 #pragma once
 
 #include "partition.h"
-#include "typedefs.h"
+#include "types.h"
 
 #ifndef EPSILON
 const Float EPSILON = 1.0;

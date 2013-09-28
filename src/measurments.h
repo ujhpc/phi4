@@ -1,6 +1,6 @@
 #pragma once
 
-#include "typedefs.h"
+#include "types.h"
 
 template <int Comp = 1> class MagnetisationMeasurer {
  public:

@@ -4,7 +4,7 @@
 #include <omp.h>
 #endif
 
-#include "typedefs.h"
+#include "types.h"
 #include "sweep.h"
 
 #include "updater_simd.h"
