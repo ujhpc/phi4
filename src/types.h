@@ -42,6 +42,8 @@ typedef IVec SIVec;
 #else
 #define SSIMD 4
 #endif
+#elif defined LEGACY
+#define SSIMD SIMD
 #endif
 typedef simd<FLOAT, SIMD> FVec;
 typedef FVec::itype IVec;
