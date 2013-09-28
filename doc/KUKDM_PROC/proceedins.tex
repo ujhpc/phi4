@@ -1,6 +1,5 @@
 \documentclass[a4paper]{llncs}
 \usepackage[plain]{algorithm}
-\usepackage{listings}
 \usepackage{algpseudocode}
 \usepackage{amsmath}
 \usepackage{dcolumn}
@@ -12,31 +11,6 @@
 \usetikzlibrary{shadows}
 
 \newcommand{\eg}{\textit{e.g.}}
-\newcommand{\code}[1]{\lstinline!#1!}
-
-\lstdefinelanguage
-  [GCC]{C++}
-  []{C++}{
-  morekeywords={[2]__attribute__,exp,log,rand},%
-  morekeywords={[3]vector_size}%
-}
-\lstset{%
-  language={[GCC]C++},%
-  basicstyle=\small,%
-  keywordstyle=\bfseries,%
-  keywordstyle=[2]\ttfamily,%
-  keywordstyle=[3]\ttfamily,%
-  commentstyle=\itshape,%
-  stepnumber=1,%
-  numbersep=5pt,%
-  tabsize=2,%
-  captionpos=b,%
-  breaklines=true,%
-  breakatwhitespace=false,%
-  showspaces=false,%
-  showtabs=false,%
-  columns=flexible%
-}
 
 \renewcommand{\a}[1]{\v{a}_{#1}}
 \renewcommand{\L}{\mathcal{L}}
@@ -507,24 +481,24 @@ simpler generator, but we have not attempted this in this work.
 \begin{algorithm}
 \begin{algorithmic}[1]
 \For{every global sweep}
-\For{every block subgrid}
-\For{every block in subgrid}
-\State load block  into shared memory
-\For{every local sublattice}
-\For{every site $i$ in local sublattice}
-\State calculate corona $c_i$
-\For{ k = 1 ..  $N_{hit}$ }
-\State $\widetilde{\vphi}_i \gets \vphi_i+\eta$
-\State $\Delta H \gets H[\widetilde{\vphi}_i]-H[\vphi_i]$
-\If{$\exp(-\Delta H) > r$}
-\State $\vphi_i \gets \widetilde{\vphi}_i$
-\EndIf
-\EndFor
-\EndFor
-\State {\tt \_\_syncthreads();}
-\EndFor
-\EndFor
-\EndFor
+  \For{every block subgrid}
+    \For{every block in subgrid}
+      \State load block into shared memory
+      \For{every local sublattice}
+        \For{every site $i$ in local sublattice}
+          \State calculate corona $c_i$
+          \For{$k = 1 \dots N_{hit}$}
+            \State $\widetilde{\vphi}_i \gets \vphi_i+\eta$
+            \State $\Delta H \gets H[\widetilde{\vphi}_i]-H[\vphi_i]$
+            \If{$\exp(-\Delta H) > r$}
+              \State $\vphi_i \gets \widetilde{\vphi}_i$
+            \EndIf
+          \EndFor
+        \EndFor
+        \State \verb!__syncthreads()!
+      \EndFor
+    \EndFor
+  \EndFor
 \EndFor
 \end{algorithmic}
 \caption{\label{alg:gpu} The GPU algorithm. The CPU algorithm differs
@@ -552,12 +526,12 @@ can use simple index arithmetic.
 To make a fair comparison with the CPU we have to use both multicore as vector
 (SSE/AVX) programming. The parallelization on many cores is relatively easy
 using the OpenMP. The same restriction apply as on GPU, so we partition the the
-lattice in the same way, but we use only one level {\em i.e.} we do not
+lattice in the same way, but we use only one level \emph{i.e.} we do not
 partition the lattice into blocks. The SIMD instructions are used to process
 four (SSE) or eight (AVX) updates in parallel (similarly to threads on GPU). At
 present only portable way to use vector instructions is to use compiler
 intrinsic\cite{intr}. We have defined our own vector type that uses combination
-of the \lstinline!__attribute__((vector_size(N)))! directive and intrinsics to
+of the \verb!__attribute__((vector_size(N)))! directive and intrinsics to
 provide a drop--in replacement for scalar types.
 
 Unfortunately not all scalar \emph{x86} instructions have vector counterparts,
@@ -572,37 +546,35 @@ In our CPU implementation we use a small enhancement exploiting the out of
 order instruction execution capabilities of the CPU. The most inner loop of the
 algorithm looks as follows
 
-\begin{lstlisting}
-for ( int i = 0; i < N_HIT; ++i ) {
-  // Here comes the DeltaH calculations
-  // ...
-  if ( exp(-DeltaH) > rand() )
-    // Accept the move
-  }
-}
-\end{lstlisting}
+\begin{algorithmic}[1]
+\For{$n = 1 \dots N_{hit}$}
+  \State{calculate $\Delta H$}
+  \If{$\mathtt{exp}(-\Delta H) > \mathtt{rand}()$}
+    \State accept the move
+  \EndIf
+\EndFor
+\end{algorithmic}
 
 The exponent is an expensive, high latency operation. The processor has to wait
 for the $\Delta H$ calculations to finish before it can start the exponent. We
 have rewritten this part as
 
-\begin{lstlisting}
-for ( int i = 0; i < N_HIT; ++i ) {
-  float lr = log( rand() );
-  // Here comes the DeltaH calculations
-  // ...
-  if ( -DeltaH > lr ) {
-    // Accept the move
-  }
-}
-\end{lstlisting}
+\begin{algorithmic}[1]
+\For{$n = 1 \dots N_{hit}$}
+  \State $lr \gets \mathtt{log}(\mathtt{rand}())$
+  \State{calculate $\Delta H$}
+  \If{$-\Delta H > lr$}
+    \State accept the move
+  \EndIf
+\EndFor
+\end{algorithmic}
 
-The advantage is now that the argument of \code{log} is independent of $\Delta
-H$ and the processor is free to reorder the instructions allowing to hide some
-of the latency. This implementation is safe even in case when \code{rand()}
-returns a zero as \code{log} then returns {\tt -Inf}. Actually the code above
-is vectorized and calculations of the four or eight $\log$'s is done in
-parallel using the \emph{Intel}'s svml library\cite{svml}.
+The advantage is now that the argument of \texttt{log} is independent of
+$\Delta H$ and the processor is free to reorder the instructions allowing to
+hide some of the latency. This implementation is safe even in case when
+\texttt{rand()} returns a zero as \texttt{log} then returns \texttt{-Inf}.
+Actually the code above is vectorized and calculations of the four or eight
+$\log$'s is done in parallel using the \emph{Intel}'s svml library\cite{svml}.
 
 As already mentioned in the previous section indexing the neighbors can be
 quite costly operation requiring expensive modulo operations or large amount of
@@ -617,16 +589,18 @@ This is in some respect the ``upper bound'' of the CPU performance.
 \section{Performance}
 \label{sec:performance}
 
-We have tested our implementations on  the following hardware:
+We have tested our implementations on the following hardware:
 \begin{itemize}
 
-\item GPU \emph{NVIDIA} GTX 470, 14 Scalar Multiprocessor = 448 CUDA cores,
-1.2GHz, CUDA 5.0 Ubuntu Linux 12.04, 1088 Gflops.
-
-\item CPU \emph{Intel} i5-2400S Sandy Bridge, 4 core, 2.5 GHz, 12 GB RAM, OSX
-10.8.3, GCC 4.8.0 -O3 +OpenMP, 160 Gflops\footnote{To estimate Gflops on CPU,
-we're using our benchmark located in repository:
-https://github.com/ujhpc/flops}.
+\item[GPU] \emph{NVIDIA} GTX 470, 14 scalar multiprocessor (448 CUDA cores),
+1.2 GHz, \\
+CUDA 5.0 Ubuntu Linux 12.04, 1088 Gflops.
+\vspace{.5em}
+\item[CPU] \emph{Intel} i5-2400S \emph{Sandy Bridge}, 4 core, 2.5 GHz, 12 GB
+RAM, \\
+OSX 10.8.3, GCC 4.8.0 \verb!-O3! OpenMP, 160 Gflops\footnote{To estimate
+Gflops on CPU, we're using our benchmark located in repository:
+\texttt{https://github.com/ujhpc/flops}}.
 
 \end{itemize}
 
