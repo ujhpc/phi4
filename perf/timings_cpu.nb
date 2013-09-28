@@ -3,10 +3,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[         0,          0]
-NotebookDataLength[     12258,        373]
-NotebookOptionsPosition[     10865,        327]
-NotebookOutlinePosition[     11474,        349]
-CellTagsIndexPosition[     11431,        346]
+NotebookDataLength[     11725,        353]
+NotebookOptionsPosition[     10372,        308]
+NotebookOutlinePosition[     10981,        330]
+CellTagsIndexPosition[     10938,        327]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -16,7 +16,7 @@ Cell[BoxData[
   RowBox[{"NotebookDirectory", "[", "]"}], "]"}]], "Input",
  CellChangeTimes->{{3.572250577024014*^9, 3.572250594356232*^9}, {
   3.574496623959332*^9, 3.5744966261082172`*^9}, {3.589381665956584*^9, 
-  3.589381686588469*^9}}],
+  3.589381686588469*^9}, {3.589381852372695*^9, 3.589381860357411*^9}}],
 
 Cell[BoxData[
  RowBox[{
@@ -259,9 +259,9 @@ Cell[BoxData[
   3.574656553671836*^9}}],
 
 Cell[BoxData[
- RowBox[{"nhit", "=", "16"}]], "Input",
+ RowBox[{"nhit", "=", "8"}]], "Input",
  CellChangeTimes->{{3.589260112828611*^9, 3.5892602375938263`*^9}, 
-   3.589262880054998*^9}],
+   3.589262880054998*^9, 3.589381871429182*^9}],
 
 Cell[BoxData[
  RowBox[{
@@ -278,25 +278,6 @@ Cell[BoxData[
     "&"}], "/@", " ", "coeffs"}]], "Input",
  CellChangeTimes->{{3.589260112828611*^9, 3.5892602375938263`*^9}, 
    3.589262880054998*^9}],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{
-   RowBox[{
-    RowBox[{"(", 
-     RowBox[{"26", "+", 
-      RowBox[{"nhit", " ", "64"}]}], ")"}], "/", 
-    RowBox[{"(", 
-     RowBox[{
-      RowBox[{"#", "[", 
-       RowBox[{"[", "2", "]"}], "]"}], "+", 
-      RowBox[{"nhit", " ", 
-       RowBox[{"#", "[", 
-        RowBox[{"[", "3", "]"}], "]"}]}]}], ")"}]}], "&"}], "/@", " ", 
-  "coeffs"}]], "Input",
- CellChangeTimes->{{3.5892628881272383`*^9, 3.589262930800353*^9}, {
-  3.589263597570983*^9, 3.5892636049455*^9}, {3.589263707742208*^9, 
-  3.5892637115169687`*^9}}],
 
 Cell[BoxData[
  RowBox[{
@@ -348,26 +329,25 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[400, 13, 270, 5, 36, "Input"],
-Cell[673, 20, 885, 16, 36, "Input"],
-Cell[1561, 38, 337, 9, 36, "Input"],
-Cell[1901, 49, 331, 9, 36, "Input"],
-Cell[2235, 60, 847, 23, 58, "Input"],
-Cell[3085, 85, 404, 12, 36, "Input"],
-Cell[3492, 99, 407, 12, 36, "Input"],
-Cell[3902, 113, 189, 5, 36, "Input"],
-Cell[4094, 120, 748, 21, 36, "Input"],
-Cell[4845, 143, 494, 13, 36, "Input"],
-Cell[5342, 158, 608, 17, 36, "Input"],
-Cell[5953, 177, 927, 24, 79, "Input"],
-Cell[6883, 203, 358, 10, 36, "Input"],
-Cell[7244, 215, 1146, 31, 58, "Input"],
-Cell[8393, 248, 385, 10, 36, "Input"],
-Cell[8781, 260, 147, 3, 36, "Input"],
-Cell[8931, 265, 443, 14, 36, "Input"],
-Cell[9377, 281, 557, 17, 36, "Input"],
-Cell[9937, 300, 504, 16, 36, "Input"],
-Cell[10444, 318, 417, 7, 36, "Input"]
+Cell[400, 13, 316, 5, 36, "Input"],
+Cell[719, 20, 885, 16, 36, "Input"],
+Cell[1607, 38, 337, 9, 36, "Input"],
+Cell[1947, 49, 331, 9, 36, "Input"],
+Cell[2281, 60, 847, 23, 58, "Input"],
+Cell[3131, 85, 404, 12, 36, "Input"],
+Cell[3538, 99, 407, 12, 36, "Input"],
+Cell[3948, 113, 189, 5, 36, "Input"],
+Cell[4140, 120, 748, 21, 36, "Input"],
+Cell[4891, 143, 494, 13, 36, "Input"],
+Cell[5388, 158, 608, 17, 36, "Input"],
+Cell[5999, 177, 927, 24, 79, "Input"],
+Cell[6929, 203, 358, 10, 36, "Input"],
+Cell[7290, 215, 1146, 31, 58, "Input"],
+Cell[8439, 248, 385, 10, 36, "Input"],
+Cell[8827, 260, 168, 3, 36, "Input"],
+Cell[8998, 265, 443, 14, 36, "Input"],
+Cell[9444, 281, 504, 16, 36, "Input"],
+Cell[9951, 299, 417, 7, 36, "Input"]
 }
 ]
 *)
