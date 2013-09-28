@@ -29,6 +29,7 @@ endif
 SED   := sed
 MV    := mv
 OS    := $(shell uname -s)
+NAME  := phi4
 
 COMPILERS := gcc-4.9 gcc-4.8 clang
 
@@ -124,23 +125,23 @@ CPPFLAGS += -MMD \
             -DDIM=$(DIM) \
             -DFLOAT=$(FLOAT) \
             -DNCOMP=$(NCOMP) \
-            -DNAME=phi4$(SUFFIX)
+            -DNAME=$(NAME)$(SUFFIX)
 
-EXEC      = ../phi4$(SUFFIX)
-MAIN      = phi4$(SUFFIX).o
-OBJECTS   = sweep$(SRC_SUFFIX)$(SUFFIX).o \
-            random$(SRC_SUFFIX)$(SUFFIX).o
+OBJDIR   := .obj
+EXECDIR  := ..
+EXEC     := $(EXECDIR)/$(NAME)$(SUFFIX)
+MAIN     := $(OBJDIR)/$(NAME)$(SUFFIX).o
+OBJECTS  := $(OBJDIR)/sweep$(SRC_SUFFIX)$(SUFFIX).o \
+            $(OBJDIR)/random$(SRC_SUFFIX)$(SUFFIX).o
 ifneq ($(SVML_FIX),)
 ifneq ($(SIMD),)
 ifeq ($(OS),Linux)
-OBJECTS  += libsvml_wrapper_linux$(CC_SUFFIX).o
+OBJECTS  += $(OBJDIR)/libsvml_wrapper_linux$(CC_SUFFIX).o
 endif
 endif
 endif
-TOBJECTS  = $(subst .cpp,.o,$(wildcard *_test.cpp)) gtest-all.o
-DEPEND    = $(subst .o,.d,$(MAIN)) \
-            $(subst .o,.d,$(OBJECTS)) \
-            $(subst .o,.d,$(TESTS_OBJECTS))
+DEPEND   := $(patsubst %.o,%.d,$(MAIN)) \
+            $(patsubst %.o,%.d,$(OBJECTS))
 
 all: $(EXEC)
 
@@ -171,21 +172,23 @@ dsym: $(EXEC)
 
 -include $(DEPEND)
 
-%$(SUFFIX).o: %.cpp Makefile
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
+
+$(OBJDIR)/%$(SUFFIX).o: %.cpp Makefile $(OBJDIR)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
-%$(CC_SUFFIX).o: %.cpp Makefile
+$(OBJDIR)/%$(CC_SUFFIX).o: %.cpp Makefile $(OBJDIR)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
-%$(SUFFIX).o: %.c Makefile
+$(OBJDIR)/%$(SUFFIX).o: %.c Makefile $(OBJDIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
-test: $(OBJECTS) $(TESTS_OBJECTS)
-	$(CXX) $(LDFLAGS) -o $@ $^ -lpthread
-
 clean:
-	rm -f $(MAIN) $(OBJECTS) $(TOBJECTS) $(DEPEND)
+	rm -f $(MAIN) $(OBJECTS) $(DEPEND)
+	test -d $(OBJDIR) && rmdir $(OBJDIR) || true
 
 clean-all:
-	rm -rf *.o *.d *.s
-	find .. -perm +ugo=x -name 'phi4-*' -delete
+	find . \( -name '*.o' -o -name '*.d' -o -name '*.s' \) -delete
+	find .. -perm +0111 -name '$(NAME)-*' -delete
+	test -d $(OBJDIR) && rmdir $(OBJDIR) || true
