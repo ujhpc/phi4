@@ -11,7 +11,8 @@
 #   FLOAT=(double or float) defaults to double, float on SIMD
 #   SIMD=(4 or 8) size of SIMD vector (enables SIMD computing)
 #   INS=(sse, avx or avx2) instruction set, default native
-#   FAST_INDEX=1 fast index (avoid memory index) size only power of 2
+#   FAST_INDEXER=1 fast indexer (no memory lookup) size only power of 2
+#   SVML_FIX=1 fix for older SVML libs (ICC<13) missing symbols
 #
 # Note: output executable will have suffix indicating current settings.
 
@@ -129,8 +130,12 @@ EXEC      = ../phi4$(SUFFIX)
 MAIN      = phi4$(SUFFIX).o
 OBJECTS   = sweep$(SRC_SUFFIX)$(SUFFIX).o \
             random$(SRC_SUFFIX)$(SUFFIX).o
+ifneq ($(SVML_FIX),)
 ifneq ($(SIMD),)
-OBJECTS  += simd$(CC_SUFFIX).o
+ifeq ($(OS),Linux)
+OBJECTS  += libsvml_wrapper_linux$(CC_SUFFIX).o
+endif
+endif
 endif
 TOBJECTS  = $(subst .cpp,.o,$(wildcard *_test.cpp)) gtest-all.o
 DEPEND    = $(subst .o,.d,$(MAIN)) \
