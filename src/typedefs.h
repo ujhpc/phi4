@@ -14,9 +14,9 @@ typedef FLOAT Float;
 #ifdef SIMD
 
 #ifndef OLD
-#include "simd2.h"
-#else
 #include "simd.h"
+#else
+#include "simd_old.h"
 #define itype mask
 #endif
 
