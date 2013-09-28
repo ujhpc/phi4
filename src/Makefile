@@ -114,11 +114,13 @@ ifneq ($(O),3)
 SUFFIX := $(SUFFIX)-o$(O)
 endif
 
-# Old SIMD wrapper
+# Legacy SIMD
 ifneq ($(OLD),)
-SUFFIX := $(SUFFIX)-old
-CPPFLAGS += -DOLD
-OLD_SRC_SUFFIX := _old
+LEGACY := 1
+endif
+ifneq ($(LEGACY),)
+SUFFIX := $(SUFFIX)-legacy
+CPPFLAGS += -DLEGACY=1
 endif
 
 LDFLAGS  += -g
@@ -133,7 +135,7 @@ EXECDIR  := ..
 EXEC     := $(EXECDIR)/$(NAME)$(SUFFIX)
 MAIN     := $(OBJDIR)/$(NAME).o
 OBJECTS  := $(OBJDIR)/sweep$(SRC_SUFFIX).o \
-            $(OBJDIR)/random$(SRC_SUFFIX)$(OLD_SRC_SUFFIX).o
+            $(OBJDIR)/random$(SRC_SUFFIX).o
 ifneq ($(SVML_FIX),)
 ifneq ($(SIMD),)
 ifeq ($(OS),Linux)
@@ -155,9 +157,9 @@ define recurse
 $1:
 	@for cc in $$(COMPILERS); do \
 		$$(MAKE) --no-print-directory CC=$$$$cc FIDX=1 SIMD=4 ARCH=corei7 $2; \
-		$$(MAKE) --no-print-directory CC=$$$$cc FIDX=1 SIMD=4 ARCH=corei7 OLD=1 $2; \
+		$$(MAKE) --no-print-directory CC=$$$$cc FIDX=1 SIMD=4 ARCH=corei7 LEGACY=1 $2; \
 		$$(MAKE) --no-print-directory CC=$$$$cc FIDX=1 SIMD=8 ARCH=corei7-avx $2; \
-		$$(MAKE) --no-print-directory CC=$$$$cc FIDX=1 SIMD=8 ARCH=corei7-avx OLD=1 $2; \
+		$$(MAKE) --no-print-directory CC=$$$$cc FIDX=1 SIMD=8 ARCH=corei7-avx LEGACY=1 $2; \
 		$$(MAKE) --no-print-directory CC=$$$$cc FIDX=1 SIMD=8 ARCH=core-avx2 $2; \
 	done
 endef
@@ -175,6 +177,11 @@ dsym: $(EXEC)
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
+
+ifneq ($(LEGACY),)
+$(OBJDIR)/%.o: legacy/%.cpp Makefile $(OBJDIR)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
+endif
 
 $(OBJDIR)/%.o: %.cpp Makefile $(OBJDIR)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<

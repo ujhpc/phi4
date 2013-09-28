@@ -214,7 +214,7 @@ int main(int argc, char* argv[]) {
     std::cout << (ns / 1.0e9) << "\t";
     std::cerr << up_ns << "\t";
     std::cerr << gops;
-#ifdef OLD
+#ifdef LEGACY
     std::cout << "\t(old)";
 #endif
     std::cout << std::endl;

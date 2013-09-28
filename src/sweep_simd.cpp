@@ -7,10 +7,10 @@
 #include "types.h"
 #include "sweep.h"
 
-#ifndef OLD
+#ifndef LEGACY
 #include "updater_simd.h"
 #else
-#include "updater_simd_old.h"
+#include "legacy/updater_simd.h"
 #endif
 
 #ifdef CACHE  /////////////////////////////////////////////////////////////////

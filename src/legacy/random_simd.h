@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "types.h"
+#include "../types.h"
 
 class rand48_array {
   static const int pitch = 32;

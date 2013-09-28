@@ -13,11 +13,11 @@ typedef FLOAT Float;
 
 #ifdef SIMD
 
-#ifndef OLD
+#ifndef LEGACY
 #include "simd.h"
 #else  // legacy code support
 #define __SIMD_H__REP
-#include "simd_old.h"
+#include "legacy/simd.h"
 #define itype mask
 #define __simd_rep REP
 #endif
@@ -27,7 +27,7 @@ typedef FLOAT Float;
 typedef Float FVec;
 typedef simd_integral_of<Float>::type IVec;
 
-#ifdef OLD  // legacy code support
+#ifdef LEGACY  // legacy code support
 typedef FVec SFVec;
 typedef IVec SIVec;
 #define SSIMD 1
@@ -37,7 +37,7 @@ typedef IVec SIVec;
 
 // some integer ops like shift are not available on AVX1
 #if !__AVX2__&& SIMD > 4
-#ifndef OLD
+#ifndef LEGACY
 #error SIMD=8 requires at least AVX2
 #else
 #define SSIMD 4
@@ -45,7 +45,7 @@ typedef IVec SIVec;
 #endif
 typedef simd<FLOAT, SIMD> FVec;
 typedef FVec::itype IVec;
-#ifdef OLD  // legacy code support
+#ifdef LEGACY  // legacy code support
 typedef simd<FLOAT, SSIMD> SFVec;
 typedef SFVec::itype SIVec;
 #endif
@@ -56,16 +56,16 @@ typedef SFVec::itype SIVec;
 
 // COMMON HEADERS /////////////////////////////////////////////////////////////
 
-#if (defined SIMD && !defined OLD) || defined FAST_INDEXER
+#if (defined SIMD && !defined LEGACY) || defined FAST_INDEXER
 #include "fast_indexer.h"
-#ifndef OLD
+#ifndef LEGACY
 typedef Indexer<DIM, IVec> Ind;
 #else  // legacy code supprt
 typedef Indexer<DIM, int> Ind;
 #endif
 #else
 #include "indexer.h"
-typedef Indexer<DIM> Ind;
+typedef ::Indexer<DIM> Ind;
 #endif
 
 #include "field.h"
@@ -73,7 +73,7 @@ typedef Indexer<DIM> Ind;
 
 // FIELD TYPE /////////////////////////////////////////////////////////////////
 
-#if defined SIMD && !defined OLD
+#if defined SIMD && !defined LEGACY
 class Storage {
  public:
   Storage(int size) { ptr = new Float[size]; }
@@ -113,10 +113,10 @@ typedef Block<DIM, Ind, octal_cell<DIM> > BlockType;
 // RANDOM GENERATOR ///////////////////////////////////////////////////////////
 
 #ifdef SIMD
-#ifndef OLD
+#ifndef LEGACY
 #include "random_simd.h"
 #else  // legacy code support
-#include "random_simd_old.h"
+#include "legacy/random_simd.h"
 #endif
 #else
 #include "random.h"
