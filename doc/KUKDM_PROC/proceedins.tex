@@ -5,6 +5,7 @@
 \usepackage{dcolumn}
 \usepackage{tikz}
 \usepackage{float}
+\usepackage{url}
 \usetikzlibrary{positioning}
 \usetikzlibrary{calc}
 \usetikzlibrary{arrows,shapes,backgrounds}
@@ -266,7 +267,7 @@ complicates the parallelization of the algorithm.
 
 \begin{figure}[H]
 \begin{center}
-\begin{tikzpicture}[scale=.8]
+\begin{tikzpicture}[scale=.9]
 \def\lcsize{8}
 \pgfmathtruncatemacro\lcsizem{\lcsize - 1}
 \pgfmathtruncatemacro\lcsizeb{\lcsize - \bksize}
@@ -311,7 +312,8 @@ complicates the parallelization of the algorithm.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{GPU implementation}
+\section[gpu]{GPU implementation\footnote{Source code available at:
+\url{https://github.com/ujhpc/phi4_cuda}}}
 
 The Metropolis algorithm lends itself naturally to parallelization, however
 some caution must be taken. Notably grid points that lie in the same
@@ -394,7 +396,7 @@ index of the sublattice it belongs to.
 The GPU is no exception as to what concerns the speed of the memory access.
 While very fast, the throughput from global memory is still almost two orders
 of magnitude slower then needed to sustain the maximal instruction throughput.
-The \emph{NVIDIA} cards we use contain so called { Scalar Multiprocessors}
+The \emph{NVIDIA} cards we use contain so called \emph{Scalar Multiprocessors}
 (SM). On Fermi architecture each SM is equipped with up 48KB shared memory and
 32K of 32bit registers\cite{Fermi} which act as user managed cache. While
 starting from the compute capability 2.0 \emph{NVIDIA} cards are also equipped
@@ -521,26 +523,33 @@ can use simple index arithmetic.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{CPU implementation}
+\section[cpu]{CPU implementation\footnote{Source code available at:
+\url{https://github.com/ujhpc/phi4}}}
 
 To make a fair comparison with the CPU we have to use both multicore as vector
 (SSE/AVX) programming. The parallelization on many cores is relatively easy
-using the OpenMP. The same restriction apply as on GPU, so we partition the the
-lattice in the same way, but we use only one level \emph{i.e.} we do not
-partition the lattice into blocks. The SIMD instructions are used to process
-four (SSE) or eight (AVX) updates in parallel (similarly to threads on GPU). At
-present only portable way to use vector instructions is to use compiler
-intrinsic\cite{intr}. We have defined our own vector type that uses combination
-of the \verb!__attribute__((vector_size(N)))! directive and intrinsics to
-provide a drop--in replacement for scalar types.
+using the \emph{OpenMP}. The same restriction apply as on GPU, so we partition
+the the lattice in the same way, but we use only one level \emph{i.e.} we do
+not partition the lattice into blocks. The SIMD instructions are used to
+process four (SSE) or eight (AVX) updates in parallel (similarly to threads on
+GPU). At present only portable way to use vector instructions is to use
+compiler intrinsic\cite{intr}. In order to avoid obscurity caused by direct of
+intrinsics, we have implemented a \emph{"drop-in"} scalar type replacement
+class that wraps vector type declared with
+\verb!__attribute__((vector_size(N)))! directive and implements missing
+operations using intrinsics.
 
-Unfortunately not all scalar \emph{x86} instructions have vector counterparts,
-which is crucial requirement for vectorizing scalar code. In particular
-\emph{x86} misses direct vector \emph{XMM} gather and scatter instructions
-(load/save vector register data from/to memory indexed by other vector
-register), unlike GPU where gather and scatter is key feature. Another drawback
-in lack of AVX 256-bit integer operations, which makes random number generator
-utilize 128-bit SSE only, even on 256-bit AVX capable CPUs.
+Unfortunately not all scalar \emph{x86} instructions in modern CPUs have vector
+counterparts, which is crucial requirement for vectorizing scalar code. In
+particular AVX instruction set misses direct vector \emph{XMM/YMM} gather and
+scatter instructions (load/save vector register data from/to memory indexed by
+other vector register), unlike GPU where gather and scatter is key feature.
+This is partially addressed by AVX2, providing masked gather instruction.
+Another drawback in lack of 256-bit wide integer operations in AVX, which makes
+random number generator utilize 128-bit SSE only, even on 256-bit AVX capable
+CPUs. Again this has changed in AVX2, which is unfortunately available only in
+\emph{Haswell} desktop processors. \emph{Xeon} server processors need to wait
+for an upgrade until next year.
 
 In our CPU implementation we use a small enhancement exploiting the out of
 order instruction execution capabilities of the CPU. The most inner loop of the
@@ -574,7 +583,7 @@ $\Delta H$ and the processor is free to reorder the instructions allowing to
 hide some of the latency. This implementation is safe even in case when
 \texttt{rand()} returns a zero as \texttt{log} then returns \texttt{-Inf}.
 Actually the code above is vectorized and calculations of the four or eight
-$\log$'s is done in parallel using the \emph{Intel}'s svml library\cite{svml}.
+$\log$'s is done in parallel using the \emph{Intel}'s SVML library\cite{svml}.
 
 As already mentioned in the previous section indexing the neighbors can be
 quite costly operation requiring expensive modulo operations or large amount of
@@ -592,15 +601,17 @@ This is in some respect the ``upper bound'' of the CPU performance.
 We have tested our implementations on the following hardware:
 \begin{itemize}
 
-\item[GPU] \emph{NVIDIA} GTX 470, 14 scalar multiprocessor (448 CUDA cores),
-1.2 GHz, \\
+\item[GPU] \emph{NVIDIA} GTX 470, 14 \emph{Scalar Multiprocessors}
+(448 CUDA cores), 1.2 GHz, \\
 CUDA 5.0 Ubuntu Linux 12.04, 1088 Gflops.
+
 \vspace{.5em}
+
 \item[CPU] \emph{Intel} i5-2400S \emph{Sandy Bridge}, 4 core, 2.5 GHz, 12 GB
 RAM, \\
-OSX 10.8.3, GCC 4.8.0 \verb!-O3! OpenMP, 160 Gflops\footnote{To estimate
-Gflops on CPU, we're using our benchmark located in repository:
-\texttt{https://github.com/ujhpc/flops}}.
+OSX 10.8.3, GCC 4.8.0 \verb!-O3! OpenMP, 160 Gflops\footnote{Estimated
+according to \cite{intel}, synthetic benchmark available at: \\
+\url{https://github.com/ujhpc/flops}}.
 
 \end{itemize}
 
@@ -740,16 +751,19 @@ ops\approx \frac{ 26+N_{hit}(64+exp)}{ \left(d + N_{hit}\cdot e\right)}
 \begin{tabular}{|r|rrr|rrr|c|}
 \hline\hline
 \multicolumn{1}{|}{} & \multicolumn{3}{c|}{GPU}
-                     & \multicolumn{3}{c|}{CPU}& GPU/CPU\\\hline
+                     & \multicolumn{3}{c|}{CPU}
+                     & GPU/CPU\\\hline
 \multicolumn{1}{|c}{size} &
 \multicolumn{1}{|c|}{ns} &
- \multicolumn{1}{c|}{Gops} &
- \multicolumn{1}{c|}{Gexp/s} &
- \multicolumn{1}{c|}{ns} &
-\multicolumn{1}{|c}{Gops} & \multicolumn{1}{|c|}{Glog/s} & speedup\\\hline\hline
-$128^3$ & 0.16 & 412 & 6.1   &    2.3 & 28.4 & 0.43 & 14.5\\\hline
-$256^3$ & 0.15 & 456 & 6.8   &    2.3 & 29.0 & 0.44 & 15.7\\\hline
-$512^3$ & 0.14 & 490 & 7.3   &    2.3 & 28.6 & 0.44 & 17.1\\\hline\hline
+\multicolumn{1}{c|}{Gops} &
+\multicolumn{1}{c|}{Gexp/s} &
+\multicolumn{1}{c|}{ns} &
+\multicolumn{1}{|c}{Gops} &
+\multicolumn{1}{|c|}{Glog/s} &
+speedup \\ \hline\hline
+$128^3$ & 0.16 & 412 & 6.1 & 3.1 & 21.4 & 0.32 & $19\times$ \\ \hline
+$256^3$ & 0.15 & 456 & 6.8 & 3.1 & 21.8 & 0.32 & $20\times$ \\ \hline
+$512^3$ & 0.14 & 490 & 7.3 & 3.1 & 21.6 & 0.32 & $22\times$ \\ \hline\hline
 \end{tabular}
 
 \end{center}
@@ -793,37 +807,66 @@ may be advantageous to use \eg the checkerboard decomposition.
 \section{Discussion}
 
 Results presented in table~\ref{tab:comp} show clear advantage of the GPU over
-CPU. This is hardly surprising, but the $26\times$ difference is much higher
-than comes from comparison of theoretical performance of tested i5 CPU to
-\emph{GTX 470}. The GTX is thus more efficient in that sense that is capable of
-achieving performance much closer to the peak. This can be attributed to two
-main reasons:
+CPU. This is hardly surprising, but the $20\times$ difference is much higher
+than comes from comparison of theoretical performance ratio of tested i5 CPU to
+\emph{GTX 470} equal $8\times$. The GTX is thus more efficient in that sense
+that is capable of achieving performance much closer to the peak. This can be
+attributed to two main reasons:
 
 \begin{itemize}
-\item The shared memory that acts as an managed cache allows to use
-  the small cache size much more effectively. In particular it is
-  possible on the GPU to fit the whole $20^3$ grid block into the
-  shared memory. This is not possible using the conventional cache
-  both on GPU and CPU leading to large number of cache misses and
-  decrease of performance.
-\item Modern CPU are not fully vector processors. Not every scalar
-  instruction has a vector counterpart. In particular the eight words
-  wide integer instructions are missing from the AVX instruction set.
-  This makes it impossible to make a 256-bit pseudo-random number
-  generator.
-\item Efficient load and store vector (gather/scatter) instruction are
-  also missing from CPU.  When not loading/storing from the
-  consecutive memory location they are effectively serialized into
-  scalar loads/stores.
+
+\item The shared memory that acts as an managed cache allows to use the small
+cache size much more effectively. In particular it is possible on the GPU to
+fit the whole $20^3$ grid block into the shared memory. This is not possible
+using the conventional cache both on GPU and CPU leading to large number of
+cache misses and decrease of performance.
+
+\item Modern CPU are not fully vector processors. Not every scalar instruction
+has a vector counterpart. In particular the eight words wide integer
+instructions are present in AVX2 instruction set, not available to \emph{Xeon}
+server CPUs, which has impact on pseudo-random number generator using only
+128-bit wide AVX instructions.
+
+\item Efficient load and store vector (gather/scatter) instruction are also
+missing in AVX. When not loading/storing from the consecutive memory location
+they are effectively serialized into scalar loads/stores. On top of this GPUs
+provide enormous memory bandwidth comparing to CPU.
+
+These however are not being accounted in raw \emph{Gops} and \emph{Glogs}
+calculations above.
+
+\item GPUs provide hardware exponent, \emph{i.e.} our \emph{GTX 470} can
+execute 4 exponent operations in single cycle of \emph{Scalar Multiprocessor}
+and recent GPUs can execute 8 exponent in single cycle. CPUs do not provide
+efficient hardware exponent implementation. Fastest AVX
+implementations\cite{svml} need minimum 20 CPU cycles, however there is no
+single implementation that works best for all \emph{x86} CPUs\cite{nolib}.
+
+\item CPUs have less general purpose registers than GPUs, making CPU code more
+prone to latency problems caused by tight register dependencies. Peak
+performance can be reached only by synthetic benchmarks, while real computation
+algorithms seldom reach half of it.
+
 \end{itemize}
 
 Undeniably the trend of vectorization of CPUs is continuing and the software
 that wants to stay competitive must adapt to it. However, the current CPU make
 this more difficult than the GPU, due to the lack of some crucial vector
-features. The CPU producers are already addressing those issues. \emph{Intel
-Xeon} $\phi$ has a extended vector instructions set and \emph{Haswell} CPU
-architecture with AVX2 should be on sale this Autumn. As a future work we are
-planning to tests those architectures.
+features present on GPU, incomplete vectorization support provided by compilers
+and complicated programming model.
+
+The CPU manufacturers are are trying to address these issues. \emph{Intel Xeon}
+$\phi$ has a extended 512-bit wide vector instructions set with hardware
+gather/scatter, also recently released \emph{Haswell} CPU architecture with
+AVX2 instruction set contains 256-bit wide integer operations and gather
+instructions. AVX2 gather is still however internally mapped to several
+$\mu$-ops, yet it provides clear benefits in terms of instruction number
+reduction having notable impact on performance.
+
+We already have some preliminary results that show $1.5\times$ performance
+boost making or CPU implementation utilize some of new AVX2 instructions. We
+are also working to port our GPU code to recent NVIDIA \emph{Kepler}
+architecture.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -860,13 +903,21 @@ A.H.~Teller, E. Teller, J.~Chem.~Phys.~\textbf{21} (6) (1953) 1087--1092.
 number generation and application using {CUDA}.}'' In Hubert Nguyen, editor,
 {\em GPU Gems 3}, chapter~37. Addison Wesley, August 2007.
 
+\bibitem{intel} ``Intel 64 and IA-32 Architectures Software Developer Manuals''
+\\
+\url{http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html}
+
 \bibitem{intr} ``Intel C++ Intrinsic Reference.''
 \verb!http://software.intel.com/sites/default!\\
 \verb!/files/m/9/4/c/8/e/18072-347603.pdf! \\
 Intel Intrinsics Guide\\
 \verb!http://software.intel.com/en-us/articles/intel-intrinsics-guide!
 
-\bibitem{svml} TO-DO ! add reference to Intel svml
+\bibitem{svml} ``Overview: Intrinsics for Short Vector Math Library (SVML)
+Functions'' \verb!http://software.intel.com/en-us/node/462496!
+
+\bibitem{nolib} Agner Fog ``Still no library that is optimal on all processors''
+\verb!http://www.agner.org/optimize/blog/read.php?i=209&v=t!
 
 \end{thebibliography}
 
