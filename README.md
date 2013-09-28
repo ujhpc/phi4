@@ -1,6 +1,8 @@
 phi4
 ====
 
+See `doc/` folder for description.
+
 Build
 -----
 
@@ -46,6 +48,39 @@ executable suffix indicating used options.
 
 		make SVML_FIX=1
 
+Notes about source code
+-----------------------
+
+Source code in `src/` is split into several logical modules and versions
+described by prefixes.
+
+### Modules
+
+* `types.h` core configuration and type dispatch header
+
+* `swep_*` files implementing single sweep
+
+* `random_*` fused *Tausworthe*/*LCG* random number generator
+
+* `partition_*` partitioning implementation (satisfying Markov Chain
+  constraints)
+
+* `indexer`, `*_index` memory indexers implementation
+
+### Prefixes
+
+* `_simd` current *SIMD* code
+
+  This code uses extensively C++ templates and support gather and AVX2.
+
+* `_simd_old` legacy *SIMD* code (deprecated) used in previous publications
+
+  This code is mixture or C++ templates and macros. Supports up to AVX.
+
+* `_test` Gtest files (deprecated)
+
+  Test files for certain classes.
+
 Operations
 ----------
 
@@ -58,25 +93,25 @@ of operations, not average.
 1. Corona gather (plus est. for `Comp=1 Dim=3`)
 
 		Corona = Comp * ( Dim * (4 + 2*(Dim-1)) - Dim + 6 )
-		      ~=    1 * (   3 * (4 + 2*   2   ) -   3 + 6 )
-		       = 27
+			  ~=	1 * (	3 * (4 + 2*	  2	  ) -	3 + 6 )
+			   = 27
 
 2. Fused Tausworthe + LCG random number generator
 
-		Rng    = Taus * 3 + LCG + 3
-	           = 6 * 3 + 6
-		       = 24
+		Rng	   = Taus * 3 + LCG + 3
+			   = 6 * 3 + 6
+			   = 24
 
 3. Initial action before updates (plus est. for `Comp=1`)
 
 		Init   = Comp * 4 + 2
-		      ~= 6
+			  ~= 6
 
-4. Update ops for given `Hits`  (plus est. for `Comp=1 Dim=3`)
+4. Update ops for given `Hits`	(plus est. for `Comp=1 Dim=3`)
 
 		Update = Hits * ( (Comp+1) * Rng + (Comp-1) * 6 + Log + 10 )
-		      ~= Hits * (       2  * Rng +                Log + 10 )
-		       = Hits * ( 58 + Log                                 )
+			  ~= Hits * (		2  * Rng +				  Log + 10 )
+			   = Hits * ( 58 + Log								   )
 
 Gives altogether for `Comp=1 Dim=3`:
 
@@ -87,3 +122,24 @@ GPU Implementation
 
 GPU implementation is available as separate project
 [phi4_cuda](/ujhpc/phi4_cuda).
+
+License
+-------
+
+> Copyright (C) 2012-2013 Piotr Bialas, Adam Strzelecki
+>
+> This file is part of phi4.
+>
+> This program is free software; you can redistribute it and/or modify
+> it under the terms of the GNU General Public License as published by
+> the Free Software Foundation; either version 3 of the License, or
+> (at your option) any later version.
+>
+> This program is distributed in the hope that it will be useful,
+> but WITHOUT ANY WARRANTY; without even the implied warranty of
+> MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+> GNU General Public License for more details.
+>
+> You should have received a copy of the GNU General Public License
+> along with this program; if not, write to the Free Software Foundation,
+> Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301	USA
