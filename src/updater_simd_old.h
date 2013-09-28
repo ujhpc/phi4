@@ -64,7 +64,6 @@ template <typename F> class Updater {
           big_corona_11 += FVec(__simd_rep(SIMD, index_nu, field));
         }
       }
-
       FVec big_corona =
           FVec(-pars_.i_Lambda) *
           (big_corona_02 -

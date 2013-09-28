@@ -10,5 +10,5 @@ doc/**/*.bbl
 doc/**/*.blg
 doc/**/*.log
 doc/**/*.synctex.gz
-src/.obj
+src/.obj-*
 phi4-*

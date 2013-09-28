@@ -128,12 +128,12 @@ CPPFLAGS += -MMD \
             -DNCOMP=$(NCOMP) \
             -DNAME=$(NAME)$(SUFFIX)
 
-OBJDIR   := .obj
+OBJDIR   := .obj$(SUFFIX)
 EXECDIR  := ..
 EXEC     := $(EXECDIR)/$(NAME)$(SUFFIX)
-MAIN     := $(OBJDIR)/$(NAME)$(SUFFIX).o
-OBJECTS  := $(OBJDIR)/sweep$(SRC_SUFFIX)$(SUFFIX).o \
-            $(OBJDIR)/random$(SRC_SUFFIX)$(OLD_SRC_SUFFIX)$(SUFFIX).o
+MAIN     := $(OBJDIR)/$(NAME).o
+OBJECTS  := $(OBJDIR)/sweep$(SRC_SUFFIX).o \
+            $(OBJDIR)/random$(SRC_SUFFIX)$(OLD_SRC_SUFFIX).o
 ifneq ($(SVML_FIX),)
 ifneq ($(SIMD),)
 ifeq ($(OS),Linux)
@@ -176,13 +176,10 @@ dsym: $(EXEC)
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
-$(OBJDIR)/%$(SUFFIX).o: %.cpp Makefile $(OBJDIR)
+$(OBJDIR)/%.o: %.cpp Makefile $(OBJDIR)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
 
-$(OBJDIR)/%$(CC_SUFFIX).o: %.cpp Makefile $(OBJDIR)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
-
-$(OBJDIR)/%$(SUFFIX).o: %.c Makefile $(OBJDIR)
+$(OBJDIR)/%.o: %.c Makefile $(OBJDIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 
 clean:
@@ -191,5 +188,6 @@ clean:
 
 clean-all:
 	find . \( -name '*.o' -o -name '*.d' -o -name '*.s' \) -delete
+	find . -name '.obj*' -type d -delete
 	find .. -perm +0111 -name '$(NAME)-*' -delete
 	test -d $(OBJDIR) && rmdir $(OBJDIR) || true

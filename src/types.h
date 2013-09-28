@@ -56,9 +56,13 @@ typedef SFVec::itype SIVec;
 
 // COMMON HEADERS /////////////////////////////////////////////////////////////
 
-#if defined SIMD || defined FAST_INDEXER
+#if (defined SIMD && !defined OLD) || defined FAST_INDEXER
 #include "fast_indexer.h"
+#ifndef OLD
 typedef Indexer<DIM, IVec> Ind;
+#else  // legacy code supprt
+typedef Indexer<DIM, int> Ind;
+#endif
 #else
 #include "indexer.h"
 typedef Indexer<DIM> Ind;
