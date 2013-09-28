@@ -48,6 +48,10 @@ executable suffix indicating used options.
 
 		make SVML_FIX=1
 
+8. Use old *legacy* code (used in publications) max AVX
+
+		make LEGACY=1
+
 Notes about source code
 -----------------------
 
@@ -62,24 +66,17 @@ described by prefixes.
 
 * `random_*` fused *Tausworthe*/*LCG* random number generator
 
-* `partition_*` partitioning implementation (satisfying Markov Chain
-  constraints)
+* `partition_*` partitioning (satisfying Markov Chain constraints)
 
 * `indexer`, `*_index` memory indexers implementation
 
+* `legacy/*` legacy versions of modules above (used in publications)
+
 ### Prefixes
 
-* `_simd` current *SIMD* code
-
-  This code uses extensively C++ templates and support gather and AVX2.
-
-* `_simd_old` legacy *SIMD* code (deprecated) used in previous publications
-
-  This code is mixture or C++ templates and macros. Supports up to AVX.
+* `_simd` *SIMD* version of module
 
 * `_test` Gtest files (deprecated)
-
-  Test files for certain classes.
 
 Operations
 ----------
