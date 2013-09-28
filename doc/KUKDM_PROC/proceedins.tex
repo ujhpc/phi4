@@ -5,7 +5,7 @@
 \usepackage{dcolumn}
 \usepackage{tikz}
 \usepackage{float}
-\usepackage{url}
+\usepackage{hyperref}
 \usetikzlibrary{positioning}
 \usetikzlibrary{calc}
 \usetikzlibrary{arrows,shapes,backgrounds}
@@ -267,7 +267,7 @@ complicates the parallelization of the algorithm.
 
 \begin{figure}[H]
 \begin{center}
-\begin{tikzpicture}[scale=.9]
+\begin{tikzpicture}
 \def\lcsize{8}
 \pgfmathtruncatemacro\lcsizem{\lcsize - 1}
 \pgfmathtruncatemacro\lcsizeb{\lcsize - \bksize}
@@ -872,12 +872,12 @@ and \emph{Xeon Phi} accelerator.
 
 \begin{thebibliography}{9}
 
-\bibitem{top500}{\tt http://www.top500.org/}
+\bibitem{top500} \url{http://www.top500.org/}
 
-\bibitem{spin1}Benjamin Block , Peter Virnau , Tobias Preis, Computer Physics
+\bibitem{spin1} Benjamin Block , Peter Virnau , Tobias Preis, Computer Physics
 Communications, Volume 181 (2010) 1549–1556.
 
-\bibitem{spin2}Ezequiel E. Ferrero, Juan Pablo De Francesco, Nicolás Wolovick,
+\bibitem{spin2} Ezequiel E. Ferrero, Juan Pablo De Francesco, Nicolás Wolovick,
 Sergio A. Cannas. Computer Physics Communications, volume 183, 1578--1587, 2012
 
 \bibitem{Checkboard}B.~Block, P.~Virnau, T.~Preis ``Multi-GPU Accelerated
@@ -896,8 +896,7 @@ A.H.~Teller, E. Teller, J.~Chem.~Phys.~\textbf{21} (6) (1953) 1087--1092.
 ``The Theory of Critical Phenomena'', Oxford University Press (1993).
 
 \bibitem{Fermi} ``NVIDIA's Next Generation CUDA ComputeArchitecture: Fermi'' \\
-\verb!http://www.nvidia.com/content/PDF/fermi_white_papers/!\\
-\verb!NVIDIA_Fermi_Compute_Architecture_Whitepaper.pdf!
+\url{http://www.nvidia.com/content/PDF/fermi_white_papers/NVIDIA_Fermi_Compute_Architecture_Whitepaper.pdf}
 
 \bibitem{howes_thomas07} Lee Howes and David Thomas. ``{\em Efficient random
 number generation and application using {CUDA}.}'' In Hubert Nguyen, editor,
@@ -907,17 +906,16 @@ number generation and application using {CUDA}.}'' In Hubert Nguyen, editor,
 \\
 \url{http://www.intel.com/content/www/us/en/processors/architectures-software-developer-manuals.html}
 
-\bibitem{intr} ``Intel C++ Intrinsic Reference.''
-\verb!http://software.intel.com/sites/default!\\
-\verb!/files/m/9/4/c/8/e/18072-347603.pdf! \\
-Intel Intrinsics Guide\\
-\verb!http://software.intel.com/en-us/articles/intel-intrinsics-guide!
+\bibitem{intr} ``Intel C++ Intrinsic Reference.'' \\
+\url{http://software.intel.com/file/18072/} \\
+``Intel Intrinsics Guide'' \\
+\url{http://software.intel.com/en-us/articles/intel-intrinsics-guide}
 
 \bibitem{svml} ``Overview: Intrinsics for Short Vector Math Library (SVML)
-Functions'' \verb!http://software.intel.com/en-us/node/462496!
+Functions'' \\ \url{http://software.intel.com/en-us/node/462496}
 
-\bibitem{nolib} Agner Fog ``Still no library that is optimal on all processors''
-\verb!http://www.agner.org/optimize/blog/read.php?i=209&v=t!
+\bibitem{nolib} Agner Fog ``Still no library that is optimal on all
+processors'' \\ \url{http://www.agner.org/optimize/blog/read.php?i=209&v=t}
 
 \end{thebibliography}
 
