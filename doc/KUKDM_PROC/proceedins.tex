@@ -1,12 +1,11 @@
 \documentclass[a4paper]{llncs}
 \usepackage[plain]{algorithm}
 \usepackage{listings}
-%\usepackage{algorithmicx}
 \usepackage{algpseudocode}
 \usepackage{amsmath}
 \usepackage{dcolumn}
-%\lstset{language=C}
 \usepackage{tikz}
+\usepackage{float}
 \usetikzlibrary{positioning}
 \usetikzlibrary{calc}
 \usetikzlibrary{arrows,shapes,backgrounds}
@@ -17,18 +16,17 @@
 
 \lstdefinelanguage
   [GCC]{C++}
-  []{C++}
-{
-  morekeywords={[2]__attribute__},%
-  morekeywords={[3]vector_size,r,DeltaH}%
+  []{C++}{
+  morekeywords={[2]__attribute__,exp,log,rand},%
+  morekeywords={[3]vector_size}%
 }
-\lstset{  language={[GCC]C++},%
+\lstset{%
+  language={[GCC]C++},%
   basicstyle=\small,%
   keywordstyle=\bfseries,%
-  keywordstyle=[2]\bfseries,%
-  %keywordstyle=[3]\itshape,%
-  commentstyle=\color{gray},%
-  stringstyle=\color{gray},%
+  keywordstyle=[2]\ttfamily,%
+  keywordstyle=[3]\ttfamily,%
+  commentstyle=\itshape,%
   stepnumber=1,%
   numbersep=5pt,%
   tabsize=2,%
@@ -40,7 +38,6 @@
   columns=flexible%
 }
 
-%\input {header.tex}
 \renewcommand{\a}[1]{\v{a}_{#1}}
 \renewcommand{\L}{\mathcal{L}}
 \renewcommand{\v}[1]{\vec{#1}}
@@ -92,12 +89,13 @@
   }
 }
 
-
 \definecolor{colorone}{HTML}{777777} % default 116699
 \definecolor{colortwo}{HTML}{DDDDDD} % default CCCCCC
 \def\bksize{8}
 \def\bkcount{4}
 \def\lcsize{5}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \title{ GPU-accelerated and CPU SIMD Optimized \\
   Monte Carlo Simulation of $\phi^4$ Model } \author{ Piotr
@@ -123,95 +121,87 @@
   discuss the observed differences.
 \end{abstract}
 
-Keywords: GPU computing, vectorization. Monte-Carlo simulations. 
+Keywords: GPU computing, vectorization. Monte-Carlo simulations.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Introduction}
 
-The Graphical Processing Units (GPU) emerge these days as the most
-efficient devices for numerical calculations. To ascertain this it is
-sufficient to look at the list of 500 supercomputers\cite{top500} and count how
-many of them have GPU accelerators and this trend is still
-increasing. This was made possible not only by the accessibility of
-the hardware but also by the realization from the side of the vendors
-that those units can be used also for computations, and providing user
-with suitable software interface to do this. Technologies like CUDA
-and OpenCL make the GPU relatively easy accessible to C/C++
-programmers. In the meantime also most of the numerical packages
-vendors have added GPU support to their tools.
+The Graphical Processing Units (GPU) emerge these days as the most efficient
+devices for numerical calculations. To ascertain this it is sufficient to look
+at the list of 500 supercomputers\cite{top500} and count how many of them have
+GPU accelerators and this trend is still increasing. This was made possible not
+only by the accessibility of the hardware but also by the realization from the
+side of the vendors that those units can be used also for computations, and
+providing user with suitable software interface to do this. Technologies like
+CUDA and OpenCL make the GPU relatively easy accessible to C/C++ programmers.
+In the meantime also most of the numerical packages vendors have added GPU
+support to their tools.
 
-However like with most of the computer languages there is a learning
-gap between using them and using them efficiently. The GPU are not
-only {\em massively parallel} machines but essentially {\em vector
-machines}. This is a trend visible also in the CPU market: the SSE
-extensions introduced four floats wide vector (SIMD) instructions, AVX
-eight floats wide and Xeon $\phi$ 16 floats wide\footnote{The Xeon
-  $\phi$ strictly speaking is not a CPU but an accelerator. However
-  its cores are based on Intel CPU Pentium architecture.}. To get most
-out of the hardware it is crucial to vectorize the algorithm and make
-good use of the available memory hierarchy.
+However like with most of the computer languages there is a learning gap
+between using them and using them efficiently. The GPU are not only {\em
+massively parallel} machines but essentially {\em vector machines}. This is a
+trend visible also in the CPU market: the SSE extensions introduced four floats
+wide vector (SIMD) instructions, AVX eight floats wide and Xeon $\phi$ 16
+floats wide\footnote{The Xeon $\phi$ strictly speaking is not a CPU but an
+accelerator. However its cores are based on \emph{Intel} CPU \emph{Pentium}
+architecture.}. To get most out of the hardware it is crucial to vectorize the
+algorithm and make good use of the available memory hierarchy.
 
+In this contribution we present an efficient implementation, both on GPU and
+CPU, of the Monte-Carlo simulations of the discretized version of the
+Ginzburg--Landau model. The Ginzburg-Landau model is probably after the Ising
+model the second most important model of the statistical physics (for an
+excellent introduction to those topics see \cite{binney}). It is the basis for
+the modern theory of the phase transitions. Under the name of the $\phi^4$
+theory it is a model for the scalar field that describes among other things the
+much publicized lately Higgs particle. It is a simple model to formulate, but
+in spite of its simplicity unsolvable. While many approximate methods exists to
+study its properties Monte-Carlo simulations are used extensively and their
+importance is growing as the speed and the accessibility of the new fast
+hardware increases.
 
-In this contribution we present an efficient
-implementation,  both on GPU and CPU, of the Monte-Carlo simulations of the 
-discretized version of the Ginzburg--Landau model. 
-The Ginzburg-Landau model is probably after the Ising model the second
-most important model of the statistical physics (for an excellent
-introduction to those topics see \cite{binney}). It is the basis for
-the modern theory of the phase transitions. Under the name of the
-$\phi^4$ theory it is a model for the scalar field that describes
-among other things the much publicized lately Higgs particle.  It is a
-simple model to formulate, but in spite of its simplicity
-unsolvable. While many approximate methods exists to study its
-properties Monte-Carlo simulations are used extensively and their
-importance is growing as the speed and the accessibility of the new
-fast hardware increases.  
+Our motivation was to develop a tool to accompany the lecture on Statistical
+Field Theory given by one of the authors. The idea was to create a kind of
+``virtual lab'' where students could study the effects of various parameters on
+the properties of the model. This requires a fast implementation working on the
+easily accessible commodity hardware, so the results can be obtained in
+reasonably short time. For the educational reasons we also included a
+``cut-off'' term (see next section) in the model, which while not strictly
+necessary allows for greater clarity of the presentation. This term however
+introduces the interactions between the sites that are not nearest neighbors
+(see figure~\ref{fig:nn}) complicating the parallelization of the algorithm. We
+have obtained a hundredfold speedup compared with our old CPU version. That
+drew our attention to the inefficiency of the CPU code. We have completely
+rewritten the code taking advantage of the many cores and SIMD instructions of
+the CPU, paradoxically it took more effort than implementing the GPU version.
 
+We believe however that our contribution is relevant to a wider audience.
+Monte-Carlo simulations of this type play an important role in statistical
+physics, solid state physics and field theory. Those simulations are usually
+very time consuming so the speed of the algorithm is of a paramount importance.
+Our implementation can be easily adapted to many variants of the model as we
+describe in more detail later. The GPU implementation is targeted for small
+desktop machines with commodity CUDA enabled graphics cards and is up to 25
+times faster than CPU program running on the same machine. Such ``small-scale''
+computing plays a very important role in science as it provides for fast
+feedback right at the workplace, without resorting to more laborious and/or
+expensive bigger machines.
 
-Our motivation was to develop a tool to accompany the lecture on
-Statistical Field Theory given by one of the authors. The idea was to
-create a kind of ``virtual lab'' where students could study the
-effects of various parameters on the properties of the model. This
-requires a fast implementation working on the easily accessible
-commodity hardware, so the results can be obtained in reasonably short
-time. For the educational reasons we also included a ``cut-off'' term
-(see next section) in the model, which while not strictly necessary
-allows for greater clarity of the presentation. This term however
-introduces the interactions between the sites that are not nearest
-neighbors (see figure~\ref{fig:nn}) complicating the parallelization
-of the algorithm.  We have obtained a hundredfold speedup compared
-with our old CPU version.  That drew our attention to the inefficiency
-of the CPU code. We have completely rewritten the code taking
-advantage of the many cores and SIMD instructions of the CPU,
-paradoxically it took more effort than implementing the GPU version.
-
-We believe however that our contribution is relevant to a wider
-audience.  Monte-Carlo simulations of this type play an important role
-in statistical physics, solid state physics and field theory.  Those
-simulations are usually very time consuming so the speed of the
-algorithm is of a paramount importance.  Our implementation can be
-easily adapted to many variants of the model as we describe in more
-detail later. The GPU implementation is targeted for small desktop
-machines with commodity CUDA enabled graphics cards and is up to 25 times faster
-than CPU program running on the same machine. Such ``small-scale''
-computing plays a very important role in science as it provides for
-fast feedback righ at the workplace, without resorting to more
-laborious and/or expensive bigger machines.
-
-Apart from providing ready to use code, which will be available
-online, we hope to contribute also to general methodology of adapting
-Monte-Carlo to SIMD architectures. This clearly is a trend in modern
-hardware but much of the knowledge remains tacit in nature.   We have
-found two published GPU implementations of similar model, however they
-were mainly discrete spin models with nearest neighbor
-interactions\cite{spin1,spin2,weigel}.  We use a continuous field
-model with extended neighborhood that to our knowledge was not yet
-ported to the GPU. 
-
+Apart from providing ready to use code, which will be available online, we hope
+to contribute also to general methodology of adapting Monte-Carlo to SIMD
+architectures. This clearly is a trend in modern hardware but much of the
+knowledge remains tacit in nature. We have found two published GPU
+implementations of similar model, however they were mainly discrete spin models
+with nearest neighbor interactions\cite{spin1,spin2,weigel}. We use a
+continuous field model with extended neighborhood that to our knowledge was not
+yet ported to the GPU.
 
 \section{Ginzburg--Landau model and Monte-Carlo simulations}
 
 Ginzburg--Landau model that we use in its discretized form is defined by the
 Hamiltonian\cite{parisi}:
+
 \begin{equation*}\label{eq:hamiltonian}\begin{split}
 H[\varphi]&=\sum_{\vi}\Biggl(
 \frac{1}{2}\sum_{\mu=1}^d(\vphi(x_\vi+\a{\mu})-\vphi(x_\vi))^2\\
@@ -222,24 +212,27 @@ H[\varphi]&=\sum_{\vi}\Biggl(
 (\vphi(x_\vi+\a{\mu})-2\vphi(x_{\vi})+\vphi(x_\vi-\a\mu))\Bigr)^2\Biggr).
 \end{split}
 \end{equation*}
-where $\vphi$ is a scalar\footnote{In general this can be a vector,
-  but in this contribution we restrict ourselves to scalar case.} field
-defined on the sites of a $d$ dimensional lattice (we only consider $d=2$ and $3$). The $x_i$
-denote a site of the lattice where $i$ is a multidimensional index
-and $\a\mu$ denotes the unit vector in the direction $\mu$. We use
-periodic boundary conditions \ie
-\begin{equation} 
+
+where $\vphi$ is a scalar\footnote{In general this can be a vector, but in this
+contribution we restrict ourselves to scalar case.} field defined on the sites
+of a $d$ dimensional lattice (we only consider $d=2$ and $3$). The $x_i$ denote
+a site of the lattice where $i$ is a multidimensional index and $\a\mu$ denotes
+the unit vector in the direction $\mu$. We use periodic boundary conditions \ie
+
+\begin{equation}
 \phi(x+L_{\mu}\a\mu)=\phi(x)
 \end{equation}
-where  $L_\mu$ is the number of lattice sites in direction $\mu$. 
+where  $L_\mu$ is the number of lattice sites in direction $\mu$.
 The Monte-Carlo simulations consist of
 generating the field configurations with probability proportional to
 $\exp(-H(\vphi))$.
 
-The  generation is done by the mean of the Metropolis
-algorithm\cite{metropolis,binney}. This amounts to sequentially updating all the points of the
-lattice. During each update we change the value of the field $\vphi$
-in on a single lattice point ($\vphi_i$ is a shorthand for $\vphi(x_\vi)$).
+The generation is done by the mean of the Metropolis
+algorithm\cite{metropolis,binney}. This amounts to sequentially updating all
+the points of the lattice. During each update we change the value of the field
+$\vphi$ in on a single lattice point ($\vphi_i$ is a shorthand for
+$\vphi(x_\vi)$).
+
 \begin{equation}
 \vphi_i\longrightarrow\widetilde{\vphi_i}=\vphi_i+\eta_i.
 \end{equation}
@@ -250,6 +243,7 @@ calculate the difference of the Hamiltonian's
 \begin{equation}
 \Delta H=H[\widetilde{\vphi_i}]-H[\vphi_i].
 \end{equation}
+
 If $\Delta H < 0$ we accept the change and substitute
 $\widetilde{\vphi_i}$ for $\vphi_i$, otherwise we accept the change
 with the probability $\exp(-\Delta H)$. In other words if we denote by
@@ -258,9 +252,10 @@ field at lattice site $x_i$ then it is given by
 \begin{equation}
 P(\vphi_i\rightarrow\vphi_i+\eta_i)=\min\left(1,\exp(-\Delta H)\right).
 \end{equation}
+
 The crucial feature of this algorithm is that the update is local {\em
   i.e.} $\Delta H$ depends only on the values of fields in the
-immediate neighborhood of the updated point 
+immediate neighborhood of the updated point
 \begin{equation}
 \begin{split}
 \Delta H & = -(\widetilde{\vphi_i}-\vphi_i)\, c_i\\
@@ -274,7 +269,7 @@ where
 c_i=\left(c^{01}_i-\frac{1}{\Lambda}(c^{02}_i-4 d c^{01}_i+2 c^{11}_i )\right)
 \end{equation}
 and
-\begin{equation}\label{eq:corona-terms}\begin{split} 
+\begin{equation}\label{eq:corona-terms}\begin{split}
 c_i^{01}&=\sum_{\mu=1}^d\left(\vphi(x_\vi+\a\mu)+\vphi(x_\vi-\a\mu)\right)\\
 c_i^{02}&=\sum_{\mu=1}^d\left(\vphi(x_\vi+2\a\mu)+\vphi(x_\vi-2\a\mu)\right)\\
 c_i^{11}&=\sum_{\mu=}^d\sum_{\nu=1}^{\mu-1}
@@ -285,19 +280,19 @@ c_i^{11}&=\sum_{\mu=}^d\sum_{\nu=1}^{\mu-1}
 \bigr)
 \end{split}
 \end{equation}
-The term $c_i$ is referred to as {\em corona} of the site $x_i$.  The
-corona is a weighted sum of the values of the field $\phi$ on the
-sites in the neighborhood of the site $x_i$. On the
-figure~\ref{fig:nn} we provide a geometrical interpretation of corona
-in two dimensions.  In our case, because of the last term in
-\eqref{eq:hamiltonian}, the corona is extended as compared to more
-commonly used nearest neighbors neighborhood (squares on the figure~\ref{fig:nn}). As we will show in
-the next section this considerably complicates the parallelization of
-the algorithm. 
-\begin{figure}
+
+The term $c_i$ is referred to as \emph{corona} of the site $x_i$. The corona is
+a weighted sum of the values of the field $\phi$ on the sites in the
+neighborhood of the site $x_i$. Figure~\ref{fig:nn} provides a geometrical
+interpretation of corona in two dimensions. In our case, because of the last
+term in \eqref{eq:hamiltonian}, the corona is extended as compared to more
+commonly used nearest neighbors neighborhood (squares on the
+figure~\ref{fig:nn}). As we will show in the next section this considerably
+complicates the parallelization of the algorithm.
+
+\begin{figure}[H]
 \begin{center}
-\begin{tikzpicture} 
-%\pgfmathtruncatemacro\lcsize{\bksize * \bkcount}
+\begin{tikzpicture}[scale=.8]
 \def\lcsize{8}
 \pgfmathtruncatemacro\lcsizem{\lcsize - 1}
 \pgfmathtruncatemacro\lcsizeb{\lcsize - \bksize}
@@ -306,81 +301,81 @@ the algorithm.
 \pgfmathtruncatemacro\bksizec{\bksize * 2}
 \pgfmathtruncatemacro\bksizem{\bksizec - 1}
 \pgfmathtruncatemacro\bksized{\bksizec + 1}
+
 \draw[very thin, gray] (-.5, -.5) grid (\bksize - .5, \bksize - .5);
-\foreach \x in {0,...,\lcsizem} 
-\foreach \y in {0, ...,\lcsizem}
-\draw[fill=white,draw=black]  (\x, \y) circle[radius=0.1];
+
+\foreach \x in {0,...,\lcsizem}
+  \foreach \y in {0, ...,\lcsizem}
+    \draw[fill=white,draw=black]  (\x, \y) circle[radius=0.1];
 
 \coordinate (c) at (4,4);
 
-\node at (c)  [circle,fill=red,draw=black] {};
+\node at (c) [circle,fill=red,draw=black] {};
 
 \def\coronaa{(0,1), (0,-1), (1,0), (-1,0)}
 \def\coronab{(0,2), (0,-2), (2,0), (-2,0)}
 \def\coronac{(1,1), (1,-1), (-1,-1), (-1,1)}
 
 \foreach \p in \coronaa {
-\path (c) +\p node  [rectangle,fill=gray, draw=black]    {};
+  \path (c) + \p node  [rectangle,fill=gray, draw=black] {};
 }
 
 \foreach \p in \coronab {
-\path (c) +\p node  [diamond,fill=gray,draw=black]    {};
+  \path (c) + \p node  [diamond,fill=gray,draw=black] {};
 }
-
 \foreach \p in \coronac {
-\path (c) +\p node  [circle,fill=gray, draw= black]    {};
+  \path (c) + \p node  [circle,fill=gray, draw= black] {};
 }
-
 \end{tikzpicture}
 \end{center}
 \caption{\label{fig:nn}The neighborhood used to calculate the $\Delta
-  H$.  The values of the field $\phi$ on the gray marked lattice sites
+  H$. The values of the field $\phi$ on the gray marked lattice sites
   contribute to the corona $c_i$ with geometrical symbols marking the
   contribution to different terms: $c^{01}$ -- squares, $c^{11}$ --
   circles and $c^{02}$ -- diamonds.}
 \end{figure}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{GPU implementation}
 
-The Metropolis algorithm lends itself naturally to parallelization,
-however some caution must be taken. Notably grid points that lie in
-the same neighborhood cannot be updated together. That is if we update
-the red point on the figure~\ref{fig:nn} we cannot update any of the
-gray points in the same time.  Basically this stems from the
-requirement that in order to process two sites $x_a$ and $x_b$ in
-parallel those two operation must be independent.  That means that the
-joint probability
-$P(\phi_a,\phi_b\rightarrow\phi_a+\eta_a,\phi_b+\eta_b)$ must
-factorize:
+The Metropolis algorithm lends itself naturally to parallelization, however
+some caution must be taken. Notably grid points that lie in the same
+neighborhood cannot be updated together. That is if we update the red point on
+the figure~\ref{fig:nn} we cannot update any of the gray points in the same
+time. Basically this stems from the requirement that in order to process two
+sites $x_a$ and $x_b$ in parallel those two operation must be independent. That
+means that the joint probability
+$P(\phi_a,\phi_b\rightarrow\phi_a+\eta_a,\phi_b+\eta_b)$ must factorize:
+
 \begin{equation}
 P(\phi_a,\phi_b\rightarrow\phi_a+\eta_a,\phi_b+\eta_b)
 =P(\phi_a\rightarrow\phi_a+\eta_a)P(\phi_b\rightarrow\phi_b+\eta_b)
 \end{equation}
+
 This can be only achieved if $P(\phi_a\rightarrow\phi_a+\eta_a)$ does
 not depend on the value of $\phi_b$ and vice versa.
 
-To ensure that this condition is satisfied we decompose the lattice
-into several sublattices such that points belonging to each sublattice
-are far enough from each other and can safely be updated in
-parallel. In case of the more commonly encountered nearest-neighbor
-interaction (squares on the figure~\ref{fig:nn}) it is enough two
-divide the lattice in two sublattices by labeling each side
-``black'' or ``white'' as on the checkerboard (sometimes this is also
-referred as ``even-odd'' decomposition)\cite{Checkboard}. It is easy to see that no site
-has a nearest neighbor of the same color, so all the sites of the
-same color can be updated in parallel. This would be the case of the
-Ginzburg-Landau model without the last term in \eqref{eq:hamiltonian}.
+To ensure that this condition is satisfied we decompose the lattice into
+several sublattices such that points belonging to each sublattice are far
+enough from each other and can safely be updated in parallel. In case of the
+more commonly encountered nearest-neighbor interaction (squares on the
+figure~\ref{fig:nn}) it is enough two divide the lattice in two sublattices by
+labeling each side ``black'' or ``white'' as on the checkerboard (sometimes
+this is also referred as ``even-odd'' decomposition)\cite{Checkboard}. It is
+easy to see that no site has a nearest neighbor of the same color, so all the
+sites of the same color can be updated in parallel. This would be the case of
+the Ginzburg-Landau model without the last term in \eqref{eq:hamiltonian}.
 
-As we consider in here a model with much bigger corona (see
-fig~\ref{fig:nn}) this simple decomposition is not sufficient any more.
-We have been unable to find a decomposition requiring less then eight
-sublattices in two dimensions, and 16 in three dimensions. The two
-dimensional decomposition is depicted on the figure~\ref{fig:part}
-where we have marked each site (square) with the index of the
-sublattice it belongs to.
+As we consider in here a model with much bigger corona (see fig~\ref{fig:nn})
+this simple decomposition is not sufficient any more. We have been unable to
+find a decomposition requiring less then eight sublattices in two dimensions,
+and 16 in three dimensions. The two dimensional decomposition is depicted on
+the figure~\ref{fig:part} where we have marked each site (square) with the
+index of the sublattice it belongs to.
+
 \begin{figure}
-\begin{center} 
+\begin{center}
 \begin{tikzpicture}[scale=0.95]
 
 % \clip[rounded corners=0cm] (-1, -1) rectangle (\bksize + 1, \bksize + 1);
@@ -412,7 +407,6 @@ sublattice it belongs to.
 
 \pgfmathtruncatemacro\lchalf{\bksize / 2}
 
-
 % main center neighborhood
 \path[draw=red,  rounded corners=.1cm, shorten >=2pt, line width=.75mm]
 (\lchalf - 2.5, \lchalf) \neighborhood;
@@ -423,24 +417,22 @@ sublattice it belongs to.
   the same sublattice and can be updated in parallel.}
 \end{figure}
 
+The GPU is no exception as to what concerns the speed of the memory access.
+While very fast, the throughput from global memory is still almost two orders
+of magnitude slower then needed to sustain the maximal instruction throughput.
+The \emph{NVIDIA} cards we use contain so called { Scalar Multiprocessors}
+(SM). On Fermi architecture each SM is equipped with up 48KB shared memory and
+32K of 32bit registers\cite{Fermi} which act as user managed cache. While
+starting from the compute capability 2.0 \emph{NVIDIA} cards are also equipped
+with L1 and L2 caches, the use of automatic cache is, as we will show later, no
+advantageous in terms of performance.
 
+To efficiently use the shared memory we adopt the hierarchical scheme from
+ref.~\cite{weigel} suitably modified to account for bigger neighborhood. We
+first divide the whole lattice in blocks of $B_x\times B_y$ points (see
+figure~\ref{fig:blocks}).
 
-The GPU is no exception as to what concerns the speed of the memory
-access.  While very fast, the throughput from global memory is still
-almost two orders of magnitude slower then needed to sustain the
-maximal instruction throughput.  The NVIDIA cards we use contain so
-called { Scalar Multiprocessors} (SM). On Fermi architecture each SM
-is equipped with up 48KB shared memory and 32K of 32bit
-registers\cite{Fermi} which act as user managed cache. While starting
-from the compute capability 2.0 Nvidia cards are also equipped with L1
-and L2 caches, the use of automatic cache is, as we will show later,
-no advantageous in terms of performance.
-
-To efficiently use the shared memory  we adopt the hierarchical scheme from
-ref.~\cite{weigel} suitably modified to account for bigger
-neighborhood.  We first divide the whole lattice in blocks of
-$B_x\times B_y$ points (see figure~\ref{fig:blocks}). 
-\begin{figure} 
+\begin{figure}
 \begin{center}
 
 \begin{tikzpicture}[scale=0.35]
@@ -463,7 +455,7 @@ $B_x\times B_y$ points (see figure~\ref{fig:blocks}).
 
 \foreach \x in {0, ..., \lcsizem}
   \foreach \y in {0, ..., \lcsizem}{
- 
+
     \path[draw=colorone, fill=white] (\x, \y) circle(.25);
 }
 
@@ -479,41 +471,38 @@ $B_x\times B_y$ points (see figure~\ref{fig:blocks}).
 \end{tikzpicture}
 \end{center}
 \caption{\label{fig:blocks}Partition of the lattice into
-  blocks.  The sites 
+  blocks.  The sites
 marked in gray are loaded into shared memory.}
 \end{figure}
-To process each point inside a block we also need the neighboring
-points.  We divide the grid of blocks into subgrids in such a way,
-that blocks together with the neighborhood in each subgrid do not
-overlap (see gray points in figure~\ref{fig:blocks}). In 2D we need
-four of such subgrids and eight in 3D case.
 
-We then start a kernel that process all blocks in one subgrid.  Each
-block in this subgrid is assigned to a block of $N_{th}$ threads (CTA
--- Cooperative Threads Array). First we fetch the values of the fields
-from global to shared memory (including border points see
-figure~\ref{fig:blocks}).  In 3D we use $B_x=B_y=B_z=16$ which gives
-altogether $20^3$ field values to be loaded with additional boundary values on the edges. This gives $32$KB which
-fits nicely into 48KB shared memory.
+To process each point inside a block we also need the neighboring points. We
+divide the grid of blocks into subgrids in such a way, that blocks together
+with the neighborhood in each subgrid do not overlap (see gray points in
+figure~\ref{fig:blocks}). In 2D we need four of such subgrids and eight in 3D
+case.
 
+We then start a kernel that process all blocks in one subgrid. Each block in
+this subgrid is assigned to a block of $N_{th}$ threads (CTA -- Cooperative
+Threads Array). First we fetch the values of the fields from global to shared
+memory (including border points see figure~\ref{fig:blocks}). In 3D we use
+$B_x=B_y=B_z=16$ which gives altogether $20^3$ field values to be loaded with
+additional boundary values on the edges. This gives $32$KB which fits nicely
+into 48KB shared memory.
 
-After that each thread updates one site
-from the first sublattice. This is done $N_{hit}$ times resulting in
-what is know as {\em multi-hit} metropolis algorithm. The advantage is
-that the corona $c_i$ does not need to be recalculated again and most
-of the needed variables resides already in registers.  Then after
-synchronization, next sublattice is updated and so on. This whole
-procedure is repeated $N_{loc}$ times, again taking advantage of
-the fact that the field values are already in the shared memory. After
-that the kernel writes the shared memory back into global and new
-kernel is started processing next subgrid of blocks (see
-algorithm~\ref{alg:gpu}).
+After that each thread updates one site from the first sublattice. This is done
+$N_{hit}$ times resulting in what is know as {\em multi-hit} metropolis
+algorithm. The advantage is that the corona $c_i$ does not need to be
+recalculated again and most of the needed variables resides already in
+registers. Then after synchronization, next sublattice is updated and so on.
+This whole procedure is repeated $N_{loc}$ times, again taking advantage of the
+fact that the field values are already in the shared memory. After that the
+kernel writes the shared memory back into global and new kernel is started
+processing next subgrid of blocks (see algorithm~\ref{alg:gpu}).
 
-Monte-Carlo calculations require a good source of random numbers. We
-use the Tausworthe pseudo--random number
-generator\cite{howes_thomas07} with one copy of the generator per
-thread. The performance could be increased by the use of simpler
-generator, but we have not attempted this in this work.
+Monte-Carlo calculations require a good source of random numbers. We use the
+Tausworthe pseudo--random number generator\cite{howes_thomas07} with one copy
+of the generator per thread. The performance could be increased by the use of
+simpler generator, but we have not attempted this in this work.
 
 \begin{algorithm}
 \begin{algorithmic}[1]
@@ -523,7 +512,7 @@ generator, but we have not attempted this in this work.
 \State load block  into shared memory
 \For{every local sublattice}
 \For{every site $i$ in local sublattice}
-\State calculate corona $c_i$ 
+\State calculate corona $c_i$
 \For{ k = 1 ..  $N_{hit}$ }
 \State $\widetilde{\vphi}_i \gets \vphi_i+\eta$
 \State $\Delta H \gets H[\widetilde{\vphi}_i]-H[\vphi_i]$
@@ -531,7 +520,7 @@ generator, but we have not attempted this in this work.
 \State $\vphi_i \gets \widetilde{\vphi}_i$
 \EndIf
 \EndFor
-\EndFor 
+\EndFor
 \State {\tt \_\_syncthreads();}
 \EndFor
 \EndFor
@@ -542,36 +531,34 @@ generator, but we have not attempted this in this work.
   by the absence of the loops over the blocks: lines 2-4.}
 \end{algorithm}
 
+One of the problems with lattice simulations is the treatment of the boundary
+conditions. The algorithm requires access to the site neighbors during each
+update. Index of neighbors can be calculated using simple arithmetic's, except
+at the boundaries. Indexing of neighbors requires checking for the boundary at
+each update or an expensive modulo operations\footnote{An exception are the
+powers of two, where modulo can be cheaply calculated. a general modulo
+operation is however quite expensive. }. Another technique is to use the
+precalculated and stored indices: for every site we store the index of four or
+six nearest neighbors. This is also very flexible but requires a large amount
+of memory. This can have a negative impact on the performance and is not well
+suitable for the GPU which usually have less RAM then CPU's. In our algorithm
+the checking for boundary is needed only when loading to shared memory. Then we
+can use simple index arithmetic.
 
-One of the problems with lattice simulations is the treatment of the boundary conditions. The
-algorithm requires access to the site neighbors during each update. Index of neighbors can be
-calculated using simple arithmetic's, except at the boundaries. Indexing of neighbors requires
-checking for the boundary at each update or an expensive modulo operations\footnote{An exception are
-  the powers of two, where modulo can be cheaply calculated. a general modulo operation is however
-  quite expensive. }. Another technique is to use the precalculated and stored indices: for every
-site we store the index of four or six nearest neighbors. This is also very flexible but requires a
-large amount of memory. This can have a negative impact on the performance and is not well suitable
-for the GPU which usually have less RAM then CPU's. In our algorithm the checking for boundary is
-needed only when loading to shared memory. Then we can use simple index arithmetic.
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{CPU implementation}
 
-% CPU implementation
-
-To make a fair comparison with the CPU we have to use both multicore
-as vector (SSE/AVX) programming.  The parallelization on many cores is
-relatively easy using the OpenMP. The same restriction apply as on
-GPU, so we partition the the lattice in the same way, but we use only
-one level {\em i.e.} we do not partition the lattice into blocks.  The
-SIMD instructions are used to process four (SSE) or eight (AVX)
-updates in parallel (similarly to threads on GPU).  At present only
-portable way to use vector instructions is to use compiler
-intrinsic\cite{intr}. We have defined our own vector type that uses
-combination of the \lstinline!__attribute__((vector_size(N)))!
-directive and intrinsics to provide a drop--in replacement for scalar
-types.
+To make a fair comparison with the CPU we have to use both multicore as vector
+(SSE/AVX) programming. The parallelization on many cores is relatively easy
+using the OpenMP. The same restriction apply as on GPU, so we partition the the
+lattice in the same way, but we use only one level {\em i.e.} we do not
+partition the lattice into blocks. The SIMD instructions are used to process
+four (SSE) or eight (AVX) updates in parallel (similarly to threads on GPU). At
+present only portable way to use vector instructions is to use compiler
+intrinsic\cite{intr}. We have defined our own vector type that uses combination
+of the \lstinline!__attribute__((vector_size(N)))! directive and intrinsics to
+provide a drop--in replacement for scalar types.
 
 Unfortunately not all scalar \emph{x86} instructions have vector counterparts,
 which is crucial requirement for vectorizing scalar code. In particular
@@ -581,71 +568,78 @@ register), unlike GPU where gather and scatter is key feature. Another drawback
 in lack of AVX 256-bit integer operations, which makes random number generator
 utilize 128-bit SSE only, even on 256-bit AVX capable CPUs.
 
-In our CPU implementation we use a small enhancement exploiting the
-out of order instruction execution capabilities of the CPU. The most
-inner loop of the algorithm looks as follows
-\begin{lstlisting}
-for(int i=0; i<N_HIT; ++i) {
+In our CPU implementation we use a small enhancement exploiting the out of
+order instruction execution capabilities of the CPU. The most inner loop of the
+algorithm looks as follows
 
-  // Here comes the  DeltaH calculations 
- 
-  if ( exp(-DeltaH) > rand();
+\begin{lstlisting}
+for ( int i = 0; i < N_HIT; ++i ) {
+  // Here comes the DeltaH calculations
+  // ...
+  if ( exp(-DeltaH) > rand() )
     // Accept the move
   }
 }
 \end{lstlisting}
-The exponent is an expensive, high latency operation. The processor
-has to wait for the $\Delta H$ calculations to finish before it can
-start the exponent. We have rewritten this part as
+
+The exponent is an expensive, high latency operation. The processor has to wait
+for the $\Delta H$ calculations to finish before it can start the exponent. We
+have rewritten this part as
+
 \begin{lstlisting}
-  for(int i=0; i<N_HIT; ++i) { 
-    float lr = lor( rand() );
- 
-    // Here comes the  DeltaH calculations 
- 
-    if ( -DeltaH >  lr     ) {
-      // Accept the move 
-    }
+for ( int i = 0; i < N_HIT; ++i ) {
+  float lr = log( rand() );
+  // Here comes the DeltaH calculations
+  // ...
+  if ( -DeltaH > lr ) {
+    // Accept the move
+  }
 }
 \end{lstlisting}
-The advantage is now that the argument of \code{log} is independent of
-$\Delta H$ and the processor is free to reorder the instructions
-allowing to hide some of the latency. This implementation is safe even
-in case when \code{rand()} returns a zero as \code{log} then returns {\tt
-  -Inf}.  Actually the code above is vectorized and calculations of
-the four or eight $\log$'s is done in parallel  using the Intel's svml
-library\cite{svml}.
 
-As already mentioned in the previous section indexing the neighbors
-can be quite costly operation requiring expensive modulo
-operations or large amount of memory. However if
-we restrict ourselves to the lattice dimensions that are powers of two
-the nearest neighbor calculations can be made using addition and bitwise
-operations. This is quite a restrictive approach, not suitable
-for real applications but we have decided to use it for comparison
-with the GPU version. This is in some respect the ``upper bound'' of
-the CPU performance.
+The advantage is now that the argument of \code{log} is independent of $\Delta
+H$ and the processor is free to reorder the instructions allowing to hide some
+of the latency. This implementation is safe even in case when \code{rand()}
+returns a zero as \code{log} then returns {\tt -Inf}. Actually the code above
+is vectorized and calculations of the four or eight $\log$'s is done in
+parallel using the \emph{Intel}'s svml library\cite{svml}.
 
+As already mentioned in the previous section indexing the neighbors can be
+quite costly operation requiring expensive modulo operations or large amount of
+memory. However if we restrict ourselves to the lattice dimensions that are
+powers of two the nearest neighbor calculations can be made using addition and
+bitwise operations. This is quite a restrictive approach, not suitable for real
+applications but we have decided to use it for comparison with the GPU version.
+This is in some respect the ``upper bound'' of the CPU performance.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Performance}
 \label{sec:performance}
 
 We have tested our implementations on  the following hardware:
 \begin{itemize}
-\item GPU Nvidia GTX 470, 14 Scalar Multiprocessor = 448 CUDA cores, 1.2GHz, CUDA 5.0 Ubuntu Linux 12.04, 1088Gflops.
-\item CPU Intel i5-2400S Sandy Bridge, 4 core, 2.5 GHz, 12 GB RAM, OSX 10.8.3, GCC 4.8.0 -O3 +OpenMP, 160 Gflops\footnote{To estimate Gflops on CPU, we're using our benchmark located in repository: https://github.com/ujhpc/flops}. 
+
+\item GPU \emph{NVIDIA} GTX 470, 14 Scalar Multiprocessor = 448 CUDA cores,
+1.2GHz, CUDA 5.0 Ubuntu Linux 12.04, 1088 Gflops.
+
+\item CPU \emph{Intel} i5-2400S Sandy Bridge, 4 core, 2.5 GHz, 12 GB RAM, OSX
+10.8.3, GCC 4.8.0 -O3 +OpenMP, 160 Gflops\footnote{To estimate Gflops on CPU,
+we're using our benchmark located in repository:
+https://github.com/ujhpc/flops}.
+
 \end{itemize}
 
-The overall performance of the algorithm expressed in Gflops or
-updates per sec. will depend strongly on the values of the $N_{loc.}$
-and $N_{hit}$. The optimal values of those parameters will depends on
-the physics of the model in particular on the values of parameters
-$\mu^2$, $g$ and $\Lambda$. To describe the performance in a general
-way we have decided to fit the execution time $T$ to the following
-model:
+The overall performance of the algorithm expressed in Gflops or updates per
+sec. will depend strongly on the values of the $N_{loc.}$ and $N_{hit}$. The
+optimal values of those parameters will depends on the physics of the model in
+particular on the values of parameters $\mu^2$, $g$ and $\Lambda$. To describe
+the performance in a general way we have decided to fit the execution time $T$
+to the following model:
+
 \begin{equation}\label{eq:model}
 T  = a+ V \cdot b +
-N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right) . 
+N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right) .
 \end{equation}
 where $V$ is the volume of the lattice.  The interpretation of the
 parameters of the model is given in table~\ref{tab:pars-int}.
@@ -664,7 +658,8 @@ performed by the corresponding step of the algorithm.}
 \end{table}
 
 \begin{table}
-\begin{center} 
+
+\begin{center}
 \begin{tabular}{|p{4cm}|l|l|l|}\hline\hline
  & float & int  & bit \\\hline
 coronas & 26 & & \\\hline
@@ -673,64 +668,74 @@ PRNG & 1 & 2  & 21  \\\hline
 $\widetilde{\vphi}_i \gets \vphi_i+\eta$& 3 & &\\\hline\hline
 \end{tabular}
 \end{center}
-\caption{\label{tab:instr-count}Number of instructions in different steps of the
-algorithm. float -- floating point, int -- integer arithmetic, bit -- shifts and
-bitwise logical. In the last row we do not include the call to PRNG. We do not include the instruction needed for indexing.}
+
+\caption{\label{tab:instr-count}Number of instructions in different steps of
+the algorithm. float -- floating point, int -- integer arithmetic, bit --
+shifts and bitwise logical. In the last row we do not include the call to PRNG.
+We do not include the instruction needed for indexing.}
+
 \end{table}
 
 The number of updates is given by
 \begin{equation}
-N_{up}=V\cdot N_{glob.}\cdot N_{loc.}\cdot N_{hit}
+N_{up} = V \cdot N_{glob.} \cdot N_{loc.} \cdot N_{hit}
 \end{equation}
 so the time per update is given by
 \begin{equation}\begin{split}
-\frac{T}{N_{up}}=&\frac{a+ V \cdot b + N_{glob.} V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right)}{V\cdot N_{glob.}\cdot N_{loc.}\cdot N_{hit}}\\
+\frac{T}{N_{up}} = &
+\frac{ a + V \cdot b + N_{glob.}
+       V \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right) }
+     { V\cdot N_{glob.}\cdot N_{loc.}\cdot N_{hit} }\\
 \approx&
-\frac{ \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right)}{N_{loc.}\cdot N_{hit}}
+\frac{ \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right) }
+     { N_{loc.}\cdot N_{hit} }
 \end{split}
 \end{equation}
-Using the data from the table~\ref{tab:pars-int} we obtain that the number of the operations performed is
+
+Using the data from the table~\ref{tab:pars-int} we obtain that the number of
+the operations performed is
+
 \begin{equation}
-N_{op}=V\cdot N_{glob.}\cdot N_{loc.}(26+\cdot N_{hit}(64+exp))
+N_{op} = V\cdot N_{glob.}\cdot N_{loc.}(26+\cdot N_{hit}(64+exp))
 \end{equation}
 \begin{equation}
-  ops=\frac{N_op}{T}\approx \frac{N_{loc.}(26+\cdot N_{hit}(64+exp))}{ \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right)}
+  ops =   \frac{ N_op }{ T }
+  \approx \frac{ N_{loc.}(26+\cdot N_{hit}(64+exp)) }
+               { \left(c + N_{loc.}\left(d + N_{hit}\cdot e\right)\right) }
 \end{equation}
 
-We have gathered the data on the execution times of the 3D program for
-four different lattice sizes. First thing we noticed is that it is not
-possible to fit all the data simultaneously to the model
-\eqref{eq:model}. However when fitting data for each lattice size
-separately we obtain a very good fit accuracy better then $1\%$ on the
-average.  This is understandable: the execution time can depend non
-linearly on the lattice volume.  One reason is that for small lattice
-sizes not all SM on the GPU are used. For the $64^3$ lattice we need
-$64^3/128=2048$ threads. With $256$ threads per CTA we use only $8$
-thread blocks, which is much smaller than 14 available SM. Even for
-$128^3$ lattice the 64 needed blocks will not use the SM evenly. Also
-the L2 cache may introduce some non-linear dependence on the lattice
-size.
+We have gathered the data on the execution times of the 3D program for four
+different lattice sizes. First thing we noticed is that it is not possible to
+fit all the data simultaneously to the model \eqref{eq:model}. However when
+fitting data for each lattice size separately we obtain a very good fit
+accuracy better then $1\%$ on the average. This is understandable: the
+execution time can depend non linearly on the lattice volume. One reason is
+that for small lattice sizes not all SM on the GPU are used. For the $64^3$
+lattice we need $64^3/128=2048$ threads. With $256$ threads per CTA we use only
+$8$ thread blocks, which is much smaller than 14 available SM. Even for $128^3$
+lattice the 64 needed blocks will not use the SM evenly. Also the L2 cache may
+introduce some non-linear dependence on the lattice size.
 
 The results of the fits are included on the table~\ref{tab:fit}.
 \begin{table}
 \begin{center}
 \begin{tabular}{||r|D{.}{.}{8}|D{.}{.}{8}|D{.}{.}{8}|D{.}{.}{8}||}
 \hline\hline
-\multicolumn{1}{|c}{$L^3$} 
-&\multicolumn{1}{|c}{$a+ L^3b$} 
-&\multicolumn{1}{|c}{$c$} 
-&\multicolumn{1}{|c}{$d$} 
+\multicolumn{1}{|c}{$L^3$}
+&\multicolumn{1}{|c}{$a+ L^3b$}
+&\multicolumn{1}{|c}{$c$}
+&\multicolumn{1}{|c}{$d$}
 &\multicolumn{1}{|c|}{$e$}\\\hline\hline
 GPU &\multicolumn{4}{c||}{} \\\hline
-$64^3$  & 0.56  & 1.64e-9       & 	2.76e-10       & 1.78e-10 \\
-$128^3$ & 0.49  & 1.06e-9       &	2.06e-10       & 1.35e-10 \\
-$256^3$ & 0.41  & 9.01e-10	&       1.85e-10       & 1.22e-10\\
-$512^3$ & 0.86  & 6.61e-10	&       2.02e-10       & 1.10e-10\\\hline\hline
-CPU &\multicolumn{4}{c||}{} \\\hline
-$64^3$  &  0.12 &       & 	1.27e-8 &	1.51e-9\\
-$128^3$ & 1.17  &       &	1.34e-8 & 	1.45e-9\\
-$256^3$ & 0.93  &       &	1.26e-8 &       1.43e-9\\
-$512^3$ & 3.72  &       &       1.35e-8 &       1.44e-9\\\hline\hline
+$64^3$  & 0.56  & 1.64e-9   &   2.76e-10  & 1.78e-10 \\
+$128^3$ & 0.49  & 1.06e-9   &   2.06e-10  & 1.35e-10 \\
+$256^3$ & 0.41  & 9.01e-10  &   1.85e-10  & 1.22e-10 \\
+$512^3$ & 0.86  & 6.61e-10  &   2.02e-10  & 1.10e-10 \\ \hline\hline
+CPU &\multicolumn{4}{c||}{} \\ \hline
+$64^3$  & 0.12  &           &   1.27e-8 &       1.51e-9 \\
+$128^3$ & 1.17  &           &   1.34e-8 &       1.45e-9 \\
+$256^3$ & 0.93  &           &   1.26e-8 &       1.43e-9 \\
+$512^3$ & 3.72  &           &   1.35e-8 &       1.44e-9 \\ \hline\hline
 \end{tabular}
 \end{center}
 \caption{\label{tab:fit}Results of the fit of the formula \eqref{eq:model} GPU
@@ -739,10 +744,13 @@ and \eqref{eq:model-cpu} CPU.}
 In case of CPU as we do not loop over the blocks the model is:
 \begin{equation}\label{eq:model-cpu}
 T  = a+ V \cdot b +
-N_{glob.} V \left(d + N_{hit}\cdot e\right). 
+N_{glob.} V \left(d + N_{hit}\cdot e\right).
 \end{equation}
+
 The coefficient $d$ is the time per spin needed to load it from and to memory
-together with the calculation of the corona. The time per update in this case is given by:
+together with the calculation of the corona. The time per update in this case
+is given by:
+
 \begin{equation}\begin{split}
 \frac{T}{N_{up}}=&\frac{a+ V \cdot b + N_{glob.} V \left(d + N_{hit}\cdot e\right)}{V\cdot N_{glob.}\cdot N_{hit}}\\
 \approx&
@@ -759,17 +767,16 @@ ops\approx \frac{ 26+N_{hit}(64+exp)}{ \left(d + N_{hit}\cdot e\right)}
 \hline\hline
 \multicolumn{1}{|}{} & \multicolumn{3}{c|}{GPU}
                      & \multicolumn{3}{c|}{CPU}& GPU/CPU\\\hline
-\multicolumn{1}{|c}{size} & 
+\multicolumn{1}{|c}{size} &
 \multicolumn{1}{|c|}{ns} &
  \multicolumn{1}{c|}{Gops} &
- \multicolumn{1}{c|}{Gexp/s} & 
+ \multicolumn{1}{c|}{Gexp/s} &
  \multicolumn{1}{c|}{ns} &
 \multicolumn{1}{|c}{Gops} & \multicolumn{1}{|c|}{Glog/s} & speedup\\\hline\hline
 $128^3$ & 0.16 & 412 & 6.1   &    2.3 & 28.4 & 0.43 & 14.5\\\hline
 $256^3$ & 0.15 & 456 & 6.8   &    2.3 & 29.0 & 0.44 & 15.7\\\hline
 $512^3$ & 0.14 & 490 & 7.3   &    2.3 & 28.6 & 0.44 & 17.1\\\hline\hline
 \end{tabular}
-
 
 \end{center}
 \caption{\label{tab:comp} Performance of the algorithm.}
@@ -786,43 +793,45 @@ first iteration of the local sweep loop would fill the L1 cache and consecutive
 iterations would not need to access the global memory and the performance
 should be comparable to our original implementation.
 
-This turned out not to be the case. The algorithm using the L1 cache
-was approximately six times slower than the one using shared
-memory. This deteriorated performance could be traced back to large
-number of cache misses. Nominally the $20^3$ block should fit in L1
-cache as it did fit into the shared memory. However the cache line is
-32 words long (128B) and the blocks are not aligned on the cache lines
-boundaries (see gray points on the figure~\ref{fig:blocks}). On top of
-that the cache is probably not fully associative. All that together
-implies that the cache size should be up to four or five times bigger
-to accommodate the whole block. 
+This turned out not to be the case. The algorithm using the L1 cache was
+approximately six times slower than the one using shared memory. This
+deteriorated performance could be traced back to large number of cache misses.
+Nominally the $20^3$ block should fit in L1 cache as it did fit into the shared
+memory. However the cache line is 32 words long (128B) and the blocks are not
+aligned on the cache lines boundaries (see gray points on the
+figure~\ref{fig:blocks}). On top of that the cache is probably not fully
+associative. All that together implies that the cache size should be up to four
+or five times bigger to accommodate the whole block.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Extensions and limitations}
 
-The above implementation can be easily adapted to other variants of
-the model.  The $\Delta H$ can be arbitrary within the constraints
-that it cannot access points outside of the neighborhood considered in
-this contribution. Of course when the $\Delta H$ calculation requires
-smaller number of lattice points the above procedure can be overly
-complicated and thus not optimal. In that case it may be advantageous
-to use \eg the checkerboard decomposition.
+The above implementation can be easily adapted to other variants of the model.
+The $\Delta H$ can be arbitrary within the constraints that it cannot access
+points outside of the neighborhood considered in this contribution. Of course
+when the $\Delta H$ calculation requires smaller number of lattice points the
+above procedure can be overly complicated and thus not optimal. In that case it
+may be advantageous to use \eg the checkerboard decomposition.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Discussion}
 
-Results presented in table~\ref{tab:comp} show clear advantage of the
-GPU over CPU. This is hardly surprising, but the $26\times$ difference
-is much higher than comes from comparison of theoretical performance of
-tested i5 CPU to \emph{GTX 470}. The GTX is thus more efficient in
-that sense that is capable of achieving performance much closer to the
-peak. This can be attributed to two main reasons:
+Results presented in table~\ref{tab:comp} show clear advantage of the GPU over
+CPU. This is hardly surprising, but the $26\times$ difference is much higher
+than comes from comparison of theoretical performance of tested i5 CPU to
+\emph{GTX 470}. The GTX is thus more efficient in that sense that is capable of
+achieving performance much closer to the peak. This can be attributed to two
+main reasons:
+
 \begin{itemize}
 \item The shared memory that acts as an managed cache allows to use
   the small cache size much more effectively. In particular it is
   possible on the GPU to fit the whole $20^3$ grid block into the
   shared memory. This is not possible using the conventional cache
   both on GPU and CPU leading to large number of cache misses and
-  decrease of performance. 
+  decrease of performance.
 \item Modern CPU are not fully vector processors. Not every scalar
   instruction has a vector counterpart. In particular the eight words
   wide integer instructions are missing from the AVX instruction set.
@@ -834,14 +843,15 @@ peak. This can be attributed to two main reasons:
   scalar loads/stores.
 \end{itemize}
 
-Undeniably the trend of vectorization of CPUs is continuing and the
-software that wants to stay competitive must adapt to it.  However, the
-current CPU make this more difficult than the GPU, due to the lack of
-some crucial vector features.  The CPU producers are already
-addressing those issues. Intel Xeon $\phi$ has a extended vector
-instructions set and Haswell CPU architecture with AVX2 should be on
-sale this Autumn. As a future work we are planning to tests those
-architectures.
+Undeniably the trend of vectorization of CPUs is continuing and the software
+that wants to stay competitive must adapt to it. However, the current CPU make
+this more difficult than the GPU, due to the lack of some crucial vector
+features. The CPU producers are already addressing those issues. \emph{Intel
+Xeon} $\phi$ has a extended vector instructions set and \emph{Haswell} CPU
+architecture with AVX2 should be on sale this Autumn. As a future work we are
+planning to tests those architectures.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{thebibliography}{9}
 \bibitem{top500}{\tt http://www.top500.org/}
@@ -855,7 +865,7 @@ N.~Metropolis, A.W.~Rosenbluth, M.N.~Rosenbluth, A.H.~Teller, E. Teller,
    J.~Chem.~Phys.~\textbf{21} (6) (1953) 1087--1092.
 \bibitem{binney}
 J.J.~Binney, N.J. Dowrick, A.J.~Fisher, and M.E.J.~Newman ``The Theory of Critical Phenomena'', Oxford University Press (1993).
-\bibitem{Fermi} 
+\bibitem{Fermi}
 ``NVIDIA's Next Generation CUDA ComputeArchitecture: Fermi'' \\
 \verb!http://www.nvidia.com/content/PDF/fermi_white_papers/!\\
 \verb!NVIDIA_Fermi_Compute_Architecture_Whitepaper.pdf!
@@ -864,7 +874,7 @@ Lee Howes and David Thomas.
 ``{\em Efficient random number generation and application using {CUDA}.}''
 In Hubert Nguyen, editor, {\em GPU Gems 3}, chapter~37. Addison
   Wesley, August 2007.
-\bibitem{intr} ``Intel C++ Intrinsic Reference.'' 
+\bibitem{intr} ``Intel C++ Intrinsic Reference.''
 \verb!http://software.intel.com/sites/default!\\\verb!/files/m/9/4/c/8/e/18072-347603.pdf! \\
 Intel Intrinsics Guide\\ \verb!http://software.intel.com/en-us/articles/intel-intrinsics-guide!
 \bibitem{svml} TO-DO ! add reference to Intel svml
