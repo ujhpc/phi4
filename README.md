@@ -6,14 +6,17 @@ Build
 
 Supports `GCC 4.6`, `ICC 13.0` and `Clang 3.0` or higher.
 
-To build executables with default config use:
+Requires `Intel SVML` library coming with `ICC` for SIMD builds using non-ICC
+compilers.
+
+To build executable with default configuration use:
 
 	make
 
 ### Building other configurations
 
 Following build options may be combined. Changing build options changes final
-executable suffix.
+executable suffix indicating used options.
 
 1. SIMD version via `SIMD=<size>`, i.e.:
 
@@ -35,14 +38,22 @@ executable suffix.
 
 		make CACHE=1
 
-6. Enabling index optimization:
+6. Enabling index optimization: (implies only `2^n` lattice sizes)
 
-		make FIDX=1
+		make FAST_INDEXER=1
+
+7. Enable SVML fix for *ICC*<13 when using non-ICC compilers and SIMD
+
+		make SVML_FIX=1
 
 Operations
 ----------
 
-This is rough estimation of number operations in the algorithm:
+This is rough estimation of number operations in the algorithm.
+
+**NOTE:** It skips lattice index calculation operations, memory operations,
+register transfers and variable initialization. So it estimates minimum number
+of operations, not average.
 
 1. Corona gather (plus est. for `Comp=1 Dim=3`)
 
@@ -53,8 +64,8 @@ This is rough estimation of number operations in the algorithm:
 2. Fused Tausworthe + LCG random number generator
 
 		Rng    = Taus * 3 + LCG + 3
-	           = 6 * 3 + 5
-		       = 23
+	           = 6 * 3 + 6
+		       = 24
 
 3. Initial action before updates (plus est. for `Comp=1`)
 
@@ -65,11 +76,11 @@ This is rough estimation of number operations in the algorithm:
 
 		Update = Hits * ( (Comp+1) * Rng + (Comp-1) * 6 + Log + 10 )
 		      ~= Hits * (       2  * Rng +                Log + 10 )
-		       = Hits * ( 56 + Log                                 )
+		       = Hits * ( 58 + Log                                 )
 
 Gives altogether for `Comp=1 Dim=3`:
 
-	Total  = 33 + Hits * ( 56 + Log )
+	Total  = 33 + Hits * ( 58 + Log )
 
 GPU Implementation
 ------------------
